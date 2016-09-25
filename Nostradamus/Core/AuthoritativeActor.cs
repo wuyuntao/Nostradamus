@@ -4,8 +4,8 @@
 	{
 		Timeline authoritativeTimeline;
 
-		protected AuthoritativeActor(Scene scene)
-			: base( scene )
+		protected AuthoritativeActor(Scene scene, ActorId id)
+			: base( scene, id )
 		{
 			authoritativeTimeline = new Timeline( "Authoritative" );
 		}

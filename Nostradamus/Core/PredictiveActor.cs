@@ -7,34 +7,11 @@ namespace Nostradamus
 		private Timeline predictiveTimeline;
 		private CommandQueue commands = new CommandQueue();
 
-		protected PredictiveActor(Scene scene)
-			: base( scene )
+		protected PredictiveActor(Scene scene, ActorId id)
+			: base( scene, id )
 		{
 			predictiveTimeline = new Timeline( string.Format( "Predictive-{0}", commands.MaxCommandSequence ) );
 		}
-
-		//internal override Timepoint AddAuthoritativePoint(int time, int lastCommandSeq, ISnapshotArgs snapshot)
-		//{
-		//	var authoritativeNode = base.AddAuthoritativePoint( time, lastCommandSeq, snapshot );
-
-		//	if( lastCommandSeq > 0 )
-		//	{
-		//		var command = commands.Dequeue( lastCommandSeq );
-		//		if( command != null )
-		//		{
-		//			var predictiveNode = predictiveBranch.FindAfter( command.Time );
-		//			if( predictiveNode == null )
-		//				throw new InvalidOperationException( "Failed to find node of command" );
-
-		//			// TODO: Rewind only error happens
-		//			var branchName = string.Format( "Predictive-{0}-Fix", lastCommandSeq );
-		//			var lastPredictiveNode = predictiveBranch.Last;
-		//			var newPredictiveBranch = WorldLine.CreateBranch( branchName, lastPredictiveNode );
-		//		}
-		//	}
-
-		//	return authoritativeNode;
-		//}
 
 		internal void CreatePredictiveTimeline(int predictiveTime, int authoritativeTime)
 		{

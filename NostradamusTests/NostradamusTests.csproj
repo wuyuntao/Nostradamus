@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commnads\MoveActorCommand.cs" />
+    <Compile Include="Core\ActorTest.cs" />
     <Compile Include="Core\SceneTest.cs" />
     <Compile Include="Events\ActorMovedEvent.cs" />
     <Compile Include="Events\ActorSpawnedEvent.cs" />
