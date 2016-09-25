@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nostradamus", "Nostradamus\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NostradamusTests", "NostradamusTests\NostradamusTests.csproj", "{CAB61849-E950-495B-898B-165874E5556C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NostradamusExamples", "NostradamusExamples\NostradamusExamples.csproj", "{FA223692-059E-4590-ACB6-00007BE2DE2D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{CAB61849-E950-495B-898B-165874E5556C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CAB61849-E950-495B-898B-165874E5556C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CAB61849-E950-495B-898B-165874E5556C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA223692-059E-4590-ACB6-00007BE2DE2D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA223692-059E-4590-ACB6-00007BE2DE2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA223692-059E-4590-ACB6-00007BE2DE2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA223692-059E-4590-ACB6-00007BE2DE2D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

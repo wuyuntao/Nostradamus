@@ -1,20 +1,23 @@
 ﻿namespace Nostradamus
 {
+	public interface ICommandArgs
+	{
+	}
+
 	class Command
 	{
+		public readonly ActorId ActorId;
 		public readonly int Time;
 		public readonly int Sequence;
 		public readonly ICommandArgs Args;
+		public bool IsDequeued;
 
-		public Command(int time, int sequence, ICommandArgs args)
+		public Command(ActorId actorId, int time, int sequence, ICommandArgs args)
 		{
+			ActorId = actorId;
 			Time = time;
 			Sequence = sequence;
 			Args = args;
 		}
-	}
-
-	public interface ICommandArgs
-	{
 	}
 }

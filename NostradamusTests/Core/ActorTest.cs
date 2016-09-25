@@ -1,4 +1,7 @@
-﻿using Nostradamus.Tests.Commnads;
+﻿using Nostradamus.Networking;
+using Nostradamus.Tests.Actors;
+using Nostradamus.Tests.Commnads;
+using Nostradamus.Tests.Events;
 using Nostradamus.Tests.Snapshots;
 using NUnit.Framework;
 
@@ -6,83 +9,73 @@ namespace Nostradamus.Tests
 {
 	public class ActorTest
 	{
-		class SimplePredictiveActor : PredictiveActor
+		[Test]
+		public void TestServerActor()
 		{
-			public SimplePredictiveActor(Scene scene, ActorId id)
-				: base( scene, id )
-			{ }
+			var sceneContext = new ServerSceneContext();
+			var scene = new Scene( sceneContext );
+
+			var actorContext = new ServerActorContext();
+			var actorId = scene.CreateActorId( nameof( SimpleCharacter ) );
+			var actorSnapshot0 = new ActorSnapshot();
+			var actor = new SimpleCharacter( scene, actorId, 0, actorSnapshot0, actorContext );
+			scene.AddActor( actor );
+
+			actorContext.EnqueueCommand( 30, new MoveActorCommand() { DeltaX = 0.1f, DeltaY = 0.1f } );
+
+			// Time: 0 - 20
+			sceneContext.Update( 20 );
+			Assert.AreEqual( scene.Time, 20 );
+
+			var actorSnapshot20 = (ActorSnapshot)actor.CreateSnapshot( 20 );
+			Assert.AreEqual( 0, actorSnapshot20.PositionX );
+			Assert.AreEqual( 0, actorSnapshot20.PositionY );
+
+			// Time: 20 - 40
+			sceneContext.Update( 20 );
+
+			Assert.AreEqual( scene.Time, 40 );
+			var actorSnapshot40 = (ActorSnapshot)actor.CreateSnapshot( 40 );
+			Assert.AreEqual( 0.1f, actorSnapshot40.PositionX );
+			Assert.AreEqual( 0.1f, actorSnapshot40.PositionY );
 		}
 
 		[Test]
-		public void TestServerClientSyncSimulation()
+		public void TestClientActor()
 		{
-			// Server tick freq: 20Hz. Client tick freq: 50Hz. Client latency: 20ms
+			var sceneContext = new ClientSceneContext();
+			var scene = new Scene( sceneContext );
 
-			// +++ Server: 0. Updated #1
-
-			// --- Client: 20 / 0. Update #1 received.
-			var scene = new Scene();
-
+			var actorContext = new ClientActorContext();
 			var actorId = new ActorId( 1 );
-			var actor = new SimplePredictiveActor( scene, actorId );
-			actor.AddAuthoritativePoint( 0, 0, new ActorSnapshot() { X = 1, Y = 1 } );
-			actor.AddAuthoritativePoint( 50, 0, new ActorSnapshot() { X = 1, Y = 1 } );
+			var actorSnapshot0 = new ActorSnapshot();
+			var actor = new SimpleCharacter( scene, actorId, 0, actorSnapshot0, actorContext );
+			scene.AddActor( actor );
 
-			// --- Client: 40 / 20. Updated #2. Move command #1 sent
-			actor.CreatePredictiveTimeline( 20, 0 );
-			actor.AddPredictiveCommand( 20, new MoveActorCommand() { X = 1, Y = 0 } );
-			actor.AddPredictivePoint( 40, new ActorSnapshot() { X = 1.2f, Y = 1 } );
+			actorContext.EnqueueAuthoritativeEvent( 40, 1, new ActorMovedEvent() { PositionX = 1.1f, PositionY = 1.1f } );
+			actorContext.EnqueueCommand( 30, new MoveActorCommand() { DeltaX = 0.1f, DeltaY = 0.1f } );
 
-			// +++ Server: 50 / 30. Updated #2.
+			// Time: 0 - 20
+			sceneContext.Update( 20 );
+			Assert.AreEqual( scene.Time, 20 );
 
-			// +++ Server: 60 / 40. Move command #1 received
+			var actorSnapshot20 = (ActorSnapshot)actor.CreateSnapshot( 20 );
+			Assert.AreEqual( 0, actorSnapshot20.PositionX );
+			Assert.AreEqual( 0, actorSnapshot20.PositionY );
 
-			// --- Client: 60 / 40. Updated #3. Move command #2 sent.
-			actor.AddPredictiveCommand( 40, new MoveActorCommand() { X = 1, Y = 0 } );
-			actor.AddPredictivePoint( 60, new ActorSnapshot() { X = 1.4f, Y = 1 } );
+			// Time: 20 - 40
+			sceneContext.Update( 20 );
 
-			// --- Client: 70 / 50. Update #2 received.
-			actor.AddAuthoritativePoint( 100, 0, new ActorSnapshot() { X = 1, Y = 1 } );
+			Assert.AreEqual( scene.Time, 40 );
+			var actorSnapshot40 = (ActorSnapshot)actor.CreateSnapshot( 40 );
+			Assert.AreEqual( 0.1f, actorSnapshot40.PositionX );
+			Assert.AreEqual( 0.1f, actorSnapshot40.PositionY );
 
-			// +++ Server: 80 / 60. Move command #2 received.
-
-			// --- Client: 80 / 60. Updated #4. Move command #3 sent.
-			actor.AddPredictiveCommand( 60, new MoveActorCommand() { X = 1, Y = 0 } );
-			actor.AddPredictivePoint( 80, new ActorSnapshot() { X = 1.6f, Y = 1 } );
-
-			// +++ Server: 100 / 80. Move command #3 received. Updated #3
-
-			// --- Client: 100 / 80. Updated #5. Move command #4 sent
-			actor.AddPredictiveCommand( 80, new MoveActorCommand() { X = 1, Y = 0 } );
-			actor.AddPredictivePoint( 100, new ActorSnapshot() { X = 1.8f, Y = 1 } );
-
-			// +++ Server: 120 / 100. Move command #4 received.
-
-			// --- Client: 120 / 100. Update #3 received. Move command #3 confirmed. Move command #5 sent
-			actor.AddAuthoritativePoint( 150, 3, new ActorSnapshot() { X = 1.5f, Y = 1 } );
-
-			actor.CreatePredictiveTimeline( 80, 150 );       // Create branch from last synchronized client timeline
-			actor.AddPredictivePoint( 100, new ActorSnapshot() { X = 1.7f, Y = 1 } );  // Replay command #4
-			actor.AddPredictivePoint( 120, new ActorSnapshot() { X = 1.9f, Y = 1 } );  // Replay command #5
-
-			// +++ Server: 140 / 120. Move command #5 received
-
-			// --- Client: 140 / 120. 
-			actor.AddPredictivePoint( 140, new ActorSnapshot() { X = 1.9f, Y = 1 } );
-
-			// +++ Server: 150 / 130. Updated #3
-
-			// --- Client: 160 / 140. 
-			actor.AddPredictivePoint( 160, new ActorSnapshot() { X = 1.9f, Y = 1 } );
-
-			// --- Client: 170 / 150. Update #3 received
-			actor.AddAuthoritativePoint( 200, 5, new ActorSnapshot() { X = 2, Y = 1 } );
-
-			// --- Client: 180 / 160. 
-			actor.CreatePredictiveTimeline( 120, 200 );
-
-			actor.AddPredictivePoint( 140, new ActorSnapshot() { X = 2, Y = 1 } );
-			actor.AddPredictivePoint( 160, new ActorSnapshot() { X = 2, Y = 1 } );
+			// Time: 40 - 60
+			sceneContext.Update( 20 );
+			var actorSnapshot60 = (ActorSnapshot)actor.CreateSnapshot( 60 );
+			Assert.AreEqual( 0.1f, actorSnapshot60.PositionX );
+			Assert.AreEqual( 0.1f, actorSnapshot60.PositionY );
 		}
 	}
 }

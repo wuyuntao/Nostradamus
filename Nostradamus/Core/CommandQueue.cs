@@ -4,25 +4,38 @@ namespace Nostradamus
 {
 	class CommandQueue
 	{
-		int maxCommandSequence;
-		Queue<Command> commands = new Queue<Command>();
+		private Actor actor;
+		private int maxCommandSequence;
+		private Queue<Command> commands = new Queue<Command>();
+
+		public CommandQueue(Actor actor)
+		{
+			this.actor = actor;
+		}
 
 		public Command Enqueue(int time, ICommandArgs commandArgs)
 		{
-			var command = new Command( time, ++maxCommandSequence, commandArgs );
+			var command = new Command( actor.Id, time, ++maxCommandSequence, commandArgs );
 
 			commands.Enqueue( command );
 
 			return command;
 		}
 
-		public Command Dequeue(int sequence)
+		public IEnumerable<Command> DequeueBefore(int time)
 		{
-			Command command = null;
-			while( commands.Count > 0 && commands.Peek().Sequence <= sequence )
-				command = commands.Dequeue();
-
-			return command;
+			while( commands.Count > 0 )
+			{
+				var command = commands.Peek();
+				if( command.Time < time )
+				{
+					yield return commands.Dequeue();
+				}
+				else
+				{
+					yield break;
+				}
+			}
 		}
 
 		public int MaxCommandSequence

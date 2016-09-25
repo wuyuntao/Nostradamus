@@ -2,7 +2,7 @@
 {
 	class ActorMovedEvent : IEventArgs
 	{
-		public float X;
-		public float Y;
+		public float PositionX;
+		public float PositionY;
 	}
 }

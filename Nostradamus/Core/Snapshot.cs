@@ -1,5 +1,14 @@
 ﻿namespace Nostradamus
 {
+	public interface ISnapshotArgs
+	{
+		ISnapshotArgs Clone();
+
+		ISnapshotArgs Interpolate(ISnapshotArgs snapshot, float factor);
+
+		ISnapshotArgs Extrapolate(int deltaTime);
+	}
+
 	class Snapshot
 	{
 		public readonly int Time;
@@ -10,9 +19,5 @@
 			Time = time;
 			Args = args;
 		}
-	}
-
-	public interface ISnapshotArgs
-	{
 	}
 }

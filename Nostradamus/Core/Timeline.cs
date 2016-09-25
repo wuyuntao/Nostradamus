@@ -28,6 +28,74 @@ namespace Nostradamus
 			return point;
 		}
 
+		public Timepoint InterpolatePoint(int time)
+		{
+			Timepoint previous = null;
+			Timepoint next = null;
+
+			for( var point = points.First; point != null; point = point.Next )
+			{
+				if( point.Value.Time < time )
+				{
+					previous = point.Value;
+				}
+				else if( point.Value.Time == time )
+				{
+					previous = next = point.Value;
+					break;
+				}
+				else
+				{
+					next = point.Value;
+					break;
+				}
+			}
+
+			ISnapshotArgs snapshot;
+			if( previous != null )
+			{
+				if( next != null )
+				{
+					if( previous == next )
+					{
+						snapshot = previous.Snapshot.Clone();
+					}
+					else
+					{
+						var deltaTime = time - previous.Time;
+						var totalTime = next.Time - previous.Time;
+						var factor = 1f * deltaTime / totalTime;
+
+						snapshot = previous.Snapshot.Interpolate( next.Snapshot, factor );
+					}
+				}
+				else
+				{
+					var deltaTime = time - previous.Time;
+
+					snapshot = previous.Snapshot.Extrapolate( deltaTime );
+				}
+			}
+			else
+			{
+				if( next != null )
+				{
+					var deltaTime = time - next.Time;
+
+					snapshot = next.Snapshot.Extrapolate( deltaTime );
+				}
+				else
+				{
+					return null;
+				}
+			}
+
+			if( snapshot != null )
+				return new Timepoint( this, time, snapshot );
+			else
+				return null;
+		}
+
 		internal Timepoint FindPoint(int time)
 		{
 			for( var point = points.First; point != null; point = point.Next )

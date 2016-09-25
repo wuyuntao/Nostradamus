@@ -31,17 +31,25 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.3.9\lib\net35\NLog.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\Actor.cs" />
+    <Compile Include="Core\ActorContext.cs" />
     <Compile Include="Core\ActorId.cs" />
-    <Compile Include="Core\AuthoritativeActor.cs" />
+    <Compile Include="Networking\ServerActorContext.cs" />
+    <Compile Include="Networking\ClientSceneContext.cs" />
+    <Compile Include="Networking\ServerSceneContext.cs" />
     <Compile Include="Core\Command.cs" />
     <Compile Include="Core\CommandQueue.cs" />
+    <Compile Include="Core\SceneContext.cs" />
     <Compile Include="Core\Snapshot.cs" />
-    <Compile Include="Core\PredictiveActor.cs" />
+    <Compile Include="Networking\ClientActorContext.cs" />
     <Compile Include="Core\Scene.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\Timeline.cs" />
@@ -49,8 +57,16 @@
     <Compile Include="Core\Timepoint.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Networking\" />
     <Folder Include="Physics\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="NLog.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

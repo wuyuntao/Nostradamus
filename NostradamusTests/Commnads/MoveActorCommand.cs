@@ -2,7 +2,7 @@
 {
 	class MoveActorCommand : ICommandArgs
 	{
-		public float X;
-		public float Y;
+		public float DeltaX;
+		public float DeltaY;
 	}
 }
