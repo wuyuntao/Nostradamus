@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Nostradamus
 {
@@ -24,6 +23,11 @@ namespace Nostradamus
 				command = commands.Dequeue();
 
 			return command;
+		}
+
+		public int MaxCommandSequence
+		{
+			get { return maxCommandSequence; }
 		}
 	}
 }

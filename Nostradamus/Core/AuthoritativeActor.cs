@@ -2,28 +2,22 @@
 {
 	public abstract class AuthoritativeActor : Actor
 	{
-		Branch authoritativeBranch;
+		Timeline authoritativeTimeline;
 
 		protected AuthoritativeActor(Scene scene)
 			: base( scene )
 		{
-			authoritativeBranch = WorldLine.CreateBranch( "Authoritative" );
+			authoritativeTimeline = new Timeline( "Authoritative" );
 		}
 
-		public virtual void OnAuthoritativeEvent(int time, int lastCommandSeq, params IEventArgs[] events)
+		internal void AddAuthoritativePoint(int time, int lastCommandSeq, ISnapshotArgs snapshot)
 		{
-			var node = authoritativeBranch.CreateNode( time );
-
-			if( events != null )
-			{
-				foreach( var e in events )
-					node.AddEvent( e );
-			}
+			authoritativeTimeline.AddPoint( time, snapshot );
 		}
 
-		internal Branch AuthoritativeBranch
+		internal Timeline AuthoritativeTimeline
 		{
-			get { return authoritativeBranch; }
+			get { return authoritativeTimeline; }
 		}
 	}
 }

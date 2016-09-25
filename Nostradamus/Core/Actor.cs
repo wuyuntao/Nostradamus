@@ -3,7 +3,6 @@
 	public abstract class Actor
 	{
 		private Scene scene;
-		private WorldLine worldLine = new WorldLine();
 
 		protected Actor(Scene scene)
 		{
@@ -13,11 +12,6 @@
 		protected Scene Scene
 		{
 			get { return scene; }
-		}
-
-		internal WorldLine WorldLine
-		{
-			get { return worldLine; }
 		}
 	}
 }

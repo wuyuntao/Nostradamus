@@ -4,54 +4,63 @@ namespace Nostradamus
 {
 	public abstract class PredictiveActor : AuthoritativeActor
 	{
-		Branch predictiveBranch;
-		CommandQueue commands = new CommandQueue();
+		private Timeline predictiveTimeline;
+		private CommandQueue commands = new CommandQueue();
 
 		protected PredictiveActor(Scene scene)
 			: base( scene )
-		{ }
-
-		public override void OnAuthoritativeEvent(int time, int lastCommandSeq, params IEventArgs[] events)
 		{
-			base.OnAuthoritativeEvent( time, lastCommandSeq, events );
-
-			if( lastCommandSeq > 0 )
-			{
-				var command = commands.Dequeue( lastCommandSeq );
-				if( command != null )
-				{
-					var node = predictiveBranch.FindAfter( command.Time );
-
-					// TODO compare difference between authoritative branch and predictive branch
-					throw new NotImplementedException();
-				}
-			}
+			predictiveTimeline = new Timeline( string.Format( "Predictive-{0}", commands.MaxCommandSequence ) );
 		}
 
-		public virtual void OnPredictiveCommand(int time, ICommandArgs commandArgs)
+		//internal override Timepoint AddAuthoritativePoint(int time, int lastCommandSeq, ISnapshotArgs snapshot)
+		//{
+		//	var authoritativeNode = base.AddAuthoritativePoint( time, lastCommandSeq, snapshot );
+
+		//	if( lastCommandSeq > 0 )
+		//	{
+		//		var command = commands.Dequeue( lastCommandSeq );
+		//		if( command != null )
+		//		{
+		//			var predictiveNode = predictiveBranch.FindAfter( command.Time );
+		//			if( predictiveNode == null )
+		//				throw new InvalidOperationException( "Failed to find node of command" );
+
+		//			// TODO: Rewind only error happens
+		//			var branchName = string.Format( "Predictive-{0}-Fix", lastCommandSeq );
+		//			var lastPredictiveNode = predictiveBranch.Last;
+		//			var newPredictiveBranch = WorldLine.CreateBranch( branchName, lastPredictiveNode );
+		//		}
+		//	}
+
+		//	return authoritativeNode;
+		//}
+
+		internal void CreatePredictiveTimeline(int predictiveTime, int authoritativeTime)
 		{
-			var command = commands.Enqueue( time, commandArgs );
+			var timepoint = AuthoritativeTimeline.FindPoint( authoritativeTime );
+			if( timepoint == null )
+				throw new ArgumentException( string.Format( "Cannot find authoritative timepoint at {0}", predictiveTime ) );
 
-			if( predictiveBranch == null )
-			{
-				var branchName = string.Format( "Predictive-{0}", command.Sequence );
-				var lastAuthoritativeNode = AuthoritativeBranch.FindBefore( time );
-
-				predictiveBranch = new Branch( branchName, lastAuthoritativeNode );
-			}
+			predictiveTimeline = new Timeline( string.Format( "Predictive-{0}", predictiveTime ) );
 		}
 
-		public virtual void OnPredictiveEvent(int time, params IEventArgs[] events)
+		internal void AddPredictiveCommand(int time, ICommandArgs commandArgs)
 		{
-			var node = predictiveBranch.CreateNode( time );
-
-			foreach( var e in events )
-				node.AddEvent( e );
+			commands.Enqueue( time, commandArgs );
 		}
 
-		internal Branch PredictiveBranch
+		internal void AddPredictivePoint(int time, ISnapshotArgs snapshot)
 		{
-			get { return predictiveBranch; }
+			if( predictiveTimeline == null )
+				throw new ArgumentNullException( "predictiveTimeline" );
+
+			predictiveTimeline.AddPoint( time, snapshot );
+		}
+
+		internal Timeline PredictiveTimeline
+		{
+			get { return predictiveTimeline; }
 		}
 	}
 }
