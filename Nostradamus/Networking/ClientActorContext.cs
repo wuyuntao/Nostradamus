@@ -28,14 +28,14 @@ namespace Nostradamus.Networking
 		{
 			var authoritativePoint = authoritativeTimeline.InterpolatePoint( time );
 			if( authoritativePoint == null )
-				throw new ArgumentException( string.Format( "Cannot find snapshot at {0}", time ) );
+				throw new ArgumentException( string.Format( "Cannot find authoritative snapshot at {0}", time ) );
 
 			if( predictiveTimeline == null )
 				return authoritativePoint.Snapshot;
 
 			var predictivePoint = predictiveTimeline.InterpolatePoint( time );
 			if( predictivePoint == null )
-				return authoritativePoint.Snapshot;
+				throw new ArgumentException( string.Format( "Cannot find predictive snapshot at {0}", time ) );
 
 			return authoritativePoint.Snapshot.Interpolate( predictivePoint.Snapshot, predictivePriority );
 		}
