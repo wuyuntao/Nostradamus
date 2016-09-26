@@ -8,7 +8,7 @@ namespace NostradamusExamples
 		{
 			var t = new ActorTest();
 			t.TestServerActor();
-			t.TestClientActor();
+			//t.TestClientActor();
 		}
 	}
 }

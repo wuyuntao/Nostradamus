@@ -7,14 +7,13 @@ namespace Nostradamus.Tests.Actors
 {
 	class SimpleCharacter : Actor
 	{
-		public SimpleCharacter(Scene scene, ActorId id, int time, ISnapshotArgs snapshot, ActorContext context)
-			: base( scene, id, time, snapshot, context )
-		{
-		}
+		public SimpleCharacter(Scene scene, ActorId id, int time, ISnapshotArgs snapshot)
+			: base(scene, id, time, snapshot)
+		{ }
 
 		internal protected override void OnCommand(ISnapshotArgs snapshot, ICommandArgs command)
 		{
-			if( command is MoveActorCommand )
+			if (command is MoveActorCommand)
 			{
 				var s = (ActorSnapshot)snapshot;
 				var c = (MoveActorCommand)command;
@@ -25,15 +24,15 @@ namespace Nostradamus.Tests.Actors
 					PositionY = s.PositionY + c.DeltaY,
 				};
 
-				ApplyEvent( e );
+				ApplyEvent(e);
 			}
 			else
-				throw new NotSupportedException( command.GetType().FullName );
+				throw new NotSupportedException(command.GetType().FullName);
 		}
 
 		internal protected override void OnEvent(ISnapshotArgs snapshot, IEventArgs @event)
 		{
-			if( @event is ActorMovedEvent )
+			if (@event is ActorMovedEvent)
 			{
 				var s = (ActorSnapshot)snapshot;
 				var e = (ActorMovedEvent)@event;
@@ -42,7 +41,7 @@ namespace Nostradamus.Tests.Actors
 				s.PositionY = e.PositionY;
 			}
 			else
-				throw new NotSupportedException( @event.GetType().FullName );
+				throw new NotSupportedException(@event.GetType().FullName);
 		}
 	}
 }

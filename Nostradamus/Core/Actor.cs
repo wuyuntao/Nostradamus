@@ -18,24 +18,23 @@ namespace Nostradamus
 		private readonly ActorContext context;
 		private readonly CommandQueue commandQueue;
 
-		protected Actor(Scene scene, ActorId id, int time, ISnapshotArgs snapshot, ActorContext context)
+		protected Actor(Scene scene, ActorId id, int time, ISnapshotArgs snapshot)
 		{
 			this.scene = scene;
 			this.id = id;
-			this.context = context;
-			this.commandQueue = new CommandQueue( this );
+			this.commandQueue = new CommandQueue(this);
 
-			context.Initialize( this, time, snapshot );
+			context = scene.Context.CreateActorContext(this, time, snapshot);
 		}
 
 		public ISnapshotArgs CreateSnapshot(int time)
 		{
-			return context.CreateSnapshot( time );
+			return context.CreateSnapshot(time);
 		}
 
 		public void ApplyEvent(IEventArgs @event)
 		{
-			context.ApplyEvent( @event );
+			context.ApplyEvent(@event);
 		}
 
 		internal protected abstract void OnCommand(ISnapshotArgs snapshot, ICommandArgs command);

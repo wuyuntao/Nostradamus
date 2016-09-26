@@ -7,20 +7,22 @@ namespace Nostradamus
 	{
 		protected static Logger logger = LogManager.GetCurrentClassLogger();
 
+		private SceneContext sceneContext;
 		private Actor actor;
 
-		internal virtual void Initialize(Actor actor, int time, ISnapshotArgs snapshot)
+		protected ActorContext(SceneContext sceneContext, Actor actor, int time, ISnapshotArgs snapshot)
 		{
-			if( this.actor != null )
-				throw new InvalidOperationException( "Already initialized" );
+			if (this.actor != null)
+				throw new InvalidOperationException("Already initialized");
 
+			this.sceneContext = sceneContext;
 			this.actor = actor;
 		}
 
 		internal virtual void Update()
 		{
-			if( actor == null )
-				throw new InvalidOperationException( "Not initialized yet" );
+			if (actor == null)
+				throw new InvalidOperationException("Not initialized yet");
 
 			actor.OnUpdate();
 		}
@@ -29,7 +31,7 @@ namespace Nostradamus
 
 		public virtual void EnqueueCommand(int time, ICommandArgs command)
 		{
-			actor.CommandQueue.Enqueue( time, command );
+			actor.CommandQueue.Enqueue(time, command);
 		}
 
 		internal abstract void ApplyEvent(IEventArgs @event);
@@ -37,6 +39,11 @@ namespace Nostradamus
 		protected Actor Actor
 		{
 			get { return actor; }
+		}
+
+		protected SceneContext SceneContext
+		{
+			get { return sceneContext; }
 		}
 	}
 }
