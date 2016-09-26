@@ -9,12 +9,12 @@ namespace Nostradamus.Client
 		private static Logger logger = LogManager.GetCurrentClassLogger();
 
 		private readonly Scene scene;
-		private readonly int clientId;
+		private readonly ClientId clientId;
 		private int time;
 		private ClientSynchronizationFrame clientSyncFrame;
 		private Queue<ServerSynchronizationFrame> serverSyncFrames = new Queue<ServerSynchronizationFrame>();
 
-		public ClientSimulator(Scene scene, int clientId)
+		public ClientSimulator(Scene scene, ClientId clientId)
 		{
 			this.scene = scene;
 			this.clientId = clientId;

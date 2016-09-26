@@ -42,6 +42,7 @@
     <Compile Include="Client\ClientSimulator.cs" />
     <Compile Include="Core\Actor.cs" />
     <Compile Include="Core\ActorContext.cs" />
+    <Compile Include="Core\ClientId.cs" />
     <Compile Include="Core\ActorId.cs" />
     <Compile Include="Client\ClientSynchronizationFrame.cs" />
     <Compile Include="Networking\ServerActorContext.cs" />

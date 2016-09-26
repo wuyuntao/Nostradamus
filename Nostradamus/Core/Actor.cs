@@ -9,12 +9,14 @@ namespace Nostradamus
 
 		private readonly Scene scene;
 		private readonly ActorId id;
+		private readonly ClientId ownerId;
 		private ISnapshotArgs snapshot;
 
-		protected Actor(Scene scene, ActorId id, ISnapshotArgs snapshot)
+		protected Actor(Scene scene, ActorId id, ClientId ownerId, ISnapshotArgs snapshot)
 		{
 			this.scene = scene;
 			this.id = id;
+			this.ownerId = ownerId;
 			this.snapshot = snapshot;
 		}
 
