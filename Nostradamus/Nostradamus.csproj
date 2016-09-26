@@ -42,6 +42,7 @@
     <Compile Include="Core\Actor.cs" />
     <Compile Include="Core\ActorContext.cs" />
     <Compile Include="Core\ActorId.cs" />
+    <Compile Include="Networking\ClientSynchronizationFrame.cs" />
     <Compile Include="Networking\ServerActorContext.cs" />
     <Compile Include="Networking\ClientSceneContext.cs" />
     <Compile Include="Networking\ServerSceneContext.cs" />
@@ -51,6 +52,7 @@
     <Compile Include="Core\Snapshot.cs" />
     <Compile Include="Networking\ClientActorContext.cs" />
     <Compile Include="Core\Scene.cs" />
+    <Compile Include="Networking\ServerSynchronizationFrame.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Networking\Timeline.cs" />
     <Compile Include="Core\Event.cs" />

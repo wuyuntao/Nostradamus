@@ -65,15 +65,17 @@ namespace Nostradamus.Tests
 
 			// Time: 20 - 40
 			sceneContext.Update( 20 );
-
 			Assert.AreEqual( scene.Time, 40 );
+
 			var actorSnapshot40 = (ActorSnapshot)actor.CreateSnapshot( 40 );
 			Assert.AreEqual( 0.1f, actorSnapshot40.PositionX );
 			Assert.AreEqual( 0.1f, actorSnapshot40.PositionY );
 
 			// Time: 40 - 60
 			sceneContext.Update( 20 );
-			var actorSnapshot60 = (ActorSnapshot)actor.CreateSnapshot( 60 );
+			Assert.AreEqual( scene.Time, 60 );
+
+            var actorSnapshot60 = (ActorSnapshot)actor.CreateSnapshot( 60 );
 			Assert.AreEqual( 0.1f, actorSnapshot60.PositionX );
 			Assert.AreEqual( 0.1f, actorSnapshot60.PositionY );
 		}
