@@ -56,9 +56,9 @@
     <Compile Include="Core\Scene.cs" />
     <Compile Include="Server\ServerSynchronizationFrame.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Networking\Timeline.cs" />
+    <Compile Include="Core\Timeline.cs" />
     <Compile Include="Core\Event.cs" />
-    <Compile Include="Networking\Timepoint.cs" />
+    <Compile Include="Core\Timepoint.cs" />
     <Compile Include="Server\ServerSimulator.cs" />
   </ItemGroup>
   <ItemGroup>

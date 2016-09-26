@@ -10,7 +10,6 @@
 		public readonly int Time;
 		public readonly int Sequence;
 		public readonly ICommandArgs Args;
-		public bool IsDequeued;
 
 		public Command(ActorId actorId, int time, int sequence, ICommandArgs args)
 		{

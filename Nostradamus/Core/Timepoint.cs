@@ -1,4 +1,4 @@
-﻿namespace Nostradamus.Networking
+﻿namespace Nostradamus
 {
 	class Timepoint
 	{

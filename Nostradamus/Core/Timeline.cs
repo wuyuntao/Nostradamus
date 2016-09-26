@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Nostradamus.Networking
+namespace Nostradamus
 {
 	class Timeline
 	{
