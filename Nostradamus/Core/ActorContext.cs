@@ -29,11 +29,6 @@ namespace Nostradamus
 
 		internal abstract ISnapshotArgs CreateSnapshot(int time);
 
-		public virtual void EnqueueCommand(int time, ICommandArgs command)
-		{
-			actor.CommandQueue.Enqueue(time, command);
-		}
-
 		internal abstract void ApplyEvent(IEventArgs @event);
 
 		protected Actor Actor

@@ -41,7 +41,7 @@ namespace Nostradamus
 
 		internal protected abstract void OnEvent(ISnapshotArgs snapshot, IEventArgs @event);
 
-		internal virtual void OnUpdate()
+		internal protected virtual void OnUpdate()
 		{
 		}
 

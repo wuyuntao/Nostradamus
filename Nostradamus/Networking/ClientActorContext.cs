@@ -40,11 +40,9 @@ namespace Nostradamus.Networking
 			return authoritativePoint.Snapshot.Interpolate(predictivePoint.Snapshot, predictivePriority);
 		}
 
-		public override void EnqueueCommand(int time, ICommandArgs command)
+		internal void EnqueueAuthoritativeEvent(Event e)
 		{
-			base.EnqueueCommand(time, command);
-
-			predictivePriority += PredictivePriorityIncreaseSpeed;
+			authoritativeEventQueue.Enqueue(e);
 		}
 
 		internal override void ApplyEvent(IEventArgs @event)
@@ -53,47 +51,6 @@ namespace Nostradamus.Networking
 		}
 
 		internal override void Update()
-		{
-			ApplyPredictiveCommands();
-		}
-
-		public void EnqueueAuthoritativeEvent(int time, int lastCommandSequence, IEventArgs @event)
-		{
-			var e = new Event(Actor.Id, time, lastCommandSequence, @event);
-
-			authoritativeEventQueue.Enqueue(e);
-		}
-
-		internal bool ApplyAuthoritativeEvents()
-		{
-			if (authoritativeEventQueue.Count > 0)
-			{
-				var snapshot = authoritativeTimeline.Last.Snapshot;
-
-				while (authoritativeEventQueue.Count > 0)
-				{
-					var e = authoritativeEventQueue.Dequeue();
-
-					Actor.OnEvent(snapshot, e.Args);
-
-					if (authoritativeEventQueue.Count == 0 || e.Time != authoritativeEventQueue.Peek().Time)
-					{
-						authoritativeTimeline.AddPoint(e.Time, snapshot);
-						snapshot = authoritativeTimeline.Last.Snapshot;
-					}
-				}
-
-				if (predictiveTimeline != null)
-				{
-					// TODO 
-					return false;
-				}
-			}
-
-			return true;
-		}
-
-		private void ApplyPredictiveCommands()
 		{
 			var timeAfterUpdate = Actor.Scene.Time + Actor.Scene.DeltaTime;
 
@@ -117,12 +74,15 @@ namespace Nostradamus.Networking
 				}
 
 				Actor.OnCommand(snapshot, command.Args);
+				predictivePriority += PredictivePriorityIncreaseSpeed;
 
 				while (predictiveEventQueue.Count > 0)
 				{
 					Actor.OnEvent(snapshot, predictiveEventQueue.Dequeue());
 				}
 			}
+
+			Actor.OnUpdate();
 
 			if (snapshot != null)
 			{
@@ -136,6 +96,36 @@ namespace Nostradamus.Networking
 				predictiveTimeline = null;
 				predictivePriority = 0;
 			}
+		}
+
+		internal ISnapshotArgs ApplyAuthoritativeEvents(int time)
+		{
+			var lastTimepoint = authoritativeTimeline.Last;
+
+			ISnapshotArgs snapshot;
+			if (authoritativeEventQueue.Count > 0)
+			{
+				snapshot = lastTimepoint.Snapshot.Clone();
+				var lastCommandSequence = -1;
+
+				while (authoritativeEventQueue.Count > 0)
+				{
+					var e = authoritativeEventQueue.Dequeue();
+
+					if (lastCommandSequence < e.LastCommandSequence)
+						lastCommandSequence = e.LastCommandSequence;
+
+					Actor.OnEvent(snapshot, e.Args);
+				}
+			}
+			else
+			{
+				snapshot = lastTimepoint.Snapshot.Extrapolate(time - lastTimepoint.Time);
+			}
+
+			authoritativeTimeline.AddPoint(time, snapshot);
+
+			return snapshot;
 		}
 	}
 }

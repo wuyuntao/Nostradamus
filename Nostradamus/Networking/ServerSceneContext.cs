@@ -25,8 +25,6 @@ namespace Nostradamus.Networking
 
 		public ServerSynchronizationFrame Update(int deltaTime)
 		{
-			events.Clear();
-
 			EnqueueCommands(Scene.Time + Scene.DeltaTime + deltaTime);
 
 			Scene.OnUpdate(deltaTime);
@@ -38,13 +36,17 @@ namespace Nostradamus.Networking
 				actor.Context.Update();
 			}
 
-			return new ServerSynchronizationFrame(Scene.Time + Scene.DeltaTime, events.ToArray());
+			var frame = new ServerSynchronizationFrame(Scene.Time + Scene.DeltaTime, events.ToArray());
+			events.Clear();
+
+			return frame;
 		}
 
 		private void EnqueueCommands(int time)
 		{
 			frames.RemoveAll(frame =>
 			{
+				// TODO: ignore frames that are beyond the range
 				if (frame.Time < time)
 				{
 					foreach (var command in frame.Commands)
