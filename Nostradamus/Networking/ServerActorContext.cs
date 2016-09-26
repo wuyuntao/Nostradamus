@@ -43,7 +43,7 @@ namespace Nostradamus.Networking
 				Actor.OnCommand(snapshot, command.Args);
 			}
 
-			Actor.OnUpdate();
+			Actor.OnUpdated();
 
 			authoritativeTimeline.AddPoint(timeAfterUpdate, snapshot);
 

@@ -82,7 +82,7 @@ namespace Nostradamus.Networking
 				}
 			}
 
-			Actor.OnUpdate();
+			Actor.OnUpdated();
 
 			if (snapshot != null)
 			{

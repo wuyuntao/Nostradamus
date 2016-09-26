@@ -24,7 +24,7 @@ namespace Nostradamus
 			if (actor == null)
 				throw new InvalidOperationException("Not initialized yet");
 
-			actor.OnUpdate();
+			actor.OnUpdated();
 		}
 
 		internal abstract ISnapshotArgs CreateSnapshot(int time);

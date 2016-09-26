@@ -39,10 +39,11 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client\ClientSimulator.cs" />
     <Compile Include="Core\Actor.cs" />
     <Compile Include="Core\ActorContext.cs" />
     <Compile Include="Core\ActorId.cs" />
-    <Compile Include="Networking\ClientSynchronizationFrame.cs" />
+    <Compile Include="Client\ClientSynchronizationFrame.cs" />
     <Compile Include="Networking\ServerActorContext.cs" />
     <Compile Include="Networking\ClientSceneContext.cs" />
     <Compile Include="Networking\ServerSceneContext.cs" />
@@ -52,14 +53,16 @@
     <Compile Include="Core\Snapshot.cs" />
     <Compile Include="Networking\ClientActorContext.cs" />
     <Compile Include="Core\Scene.cs" />
-    <Compile Include="Networking\ServerSynchronizationFrame.cs" />
+    <Compile Include="Server\ServerSynchronizationFrame.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Networking\Timeline.cs" />
     <Compile Include="Core\Event.cs" />
     <Compile Include="Networking\Timepoint.cs" />
+    <Compile Include="Server\ServerSimulator.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Physics\" />
+    <Folder Include="Utils\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="NLog.config">

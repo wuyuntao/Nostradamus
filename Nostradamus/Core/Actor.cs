@@ -3,66 +3,62 @@ using System;
 
 namespace Nostradamus
 {
-	public enum AuthorityType : byte
-	{
-		Authoritative,
-		Predictive,
-	}
-
 	public abstract class Actor
 	{
 		protected static Logger logger = LogManager.GetCurrentClassLogger();
 
 		private readonly Scene scene;
 		private readonly ActorId id;
-		private readonly ActorContext context;
-		private readonly CommandQueue commandQueue;
+		private ISnapshotArgs snapshot;
 
-		protected Actor(Scene scene, ActorId id, int time, ISnapshotArgs snapshot)
+		protected Actor(Scene scene, ActorId id, ISnapshotArgs snapshot)
 		{
 			this.scene = scene;
 			this.id = id;
-			this.commandQueue = new CommandQueue(this);
-
-			context = scene.Context.CreateActorContext(this, time, snapshot);
+			this.snapshot = snapshot;
 		}
 
-		public ISnapshotArgs CreateSnapshot(int time)
+		internal protected virtual ISnapshotArgs CreateSnapshot()
 		{
-			return context.CreateSnapshot(time);
+			return snapshot.Clone();
 		}
 
-		public void ApplyEvent(IEventArgs @event)
+		internal protected virtual void ApplyEvent(IEventArgs @event)
 		{
-			context.ApplyEvent(@event);
+			var snapshot = OnEventApplied(@event);
+			if (snapshot == null)
+				throw new InvalidOperationException("Snapshot cannot be null");
+
+			this.snapshot = snapshot;
 		}
 
-		internal protected abstract void OnCommand(ISnapshotArgs snapshot, ICommandArgs command);
-
-		internal protected abstract void OnEvent(ISnapshotArgs snapshot, IEventArgs @event);
-
-		internal protected virtual void OnUpdate()
+		internal protected virtual void RollbackSnapshot(ISnapshotArgs snapshot)
 		{
+			if (snapshot == null)
+				throw new InvalidOperationException("Snapshot cannot be null");
+
+			this.snapshot = snapshot;
 		}
 
-		internal protected Scene Scene
+		internal protected abstract void OnCommandReceived(ICommandArgs command);
+
+		internal protected abstract ISnapshotArgs OnEventApplied(IEventArgs @event);
+
+		internal protected abstract void OnUpdate();
+
+		protected Scene Scene
 		{
 			get { return scene; }
 		}
 
-		internal protected ActorId Id
+		protected ActorId Id
 		{
 			get { return id; }
 		}
 
-		internal ActorContext Context
+		protected ISnapshotArgs Snapshot
 		{
-			get { return context; }
-		}
-
-		internal CommandQueue CommandQueue
-		{
-			get { return commandQueue; }
+			get { return snapshot; }
 		}
 	}
 }

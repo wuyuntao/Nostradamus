@@ -4,7 +4,7 @@
 	{
 	}
 
-	class Command
+	public sealed class Command
 	{
 		public readonly ActorId ActorId;
 		public readonly int Time;

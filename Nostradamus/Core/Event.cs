@@ -4,7 +4,7 @@
 	{
 	}
 
-	class Event
+	public sealed class Event
 	{
 		public readonly ActorId ActorId;
 		public readonly int Time;
