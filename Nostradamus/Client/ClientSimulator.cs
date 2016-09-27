@@ -1,6 +1,8 @@
 ﻿using NLog;
 using Nostradamus.Server;
 using System.Collections.Generic;
+using System;
+using System.Linq;
 
 namespace Nostradamus.Client
 {
@@ -11,46 +13,146 @@ namespace Nostradamus.Client
 		private readonly Scene scene;
 		private readonly ClientId clientId;
 		private int time;
-		private ClientSynchronizationFrame clientSyncFrame;
-		private Queue<ServerSynchronizationFrame> serverSyncFrames = new Queue<ServerSynchronizationFrame>();
-		private int maxCommandSequence;
+		private ClientSyncFrame clientSyncFrame;
+		private Queue<ServerSyncFrame> serverSyncFrames = new Queue<ServerSyncFrame>();
+		private int maxCommandSeq;
 		private Queue<Command> unacknowledgedCommands = new Queue<Command>();
-		private Dictionary<ActorId, ActorSynchronization> actorSyncs = new Dictionary<ActorId, ActorSynchronization>();
+		private Dictionary<ActorId, ActorContext> actorContexts = new Dictionary<ActorId, ActorContext>();
 
 		public ClientSimulator(Scene scene, ClientId clientId)
 		{
 			this.scene = scene;
 			this.clientId = clientId;
-			this.clientSyncFrame = new ClientSynchronizationFrame(clientId, 0);
+			this.clientSyncFrame = new ClientSyncFrame(clientId, 0);
 		}
 
-		public void AddServerSyncFrame(ServerSynchronizationFrame frame)
+		public void AddServerSyncFrame(ServerSyncFrame frame)
 		{
 			serverSyncFrames.Enqueue(frame);
 		}
 
 		public void AddCommand(ActorId actorId, ICommandArgs commandArgs)
 		{
-			var command = new Command(actorId, scene.Time, scene.DeltaTime, ++maxCommandSequence, commandArgs);
+			var command = new Command(actorId, scene.Time, scene.DeltaTime, ++maxCommandSeq, commandArgs);
 
 			clientSyncFrame.Commands.Add(command);
 		}
 
-		public ClientSynchronizationFrame Update(int deltaTime)
+		public ClientSyncFrame Update(int deltaTime)
 		{
-			ProcessServerSyncFrames();
+			if (serverSyncFrames.Count > 0)
+				Synchronize();
 
-			clientSyncFrame = new ClientSynchronizationFrame(clientId, time);
+			Predict(clientSyncFrame, time, deltaTime);
 
+			time += deltaTime;
+
+			var frame = clientSyncFrame;
+			clientSyncFrame = new ClientSyncFrame(clientId, time);
+			return frame;
+		}
+
+		private void Synchronize()
+		{
+			int? lastCommandSeq = null;
+			while (serverSyncFrames.Count > 0)
+			{
+				var frame = serverSyncFrames.Dequeue();
+				lastCommandSeq = frame.GetLastCommandSeq(clientId);
+
+				Synchronize(frame);
+			}
+
+			if (lastCommandSeq == null)
+				return;
+
+			var lastCommandTime = DequeueAcknowledgedCommands(lastCommandSeq.Value);
+
+			if (IsSynchronized(lastCommandTime))
+				return;
+
+			RewindAndReplay(lastCommandTime);
+		}
+
+		private void Synchronize(ServerSyncFrame frame)
+		{
+			scene.Time = frame.Time;
+			scene.DeltaTime = frame.DeltaTime;
+
+			foreach (var @event in frame.Events)
+			{
+				var actorContext = GetActorContext(@event.ActorId);
+				if (actorContext != null)
+					actorContext.AddAuthoritativeEvent(@event);
+				else
+					logger.Warn("Cannot find actor '{0}' of event {1}", @event.ActorId, @event.Args);
+			}
+
+			foreach (var actorContext in actorContexts.Values)
+			{
+				actorContext.AddAuthoritativeTimepoint();
+			}
+		}
+
+		private int DequeueAcknowledgedCommands(int lastCommandSeq)
+		{
+			while (unacknowledgedCommands.Count > 0 && unacknowledgedCommands.Peek().Sequence <= lastCommandSeq)
+			{
+				var command = unacknowledgedCommands.Dequeue();
+
+				if (command.Sequence == lastCommandSeq)
+					return command.Time + command.DeltaTime;
+			}
+
+			throw new InvalidOperationException(string.Format("Cannot find acknowledged command #{0}", lastCommandSeq));
+		}
+
+		private bool IsSynchronized(int time)
+		{
+			return actorContexts.Values.All(a => a.IsSynchronized(time));
+		}
+
+		private void RewindAndReplay(int time)
+		{
+			bool replay = false;
+			foreach (var actorContext in actorContexts.Values)
+			{
+				replay = actorContext.Rewind(time) || replay;
+			}
+
+			if (!replay)
+				return;
+
+			var commands = unacknowledgedCommands;
+			unacknowledgedCommands = new Queue<Command>();
+
+			const int deltaTime = 50;
+			for (; time < this.time; time += deltaTime)
+			{
+				var syncFrame = new ClientSyncFrame(clientId, time);
+				while (commands.Count > 0 && commands.Peek().Time <= time)
+				{
+					var command = commands.Dequeue();
+					var newCommand = new Command(command.ActorId, time, deltaTime, command.Sequence, command.Args);
+
+					syncFrame.Commands.Add(newCommand);
+				}
+
+				Predict(syncFrame, time, deltaTime);
+			}
+		}
+
+		private void Predict(ClientSyncFrame syncFrame, int time, int deltaTime)
+		{
 			scene.Time = time;
 			scene.DeltaTime = deltaTime;
 
-			foreach (var command in clientSyncFrame.Commands)
+			foreach (var command in syncFrame.Commands)
 			{
-				var actor = scene.GetActor(command.ActorId);
-				if (actor != null)
+				var actorContext = GetActorContext(command.ActorId);
+				if (actorContext != null)
 				{
-					actor.OnCommandReceived(command.Args);
+					actorContext.AddPredictiveCommand(command);
 
 					unacknowledgedCommands.Enqueue(command);
 				}
@@ -60,75 +162,16 @@ namespace Nostradamus.Client
 
 			scene.OnUpdate();
 
-			time += deltaTime;
-
-			var frame = clientSyncFrame;
-			clientSyncFrame = new ClientSynchronizationFrame(clientId, time);
-			return frame;
-		}
-
-		private void ProcessServerSyncFrames()
-		{
-			if (serverSyncFrames.Count == 0)
-				return;
-
-			while (serverSyncFrames.Count > 0)
+			foreach (var actorContext in actorContexts.Values)
 			{
-				var frame = serverSyncFrames.Dequeue();
-
-				var lastCommandSeq = frame.GetLastCommandSequence(clientId);
-				var lastCommandTime = 0;
-
-				if (lastCommandSeq > 0 && unacknowledgedCommands.Count > 0)
-				{
-					while (unacknowledgedCommands.Count > 0 && unacknowledgedCommands.Peek().Sequence <= lastCommandSeq)
-					{
-						var command = unacknowledgedCommands.Dequeue();
-						lastCommandTime = command.Time + command.DeltaTime;
-					}
-				}
-
-				foreach (var @event in frame.Events)
-				{
-					var actorSync = GetActorSync(@event.ActorId);
-					if (actorSync != null)
-						actorSync.AddAuthoritativeEvent(@event);
-					else
-						logger.Warn("Cannot find actor '{0}' of event {1}", @event.ActorId, @event.Args);
-				}
-
-				scene.Time = frame.Time;
-				scene.DeltaTime = frame.DeltaTime;
-
-				var reconciliation = false;
-				foreach (var actorSync in actorSyncs.Values)
-				{
-					actorSync.AddAuthoritativeTimepoint();
-
-					if (lastCommandTime > 0)
-						reconciliation = reconciliation || actorSync.CheckReconciliation();
-				}
-
-				if (reconciliation)
-				{
-					foreach (var actorSync in actorSyncs.Values)
-					{
-						actorSync.RollbackPredictiveSnapshot(lastCommandTime);
-					}
-
-					var reconciliationDeltaTime = 50;
-					for (var time = lastCommandTime; time < this.time; time += reconciliationDeltaTime)
-					{
-						// Replay unacknowledged commands
-					}
-				}
+				actorContext.AddPredictiveTimepoint(time + deltaTime);
 			}
 		}
 
-		private ActorSynchronization GetActorSync(ActorId id)
+		private ActorContext GetActorContext(ActorId id)
 		{
-			ActorSynchronization sync;
-			actorSyncs.TryGetValue(id, out sync);
+			ActorContext sync;
+			actorContexts.TryGetValue(id, out sync);
 			return sync;
 		}
 	}

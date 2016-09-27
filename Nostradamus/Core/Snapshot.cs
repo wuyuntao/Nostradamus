@@ -7,6 +7,8 @@
 		ISnapshotArgs Interpolate(ISnapshotArgs snapshot, float factor);
 
 		ISnapshotArgs Extrapolate(int deltaTime);
+
+		bool IsApproximate(ISnapshotArgs predictiveSnapshot);
 	}
 
 	class Snapshot

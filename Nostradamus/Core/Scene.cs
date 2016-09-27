@@ -35,7 +35,7 @@ namespace Nostradamus
 		internal protected virtual void OnUpdate()
 		{
 			foreach (var actor in actors.Values)
-				actor.OnUpdate(time, deltaTime);
+				actor.OnUpdate();
 		}
 
 		public IEnumerable<Actor> Actors

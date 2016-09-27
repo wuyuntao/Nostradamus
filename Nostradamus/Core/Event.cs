@@ -8,14 +8,14 @@
 	{
 		public readonly ActorId ActorId;
 		public readonly int Time;
-		public readonly int LastCommandSequence;
+		public readonly int LastCommandSeq;
 		public readonly IEventArgs Args;
 
-		public Event(ActorId actorId, int time, int lastCommandSequence, IEventArgs args)
+		public Event(ActorId actorId, int time, int lastCommandSeq, IEventArgs args)
 		{
 			ActorId = actorId;
 			Time = time;
-			LastCommandSequence = lastCommandSequence;
+			LastCommandSeq = lastCommandSeq;
 			Args = args;
 		}
 	}

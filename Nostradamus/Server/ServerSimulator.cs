@@ -10,22 +10,22 @@ namespace Nostradamus.Server
 
 		private readonly Scene scene;
 		private int time;
-		private ServerSynchronizationFrame serverSyncFrame;
-		private readonly Queue<ClientSynchronizationFrame> clientSyncFrames = new Queue<ClientSynchronizationFrame>();
+		private ServerSyncFrame serverSyncFrame;
+		private readonly Queue<ClientSyncFrame> clientSyncFrames = new Queue<ClientSyncFrame>();
 
 		public ServerSimulator(Scene scene)
 		{
 			this.scene = scene;
 		}
 
-		public void AddClientSyncFrame(ClientSynchronizationFrame frame)
+		public void AddClientSyncFrame(ClientSyncFrame frame)
 		{
 			clientSyncFrames.Enqueue(frame);
 		}
 
-		public ServerSynchronizationFrame Update(int deltaTime)
+		public ServerSyncFrame Update(int deltaTime)
 		{
-			serverSyncFrame = new ServerSynchronizationFrame(time, deltaTime);
+			serverSyncFrame = new ServerSyncFrame(time, deltaTime);
 
 			scene.Time = time;
 			scene.DeltaTime = deltaTime;
@@ -33,7 +33,7 @@ namespace Nostradamus.Server
 			while (clientSyncFrames.Count > 0)
 			{
 				var frame = clientSyncFrames.Dequeue();
-				var lastCommandSeq = serverSyncFrame.GetLastCommandSequence(frame.ClientId);
+				var lastCommandSeq = serverSyncFrame.GetLastCommandSeq(frame.ClientId);
 
 				foreach (var command in frame.Commands)
 				{
@@ -56,7 +56,7 @@ namespace Nostradamus.Server
 				}
 
 				if (lastCommandSeq > 0)
-					serverSyncFrame.LastCommandSequences[frame.ClientId] = lastCommandSeq;
+					serverSyncFrame.LastCommandSeqs[frame.ClientId] = lastCommandSeq;
 			}
 
 			scene.OnUpdate();

@@ -2,13 +2,13 @@
 
 namespace Nostradamus.Client
 {
-	public sealed class ClientSynchronizationFrame
+	public sealed class ClientSyncFrame
 	{
 		public readonly ClientId ClientId;
 		public readonly int Time;
 		public readonly List<Command> Commands = new List<Command>();
 
-		public ClientSynchronizationFrame(ClientId clientId, int time, IEnumerable<Command> commands = null)
+		public ClientSyncFrame(ClientId clientId, int time, IEnumerable<Command> commands = null)
 		{
 			ClientId = clientId;
 			Time = time;

@@ -53,7 +53,7 @@ namespace Nostradamus
 			get { return scene; }
 		}
 
-		protected ActorId Id
+		internal protected ActorId Id
 		{
 			get { return id; }
 		}
