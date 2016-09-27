@@ -49,10 +49,9 @@
     <Compile Include="Networking\ClientSceneContext.cs" />
     <Compile Include="Networking\ServerSceneContext.cs" />
     <Compile Include="Core\Command.cs" />
-    <Compile Include="Core\CommandQueue.cs" />
     <Compile Include="Core\SceneContext.cs" />
     <Compile Include="Core\Snapshot.cs" />
-    <Compile Include="Networking\ClientActorContext.cs" />
+    <Compile Include="Client\ActorSynchronization.cs" />
     <Compile Include="Core\Scene.cs" />
     <Compile Include="Server\ServerSynchronizationFrame.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

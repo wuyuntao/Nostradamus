@@ -5,7 +5,7 @@ namespace Nostradamus
 {
 	public abstract class Actor
 	{
-		protected static Logger logger = LogManager.GetCurrentClassLogger();
+		protected static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
 		private readonly Scene scene;
 		private readonly ActorId id;
@@ -48,7 +48,7 @@ namespace Nostradamus
 
 		internal protected abstract void OnUpdate();
 
-		protected Scene Scene
+		internal protected Scene Scene
 		{
 			get { return scene; }
 		}
@@ -58,7 +58,7 @@ namespace Nostradamus
 			get { return id; }
 		}
 
-		protected ISnapshotArgs Snapshot
+		internal protected ISnapshotArgs Snapshot
 		{
 			get { return snapshot; }
 		}

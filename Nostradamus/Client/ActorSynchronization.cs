@@ -1,26 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Nostradamus.Networking
+namespace Nostradamus.Client
 {
-	class ClientActorContext : ActorContext
+	class ActorSynchronization
 	{
 		private const float PredictivePriorityIncreaseSpeed = 0.1f;
 		private const float PredictivePriorityDecreaseSpeed = 0.02f;
 
-		private ClientSceneContext sceneContext;
+		private Actor actor;
+
 		private Timeline authoritativeTimeline;
 		private Queue<Event> authoritativeEventQueue = new Queue<Event>();
+
 		private Timeline predictiveTimeline;
 		private Queue<IEventArgs> predictiveEventQueue = new Queue<IEventArgs>();
 		private float predictivePriority;
 
-		public ClientActorContext(ClientSceneContext sceneContext, Actor actor, int time, ISnapshotArgs snapshot)
-			: base(sceneContext, actor, time, snapshot)
+		public ActorSynchronization(Actor actor, int time, ISnapshotArgs snapshot)
 		{
-			this.sceneContext = sceneContext;
+			this.actor = actor;
 
-			authoritativeTimeline = new Timeline("Authoritative");
+			authoritativeTimeline = new Timeline("Server");
 			authoritativeTimeline.AddPoint(time, snapshot);
 		}
 
@@ -38,11 +39,6 @@ namespace Nostradamus.Networking
 				throw new ArgumentException(string.Format("Cannot find predictive snapshot at {0}", time));
 
 			return authoritativePoint.Snapshot.Interpolate(predictivePoint.Snapshot, predictivePriority);
-		}
-
-		internal void EnqueueAuthoritativeEvent(Event e)
-		{
-			authoritativeEventQueue.Enqueue(e);
 		}
 
 		internal override void ApplyEvent(IEventArgs @event)
@@ -126,6 +122,46 @@ namespace Nostradamus.Networking
 			authoritativeTimeline.AddPoint(time, snapshot);
 
 			return snapshot;
+		}
+
+		public void AddAuthoritativeEvent(Event @event)
+		{
+			authoritativeEventQueue.Enqueue(@event);
+		}
+
+		public void AddAuthoritativeTimepoint()
+		{
+			var currentSnapshot = actor.Snapshot;
+
+			actor.RollbackSnapshot(authoritativeTimeline.Last.Snapshot);
+
+			if (authoritativeEventQueue.Count > 0)
+			{
+				while (authoritativeEventQueue.Count > 0)
+				{
+					var @event = authoritativeEventQueue.Dequeue();
+
+					actor.ApplyEvent(@event.Args);
+				}
+
+				authoritativeTimeline.AddPoint(actor.Scene.Time + actor.Scene.DeltaTime, actor.Snapshot);
+			}
+			else
+			{
+				authoritativeTimeline.AddPoint(actor.Scene.Time + actor.Scene.DeltaTime, actor.Snapshot.Extrapolate(actor.Scene.DeltaTime));
+			}
+
+			actor.RollbackSnapshot(currentSnapshot);
+		}
+
+		public bool CheckReconciliation()
+		{
+			throw new NotImplementedException();
+		}
+
+		internal void RollbackPredictiveSnapshot(int lastCommandTime)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

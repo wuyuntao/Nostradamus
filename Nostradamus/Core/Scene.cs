@@ -5,7 +5,7 @@ namespace Nostradamus
 {
 	public class Scene
 	{
-		protected static Logger logger = LogManager.GetCurrentClassLogger();
+		protected static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
 		private int maxActorId;
 		private readonly Dictionary<ActorId, Actor> actors = new Dictionary<ActorId, Actor>();

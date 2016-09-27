@@ -7,14 +7,19 @@ namespace Nostradamus.Server
 		public readonly int Time;
 		public readonly int DeltaTime;
 		public readonly List<Event> Events = new List<Event>();
+		public readonly SortedList<ClientId, int> LastCommandSequences = new SortedList<ClientId, int>();
 
-		public ServerSynchronizationFrame(int time, int deltaTime, IEnumerable<Event> events = null)
+		public ServerSynchronizationFrame(int time, int deltaTime)
 		{
 			Time = time;
 			DeltaTime = deltaTime;
+		}
 
-			if (events != null)
-				Events.AddRange(events);
+		public int GetLastCommandSequence(ClientId clientId)
+		{
+			int sequence;
+			LastCommandSequences.TryGetValue(clientId, out sequence);
+			return sequence;
 		}
 	}
 }

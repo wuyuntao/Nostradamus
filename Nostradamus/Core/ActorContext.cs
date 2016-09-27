@@ -5,7 +5,7 @@ namespace Nostradamus
 {
 	public abstract class ActorContext
 	{
-		protected static Logger logger = LogManager.GetCurrentClassLogger();
+		protected static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
 		private SceneContext sceneContext;
 		private Actor actor;
