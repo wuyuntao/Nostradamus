@@ -24,6 +24,8 @@ namespace Nostradamus.Client
 			this.scene = scene;
 			this.clientId = clientId;
 			this.clientSyncFrame = new ClientSyncFrame(clientId, 0);
+
+			scene.OnActorAdded += Scene_OnActorAdded;
 		}
 
 		public void AddServerSyncFrame(ServerSyncFrame frame)
@@ -166,6 +168,13 @@ namespace Nostradamus.Client
 			{
 				actorContext.AddPredictiveTimepoint(time + deltaTime);
 			}
+		}
+
+		private void Scene_OnActorAdded(Actor actor)
+		{
+			var actorContext = new ActorContext(actor, scene.Time, actor.Snapshot);
+
+			actorContexts.Add(actor.Id, actorContext);
 		}
 
 		private ActorContext GetActorContext(ActorId id)

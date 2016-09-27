@@ -10,9 +10,12 @@ namespace Nostradamus
 		private int maxActorId;
 		private readonly Dictionary<ActorId, Actor> actors = new Dictionary<ActorId, Actor>();
 
-		internal delegate void CreateEventDelegate(Event @event);
+		internal delegate void EventDelegate(Event @event);
+		internal delegate void ActorDelegate(Actor actor);
 
-		internal event CreateEventDelegate OnEventCreated;
+		internal event EventDelegate OnEventCreated;
+		internal event ActorDelegate OnActorAdded;
+		internal event ActorDelegate OnActorRemoved;
 
 		public ActorId CreateActorId(string description = null)
 		{
@@ -29,11 +32,17 @@ namespace Nostradamus
 		public void AddActor(Actor actor)
 		{
 			actors.Add(actor.Id, actor);
+
+			if (OnActorAdded != null)
+				OnActorAdded(actor);
 		}
 
 		public void RemoveActor(Actor actor)
 		{
 			actors.Remove(actor.Id);
+
+			if (OnActorRemoved != null)
+				OnActorRemoved(actor);
 		}
 
 		internal protected virtual void OnUpdate()
