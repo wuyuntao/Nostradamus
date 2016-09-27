@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actors\SimpleCharacter.cs" />
+    <Compile Include="Client\ClientSimulatorTest.cs" />
     <Compile Include="Commnads\MoveActorCommand.cs" />
     <Compile Include="Core\ActorTest.cs" />
     <Compile Include="Events\ActorMovedEvent.cs" />
@@ -47,6 +48,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\TimelineTest.cs" />
     <Compile Include="Scenes\SimpleScene.cs" />
+    <Compile Include="Server\ServerSimulatorTest.cs" />
     <Compile Include="Snapshots\ActorSnapshot.cs" />
   </ItemGroup>
   <ItemGroup>

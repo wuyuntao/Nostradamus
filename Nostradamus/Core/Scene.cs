@@ -10,6 +10,10 @@ namespace Nostradamus
 		private int maxActorId;
 		private readonly Dictionary<ActorId, Actor> actors = new Dictionary<ActorId, Actor>();
 
+		internal delegate void CreateEventDelegate(Event @event);
+
+		internal event CreateEventDelegate OnEventCreated;
+
 		public ActorId CreateActorId(string description = null)
 		{
 			return new ActorId(++maxActorId, description);
@@ -41,6 +45,16 @@ namespace Nostradamus
 		public IEnumerable<Actor> Actors
 		{
 			get { return actors.Values; }
+		}
+
+		internal Event CreateEvent(Actor actor, int lastCommandSeq, IEventArgs @event)
+		{
+			var e = new Event(actor.Id, actor.OwnerId, Time, lastCommandSeq, @event);
+
+			if (OnEventCreated != null)
+				OnEventCreated(e);
+
+			return e;
 		}
 
 		public int Time { get; internal set; }

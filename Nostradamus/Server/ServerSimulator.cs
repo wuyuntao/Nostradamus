@@ -16,6 +16,7 @@ namespace Nostradamus.Server
 		public ServerSimulator(Scene scene)
 		{
 			this.scene = scene;
+			this.scene.OnEventCreated += Scene_OnEventCreated;
 		}
 
 		public void AddClientSyncFrame(ClientSyncFrame frame)
@@ -39,7 +40,7 @@ namespace Nostradamus.Server
 				{
 					if (command.Sequence <= lastCommandSeq)
 					{
-						logger.Warn("Received unorderred command: {0} <= {1}", command.Sequence, lastCommandSeq);
+						logger.Warn("Received unordered command: {0} <= {1}", command.Sequence, lastCommandSeq);
 						continue;
 					}
 
@@ -47,7 +48,6 @@ namespace Nostradamus.Server
 					if (actor != null)
 					{
 						actor.OnCommandReceived(command.Args);
-
 					}
 					else
 						logger.Warn("Cannot find actor '{0}'  of command {1}", command.ActorId, command.Args);
@@ -64,6 +64,11 @@ namespace Nostradamus.Server
 			time += deltaTime;
 
 			return serverSyncFrame;
+		}
+
+		private void Scene_OnEventCreated(Event @event)
+		{
+			serverSyncFrame.Events.Add(@event);
 		}
 	}
 }

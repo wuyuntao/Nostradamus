@@ -11,6 +11,7 @@ namespace Nostradamus
 		private readonly ActorId id;
 		private readonly ClientId ownerId;
 		private ISnapshotArgs snapshot;
+		private int lastCommandSeq;
 
 		protected Actor(Scene scene, ActorId id, ClientId ownerId, ISnapshotArgs snapshot)
 		{
@@ -31,6 +32,8 @@ namespace Nostradamus
 			if (snapshot == null)
 				throw new InvalidOperationException("Snapshot cannot be null");
 
+			scene.CreateEvent(this, lastCommandSeq, @event);
+
 			this.snapshot = snapshot;
 		}
 
@@ -40,6 +43,15 @@ namespace Nostradamus
 				throw new InvalidOperationException("Snapshot cannot be null");
 
 			this.snapshot = snapshot;
+		}
+
+		internal void ReceiveCommand(Command command)
+		{
+			lastCommandSeq = command.Sequence;
+
+			OnCommandReceived(command.Args);
+
+			lastCommandSeq = 0;
 		}
 
 		internal protected abstract void OnCommandReceived(ICommandArgs command);
@@ -56,6 +68,11 @@ namespace Nostradamus
 		internal protected ActorId Id
 		{
 			get { return id; }
+		}
+
+		internal protected ClientId OwnerId
+		{
+			get { return ownerId; }
 		}
 
 		internal protected ISnapshotArgs Snapshot
