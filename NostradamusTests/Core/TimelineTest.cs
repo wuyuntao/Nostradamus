@@ -1,8 +1,7 @@
-﻿using Nostradamus.Networking;
-using Nostradamus.Tests.Snapshots;
+﻿using Nostradamus.Tests.Snapshots;
 using NUnit.Framework;
 
-namespace Nostradamus.Tests.Networking
+namespace Nostradamus.Tests
 {
 	public class TimelineTest
 	{

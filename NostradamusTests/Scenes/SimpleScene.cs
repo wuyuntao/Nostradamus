@@ -7,13 +7,13 @@ namespace Nostradamus.Tests.Scenes
 	{
 		private SimpleCharacter character;
 
-		protected internal override void OnUpdate(int deltaTime)
+		protected internal override void OnUpdate()
 		{
-			base.OnUpdate(deltaTime);
+			base.OnUpdate();
 
 			if (Time == 0)
 			{
-				character = new SimpleCharacter(this, CreateActorId(), 0, new ActorSnapshot());
+				character = new SimpleCharacter(this, CreateActorId(), new ClientId(1), new ActorSnapshot());
 
 				AddActor(character);
 			}

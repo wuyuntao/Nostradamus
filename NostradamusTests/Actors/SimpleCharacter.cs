@@ -7,21 +7,21 @@ namespace Nostradamus.Tests.Actors
 {
 	class SimpleCharacter : Actor
 	{
-		public SimpleCharacter(Scene scene, ActorId id, int time, ISnapshotArgs snapshot)
-			: base(scene, id, time, snapshot)
+		public SimpleCharacter(Scene scene, ActorId id, ClientId clientId, ISnapshotArgs snapshot)
+			: base(scene, id, clientId, snapshot)
 		{ }
 
-		internal protected override void OnCommand(ISnapshotArgs snapshot, ICommandArgs command)
+		protected internal override void OnCommandReceived(ICommandArgs command)
 		{
 			if (command is MoveActorCommand)
 			{
-				var s = (ActorSnapshot)snapshot;
+				var s = (ActorSnapshot)Snapshot;
 				var c = (MoveActorCommand)command;
 
 				var e = new ActorMovedEvent()
 				{
-					PositionX = s.PositionX + c.DeltaX,
-					PositionY = s.PositionY + c.DeltaY,
+					PositionX = s.PositionX + c.DeltaX * Scene.DeltaTime / 1000f,
+					PositionY = s.PositionY + c.DeltaY * Scene.DeltaTime / 1000f,
 				};
 
 				ApplyEvent(e);
@@ -30,18 +30,24 @@ namespace Nostradamus.Tests.Actors
 				throw new NotSupportedException(command.GetType().FullName);
 		}
 
-		internal protected override void OnEvent(ISnapshotArgs snapshot, IEventArgs @event)
+		protected internal override ISnapshotArgs OnEventApplied(IEventArgs @event)
 		{
 			if (@event is ActorMovedEvent)
 			{
-				var s = (ActorSnapshot)snapshot;
+				var s = (ActorSnapshot)Snapshot.Clone();
 				var e = (ActorMovedEvent)@event;
 
 				s.PositionX = e.PositionX;
 				s.PositionY = e.PositionY;
+
+				return s;
 			}
 			else
 				throw new NotSupportedException(@event.GetType().FullName);
+		}
+
+		protected internal override void OnUpdate()
+		{
 		}
 	}
 }

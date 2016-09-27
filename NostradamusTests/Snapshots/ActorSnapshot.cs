@@ -16,14 +16,21 @@
 
 			return new ActorSnapshot()
 			{
-				PositionX = PositionX + ( s.PositionX - PositionX ) * factor,
-				PositionY = PositionY + ( s.PositionY - PositionY ) * factor,
+				PositionX = PositionX + (s.PositionX - PositionX) * factor,
+				PositionY = PositionY + (s.PositionY - PositionY) * factor,
 			};
 		}
 
 		ISnapshotArgs ISnapshotArgs.Extrapolate(int deltaTime)
 		{
 			return new ActorSnapshot() { PositionX = PositionX, PositionY = PositionY };
+		}
+
+		bool ISnapshotArgs.IsApproximate(ISnapshotArgs snapshot)
+		{
+			var s = (ActorSnapshot)snapshot;
+
+			return (PositionX - s.PositionX) * (PositionX - s.PositionX) + (PositionY - s.PositionY) * (PositionY - s.PositionY) < 0.1;
 		}
 	}
 }
