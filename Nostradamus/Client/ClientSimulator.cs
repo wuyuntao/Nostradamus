@@ -54,7 +54,7 @@ namespace Nostradamus.Client
 
 		private void Synchronize()
 		{
-			int? lastCommandSeq = null;
+			int lastCommandSeq = 0;
 			while (serverSyncFrames.Count > 0)
 			{
 				var frame = serverSyncFrames.Dequeue();
@@ -63,10 +63,10 @@ namespace Nostradamus.Client
 				Synchronize(frame);
 			}
 
-			if (lastCommandSeq == null)
+			if (lastCommandSeq == 0)
 				return;
 
-			var lastCommandTime = DequeueAcknowledgedCommands(lastCommandSeq.Value);
+			var lastCommandTime = DequeueAcknowledgedCommands(lastCommandSeq);
 
 			if (IsSynchronized(lastCommandTime))
 				return;

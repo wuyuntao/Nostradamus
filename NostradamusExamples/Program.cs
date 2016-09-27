@@ -1,4 +1,5 @@
-﻿using Nostradamus.Tests.Server;
+﻿using Nostradamus.Tests.Client;
+using Nostradamus.Tests.Server;
 
 namespace NostradamusExamples
 {
@@ -6,7 +7,10 @@ namespace NostradamusExamples
 	{
 		static void Main(string[] args)
 		{
-			var t = new ServerSimulatorTest();
+			//var t = new ServerSimulatorTest();
+			//t.TestSimpleScene();
+
+			var t = new ClientSimulatorTest();
 			t.TestSimpleScene();
 		}
 	}
