@@ -65,6 +65,12 @@ namespace Nostradamus.Physics
 			rigidBody.AngularVelocity = snapshot.AngularVelocity;
 		}
 
+		protected void ApplyCentralForce(Vector3 force)
+		{
+			rigidBody.ApplyCentralForce(force);
+			rigidBody.Activate();
+		}
+
 		protected new PhysicsScene Scene
 		{
 			get { return scene; }

@@ -1,4 +1,5 @@
 ﻿using Nostradamus.Tests.Client;
+using Nostradamus.Tests.Physics;
 using Nostradamus.Tests.Server;
 
 namespace NostradamusExamples
@@ -10,9 +11,12 @@ namespace NostradamusExamples
 			//var t = new ServerSimulatorTest();
 			//t.TestSimpleScene();
 
-			var t = new ClientSimulatorTest();
+			//var t = new ClientSimulatorTest();
 			//t.TestSimpleScene();
-			t.TestSimpleSceneWithServer();
+			//t.TestSimpleSceneWithServer();
+
+			var t = new PhysicsSceneTest();
+			t.TestSimplePhysicsScene();
 		}
 	}
 }
