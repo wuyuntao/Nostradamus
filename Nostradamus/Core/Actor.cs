@@ -22,12 +22,12 @@ namespace Nostradamus
 			this.snapshot = snapshot;
 		}
 
-		internal protected virtual ISnapshotArgs CreateSnapshot()
+		protected internal virtual ISnapshotArgs CreateSnapshot()
 		{
 			return snapshot.Clone();
 		}
 
-		internal protected virtual void ApplyEvent(IEventArgs @event)
+		protected internal virtual void ApplyEvent(IEventArgs @event)
 		{
 			var snapshot = OnEventApplied(@event);
 			if (snapshot == null)
@@ -38,7 +38,7 @@ namespace Nostradamus
 			this.snapshot = snapshot;
 		}
 
-		internal protected virtual void SetSnapshot(ISnapshotArgs snapshot)
+		protected internal virtual void SetSnapshot(ISnapshotArgs snapshot)
 		{
 			if (snapshot == null)
 				throw new InvalidOperationException("Snapshot cannot be null");
@@ -55,28 +55,28 @@ namespace Nostradamus
 			lastCommandSeq = 0;
 		}
 
-		internal protected abstract void OnCommandReceived(ICommandArgs command);
+		protected internal abstract void OnCommandReceived(ICommandArgs command);
 
-		internal protected abstract ISnapshotArgs OnEventApplied(IEventArgs @event);
+		protected internal abstract ISnapshotArgs OnEventApplied(IEventArgs @event);
 
-		internal protected abstract void OnUpdate();
+		protected internal abstract void OnUpdate();
 
-		internal protected Scene Scene
+		protected internal Scene Scene
 		{
 			get { return scene; }
 		}
 
-		internal protected ActorId Id
+		protected internal ActorId Id
 		{
 			get { return id; }
 		}
 
-		internal protected ClientId OwnerId
+		protected internal ClientId OwnerId
 		{
 			get { return ownerId; }
 		}
 
-		internal protected ISnapshotArgs Snapshot
+		protected internal ISnapshotArgs Snapshot
 		{
 			get { return snapshot; }
 		}

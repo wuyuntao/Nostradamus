@@ -30,7 +30,7 @@ namespace Nostradamus
 			return actor;
 		}
 
-		public void AddActor(Actor actor)
+		public virtual void AddActor(Actor actor)
 		{
 			actors.Add(actor.Id, actor);
 
@@ -38,7 +38,7 @@ namespace Nostradamus
 				OnActorAdded(actor);
 		}
 
-		public void RemoveActor(Actor actor)
+		public virtual void RemoveActor(Actor actor)
 		{
 			actors.Remove(actor.Id);
 
@@ -46,7 +46,7 @@ namespace Nostradamus
 				OnActorRemoved(actor);
 		}
 
-		internal protected virtual void OnUpdate()
+		protected internal virtual void OnUpdate()
 		{
 			foreach (var actor in actors.Values)
 				actor.OnUpdate();

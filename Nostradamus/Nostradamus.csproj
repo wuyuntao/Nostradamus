@@ -58,6 +58,12 @@
     <Compile Include="Core\Snapshot.cs" />
     <Compile Include="Client\ActorContext.cs" />
     <Compile Include="Core\Scene.cs" />
+    <Compile Include="Physics\PhysicsSceneDesc.cs" />
+    <Compile Include="Physics\PhysicsScene.cs" />
+    <Compile Include="Physics\RigidBodyActor.cs" />
+    <Compile Include="Physics\RigidBodySnapshot.cs" />
+    <Compile Include="Physics\RigidBodyDesc.cs" />
+    <Compile Include="Physics\SceneColliderDesc.cs" />
     <Compile Include="Server\ActorContext.cs" />
     <Compile Include="Server\ServerSyncFrame.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -69,7 +75,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Networking\" />
-    <Folder Include="Physics\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="NLog.config">
