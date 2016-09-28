@@ -1,9 +1,10 @@
 ﻿using NLog;
+using Nostradamus.Utils;
 using System.Collections.Generic;
 
 namespace Nostradamus
 {
-	public class Scene
+	public class Scene : Disposable
 	{
 		protected static readonly Logger logger = LogManager.GetCurrentClassLogger();
 

@@ -1,16 +1,12 @@
-﻿using NLog;
-using Nostradamus.Server;
-using System.Collections.Generic;
+﻿using Nostradamus.Server;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Nostradamus.Client
 {
-	public sealed class ClientSimulator
+	public sealed class ClientSimulator : Simulator
 	{
-		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
-		private readonly Scene scene;
 		private readonly ClientId clientId;
 		private readonly int reconciliationDeltaTime;
 		private int time;
@@ -18,16 +14,26 @@ namespace Nostradamus.Client
 		private Queue<ServerSyncFrame> serverSyncFrames = new Queue<ServerSyncFrame>();
 		private int maxCommandSeq;
 		private Queue<Command> unacknowledgedCommands = new Queue<Command>();
-		private Dictionary<ActorId, ActorContext> actorContexts = new Dictionary<ActorId, ActorContext>();
+		private readonly Dictionary<ActorId, ActorContext> actorContexts = new Dictionary<ActorId, ActorContext>();
 
 		public ClientSimulator(Scene scene, ClientId clientId, int reconciliationDeltaTime)
+			: base(scene)
 		{
-			this.scene = scene;
 			this.clientId = clientId;
 			this.reconciliationDeltaTime = reconciliationDeltaTime;
 			this.clientSyncFrame = new ClientSyncFrame(clientId, 0);
 
 			scene.OnActorAdded += Scene_OnActorAdded;
+		}
+
+		protected override void DisposeManaged()
+		{
+			foreach (var actorContext in actorContexts.Values)
+				actorContext.Dispose();
+
+			actorContexts.Clear();
+
+			base.DisposeManaged();
 		}
 
 		public void AddServerSyncFrame(ServerSyncFrame frame)
@@ -37,7 +43,7 @@ namespace Nostradamus.Client
 
 		public void AddCommand(ActorId actorId, ICommandArgs commandArgs)
 		{
-			var command = new Command(actorId, scene.Time, scene.DeltaTime, ++maxCommandSeq, commandArgs);
+			var command = new Command(actorId, Scene.Time, Scene.DeltaTime, ++maxCommandSeq, commandArgs);
 
 			clientSyncFrame.Commands.Add(command);
 		}
@@ -80,8 +86,8 @@ namespace Nostradamus.Client
 
 		private void Synchronize(ServerSyncFrame frame)
 		{
-			scene.Time = frame.Time;
-			scene.DeltaTime = frame.DeltaTime;
+			Scene.Time = frame.Time;
+			Scene.DeltaTime = frame.DeltaTime;
 
 			foreach (var @event in frame.Events)
 			{
@@ -161,8 +167,8 @@ namespace Nostradamus.Client
 
 		private void Predict(ClientSyncFrame syncFrame, int time, int deltaTime, bool isReplay)
 		{
-			scene.Time = time;
-			scene.DeltaTime = deltaTime;
+			Scene.Time = time;
+			Scene.DeltaTime = deltaTime;
 
 			foreach (var command in syncFrame.Commands)
 			{
@@ -180,7 +186,7 @@ namespace Nostradamus.Client
 					logger.Warn("Cannot find actor '{0}'  of command {1}", command.ActorId, command.Args);
 			}
 
-			scene.OnUpdate();
+			Scene.OnUpdate();
 
 			foreach (var actorContext in actorContexts.Values)
 			{
@@ -190,7 +196,7 @@ namespace Nostradamus.Client
 
 		private void Scene_OnActorAdded(Actor actor)
 		{
-			var actorContext = new ActorContext(actor, scene.Time, actor.Snapshot);
+			var actorContext = new ActorContext(actor, Scene.Time, actor.Snapshot);
 
 			actorContexts.Add(actor.Id, actorContext);
 		}

@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Nostradamus.Utils;
+using System.Collections.Generic;
 
 namespace Nostradamus.Client
 {
-	class ActorContext
+	class ActorContext : Disposable
 	{
 		private const float PredictivePriorityIncreaseSpeed = 0.1f;
 		private const float PredictivePriorityDecreaseSpeed = 0.02f;
@@ -21,6 +22,13 @@ namespace Nostradamus.Client
 
 			authoritativeTimeline = new Timeline("Server");
 			authoritativeTimeline.AddPoint(time, snapshot);
+		}
+
+		protected override void DisposeManaged()
+		{
+			SafeDispose(ref actor);
+
+			base.DisposeManaged();
 		}
 
 		public void AddAuthoritativeEvent(Event @event)

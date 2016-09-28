@@ -1,22 +1,30 @@
-﻿using NLog;
-using Nostradamus.Client;
+﻿using Nostradamus.Client;
 using System.Collections.Generic;
 
 namespace Nostradamus.Server
 {
-	public sealed class ServerSimulator
+	public sealed class ServerSimulator : Simulator
 	{
-		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
-		private readonly Scene scene;
 		private int time;
 		private ServerSyncFrame serverSyncFrame;
 		private readonly Queue<ClientSyncFrame> clientSyncFrames = new Queue<ClientSyncFrame>();
+		private readonly Dictionary<ActorId, ActorContext> actorContexts = new Dictionary<ActorId, ActorContext>();
 
 		public ServerSimulator(Scene scene)
+			: base(scene)
 		{
-			this.scene = scene;
-			this.scene.OnEventCreated += Scene_OnEventCreated;
+			Scene.OnActorAdded += Scene_OnActorAdded;
+			Scene.OnEventCreated += Scene_OnEventCreated;
+		}
+
+		protected override void DisposeManaged()
+		{
+			foreach (var actorContext in actorContexts.Values)
+				actorContext.Dispose();
+
+			actorContexts.Clear();
+
+			base.DisposeManaged();
 		}
 
 		public void AddClientSyncFrame(ClientSyncFrame frame)
@@ -28,8 +36,8 @@ namespace Nostradamus.Server
 		{
 			serverSyncFrame = new ServerSyncFrame(time, deltaTime);
 
-			scene.Time = time;
-			scene.DeltaTime = deltaTime;
+			Scene.Time = time;
+			Scene.DeltaTime = deltaTime;
 
 			while (clientSyncFrames.Count > 0)
 			{
@@ -44,10 +52,10 @@ namespace Nostradamus.Server
 						continue;
 					}
 
-					var actor = scene.GetActor(command.ActorId);
-					if (actor != null)
+					var actorContext = GetActorContext(command.ActorId);
+					if (actorContext != null)
 					{
-						actor.OnCommandReceived(command.Args);
+						actorContext.Actor.OnCommandReceived(command.Args);
 					}
 					else
 						logger.Warn("Cannot find actor '{0}'  of command {1}", command.ActorId, command.Args);
@@ -59,16 +67,27 @@ namespace Nostradamus.Server
 					serverSyncFrame.LastCommandSeqs[frame.ClientId] = lastCommandSeq;
 			}
 
-			scene.OnUpdate();
+			Scene.OnUpdate();
 
 			time += deltaTime;
 
 			return serverSyncFrame;
 		}
+		private void Scene_OnActorAdded(Actor actor)
+		{
+			actorContexts.Add(actor.Id, new ActorContext(actor));
+		}
 
 		private void Scene_OnEventCreated(Event @event)
 		{
 			serverSyncFrame.Events.Add(@event);
+		}
+
+		private ActorContext GetActorContext(ActorId id)
+		{
+			ActorContext sync;
+			actorContexts.TryGetValue(id, out sync);
+			return sync;
 		}
 	}
 }

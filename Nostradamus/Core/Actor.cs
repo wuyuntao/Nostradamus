@@ -1,9 +1,10 @@
 ﻿using NLog;
+using Nostradamus.Utils;
 using System;
 
 namespace Nostradamus
 {
-	public abstract class Actor
+	public abstract class Actor : Disposable
 	{
 		protected static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
