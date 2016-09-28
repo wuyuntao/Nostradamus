@@ -76,6 +76,14 @@ namespace Nostradamus.Physics
 
 			// TODO: Is maxSubSteps and fixedTimestep necessary?
 			world.StepSimulation(DeltaTime / 1000f);
+
+			foreach (var actor in Actors)
+			{
+				if (actor is RigidBodyActor)
+				{
+					((RigidBodyActor)actor).ApplyMovedEvent();
+				}
+			}
 		}
 
 		internal DiscreteDynamicsWorld World

@@ -36,6 +36,25 @@ namespace Nostradamus.Physics
 			}
 		}
 
+		protected internal override ISnapshotArgs OnEventApplied(IEventArgs @event)
+		{
+			if (@event is RigidBodyMovedEvent)
+			{
+				var e = (RigidBodyMovedEvent)@event;
+
+				var s = (RigidBodySnapshot)CreateSnapshot();
+
+				s.Position = e.Position;
+				s.Rotation = e.Rotation;
+				s.LinearVelocity = e.LinearVelocity;
+				s.AngularVelocity = e.AngularVelocity;
+
+				return s;
+			}
+			else
+				return null;
+		}
+
 		protected internal override void OnUpdate()
 		{
 			SyncSnapshotFromRigidBody((RigidBodySnapshot)Snapshot);
@@ -69,6 +88,21 @@ namespace Nostradamus.Physics
 		{
 			rigidBody.ApplyCentralForce(force);
 			rigidBody.Activate();
+		}
+
+		internal void ApplyMovedEvent()
+		{
+			// TODO: Check threshold with dead reckoning algorithm to reduce the frequency of triggering event
+
+			var eventArgs = new RigidBodyMovedEvent()
+			{
+				Position = rigidBody.CenterOfMassPosition,
+				Rotation = Quaternion.RotationMatrix(rigidBody.CenterOfMassTransform),
+				LinearVelocity = rigidBody.LinearVelocity,
+				AngularVelocity = rigidBody.AngularVelocity,
+			};
+
+			ApplyEvent(eventArgs);
 		}
 
 		protected new PhysicsScene Scene

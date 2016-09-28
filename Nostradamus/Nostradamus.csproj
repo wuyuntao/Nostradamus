@@ -105,6 +105,7 @@
     <Compile Include="Physics\PhysicsSceneDesc.cs" />
     <Compile Include="Physics\PhysicsScene.cs" />
     <Compile Include="Physics\RigidBodyActor.cs" />
+    <Compile Include="Physics\RigidBodyMovedEvent.cs" />
     <Compile Include="Physics\RigidBodySnapshot.cs" />
     <Compile Include="Physics\RigidBodyDesc.cs" />
     <Compile Include="Physics\SceneColliderDesc.cs" />

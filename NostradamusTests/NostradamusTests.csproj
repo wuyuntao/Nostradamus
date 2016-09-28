@@ -98,7 +98,6 @@
     <Compile Include="Commnads\MoveBallCommand.cs" />
     <Compile Include="Events\ActorMovedEvent.cs" />
     <Compile Include="Events\ActorSpawnedEvent.cs" />
-    <Compile Include="Events\RigidBodyMovedEvent.cs" />
     <Compile Include="Physics\PhysicsSceneTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\TimelineTest.cs" />

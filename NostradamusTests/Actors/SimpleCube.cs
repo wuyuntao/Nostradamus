@@ -45,24 +45,11 @@ namespace Nostradamus.Tests.Actors
 
 		protected internal override ISnapshotArgs OnEventApplied(IEventArgs @event)
 		{
-			if (@event is RigidBodyMovedEvent)
-			{
-				var e = (RigidBodyMovedEvent)@event;
-
-				return e.NewSnapshot;
-			}
-			else
+			var snapshot = base.OnEventApplied(@event);
+			if (snapshot == null)
 				throw new NotSupportedException(@event.GetType().FullName);
-		}
 
-		protected internal override void OnUpdate()
-		{
-			base.OnUpdate();
-
-			ApplyEvent(new RigidBodyMovedEvent()
-			{
-				NewSnapshot = (RigidBodySnapshot)CreateSnapshot()
-			});
+			return snapshot;
 		}
 	}
 }
