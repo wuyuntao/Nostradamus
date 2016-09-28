@@ -42,7 +42,6 @@
     <Compile Include="Actors\SimpleCharacter.cs" />
     <Compile Include="Client\ClientSimulatorTest.cs" />
     <Compile Include="Commnads\MoveActorCommand.cs" />
-    <Compile Include="Core\ActorTest.cs" />
     <Compile Include="Events\ActorMovedEvent.cs" />
     <Compile Include="Events\ActorSpawnedEvent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

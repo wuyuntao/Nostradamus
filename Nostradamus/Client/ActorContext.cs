@@ -67,9 +67,11 @@ namespace Nostradamus.Client
 			if (predictiveTimeline == null)
 				return false;
 
+			var snapshot = authoritativeTimeline.Last.Snapshot;
 			predictiveTimeline = new Timeline(string.Format("Predictive-{0}", time));
-			predictiveTimeline.AddPoint(time, authoritativeTimeline.Last.Snapshot);
+			predictiveTimeline.AddPoint(time, snapshot.Clone());
 
+			actor.RollbackSnapshot(snapshot.Clone());
 			return true;
 		}
 

@@ -1,4 +1,6 @@
-﻿namespace Nostradamus.Tests.Snapshots
+﻿using System;
+
+namespace Nostradamus.Tests.Snapshots
 {
 	class ActorSnapshot : ISnapshotArgs
 	{
@@ -30,7 +32,9 @@
 		{
 			var s = (ActorSnapshot)snapshot;
 
-			return (PositionX - s.PositionX) * (PositionX - s.PositionX) + (PositionY - s.PositionY) * (PositionY - s.PositionY) < 0.1;
+			var distanceSqrt = (PositionX - s.PositionX) * (PositionX - s.PositionX) + (PositionY - s.PositionY) * (PositionY - s.PositionY);
+
+			return distanceSqrt < 0.01f * 0.01f;
 		}
 	}
 }

@@ -125,19 +125,29 @@ namespace Nostradamus.Client
 			if (!replay)
 				return;
 
-			var commands = unacknowledgedCommands;
-			unacknowledgedCommands = new Queue<Command>();
+			Queue<Command> commands;
+			if (unacknowledgedCommands.Count > 0)
+			{
+				commands = unacknowledgedCommands;
+				unacknowledgedCommands = new Queue<Command>();
+			}
+			else
+				commands = null;
 
 			const int deltaTime = 50;
 			for (; time < this.time; time += deltaTime)
 			{
 				var syncFrame = new ClientSyncFrame(clientId, time);
-				while (commands.Count > 0 && commands.Peek().Time <= time)
-				{
-					var command = commands.Dequeue();
-					var newCommand = new Command(command.ActorId, time, deltaTime, command.Sequence, command.Args);
 
-					syncFrame.Commands.Add(newCommand);
+				if (commands != null)
+				{
+					while (commands.Count > 0 && commands.Peek().Time <= time)
+					{
+						var command = commands.Dequeue();
+						var newCommand = new Command(command.ActorId, time, deltaTime, command.Sequence, command.Args);
+
+						syncFrame.Commands.Add(newCommand);
+					}
 				}
 
 				Predict(syncFrame, time, deltaTime);
@@ -154,6 +164,9 @@ namespace Nostradamus.Client
 				var actorContext = GetActorContext(command.ActorId);
 				if (actorContext != null)
 				{
+					command.Time = time;
+					command.DeltaTime = deltaTime;
+
 					actorContext.AddPredictiveCommand(command);
 
 					unacknowledgedCommands.Enqueue(command);

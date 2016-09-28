@@ -7,8 +7,8 @@
 	public sealed class Command
 	{
 		public readonly ActorId ActorId;
-		public readonly int Time;
-		public readonly int DeltaTime;
+		public int Time;
+		public int DeltaTime;
 		public readonly int Sequence;
 		public readonly ICommandArgs Args;
 
