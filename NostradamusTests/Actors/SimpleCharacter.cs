@@ -7,8 +7,6 @@ namespace Nostradamus.Tests.Actors
 {
 	class SimpleCharacter : Actor
 	{
-		private bool hasMoved;
-
 		public SimpleCharacter(Scene scene, ActorId id, ClientId clientId, ISnapshotArgs snapshot)
 			: base(scene, id, clientId, snapshot)
 		{ }
@@ -17,10 +15,10 @@ namespace Nostradamus.Tests.Actors
 		{
 			if (command is MoveActorCommand)
 			{
-				if (hasMoved)
+				var s = (ActorSnapshot)Snapshot;
+				if (s.HasMoved)
 					return;
 
-				var s = (ActorSnapshot)Snapshot;
 				var c = (MoveActorCommand)command;
 
 				var e = new ActorMovedEvent()
@@ -30,8 +28,6 @@ namespace Nostradamus.Tests.Actors
 				};
 
 				ApplyEvent(e);
-
-				hasMoved = true;
 			}
 			else
 				throw new NotSupportedException(command.GetType().FullName);
@@ -46,6 +42,7 @@ namespace Nostradamus.Tests.Actors
 
 				s.PositionX = e.PositionX;
 				s.PositionY = e.PositionY;
+				s.HasMoved = true;
 
 				return s;
 			}
@@ -55,7 +52,9 @@ namespace Nostradamus.Tests.Actors
 
 		protected internal override void OnUpdate()
 		{
-			hasMoved = false;
+			var s = (ActorSnapshot)Snapshot;
+
+			s.HasMoved = false;
 		}
 	}
 }
