@@ -11,7 +11,8 @@ namespace NostradamusExamples
 			//t.TestSimpleScene();
 
 			var t = new ClientSimulatorTest();
-			t.TestSimpleScene();
+			//t.TestSimpleScene();
+			t.TestSimpleSceneWithServer();
 		}
 	}
 }

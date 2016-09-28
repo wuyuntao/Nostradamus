@@ -12,6 +12,7 @@ namespace Nostradamus.Client
 
 		private readonly Scene scene;
 		private readonly ClientId clientId;
+		private readonly int reconciliationDeltaTime;
 		private int time;
 		private ClientSyncFrame clientSyncFrame;
 		private Queue<ServerSyncFrame> serverSyncFrames = new Queue<ServerSyncFrame>();
@@ -19,10 +20,11 @@ namespace Nostradamus.Client
 		private Queue<Command> unacknowledgedCommands = new Queue<Command>();
 		private Dictionary<ActorId, ActorContext> actorContexts = new Dictionary<ActorId, ActorContext>();
 
-		public ClientSimulator(Scene scene, ClientId clientId)
+		public ClientSimulator(Scene scene, ClientId clientId, int reconciliationDeltaTime)
 		{
 			this.scene = scene;
 			this.clientId = clientId;
+			this.reconciliationDeltaTime = reconciliationDeltaTime;
 			this.clientSyncFrame = new ClientSyncFrame(clientId, 0);
 
 			scene.OnActorAdded += Scene_OnActorAdded;
@@ -40,12 +42,12 @@ namespace Nostradamus.Client
 			clientSyncFrame.Commands.Add(command);
 		}
 
-		public ClientSyncFrame Update(int deltaTime)
+		public ClientSyncFrame Simulate(int deltaTime)
 		{
 			if (serverSyncFrames.Count > 0)
 				Synchronize();
 
-			Predict(clientSyncFrame, time, deltaTime);
+			Predict(clientSyncFrame, time, deltaTime, false);
 
 			time += deltaTime;
 
@@ -134,9 +136,12 @@ namespace Nostradamus.Client
 			else
 				commands = null;
 
-			const int deltaTime = 50;
+			var deltaTime = reconciliationDeltaTime;
 			for (; time < this.time; time += deltaTime)
 			{
+				if (time + deltaTime > this.time)
+					deltaTime = this.time - time;
+
 				var syncFrame = new ClientSyncFrame(clientId, time);
 
 				if (commands != null)
@@ -150,11 +155,11 @@ namespace Nostradamus.Client
 					}
 				}
 
-				Predict(syncFrame, time, deltaTime);
+				Predict(syncFrame, time, deltaTime, true);
 			}
 		}
 
-		private void Predict(ClientSyncFrame syncFrame, int time, int deltaTime)
+		private void Predict(ClientSyncFrame syncFrame, int time, int deltaTime, bool isReplay)
 		{
 			scene.Time = time;
 			scene.DeltaTime = deltaTime;
@@ -179,7 +184,7 @@ namespace Nostradamus.Client
 
 			foreach (var actorContext in actorContexts.Values)
 			{
-				actorContext.AddPredictiveTimepoint(time + deltaTime);
+				actorContext.AddPredictiveTimepoint(time + deltaTime, isReplay);
 			}
 		}
 

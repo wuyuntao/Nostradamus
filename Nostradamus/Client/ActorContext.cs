@@ -14,7 +14,6 @@ namespace Nostradamus.Client
 
 		private Timeline predictiveTimeline;
 		private Queue<IEventArgs> predictiveEventQueue = new Queue<IEventArgs>();
-		private float predictivePriority;
 
 		public ActorContext(Actor actor, int time, ISnapshotArgs snapshot)
 		{
@@ -33,7 +32,7 @@ namespace Nostradamus.Client
 		{
 			var currentSnapshot = actor.Snapshot;
 
-			actor.RollbackSnapshot(authoritativeTimeline.Last.Snapshot);
+			actor.SetSnapshot(authoritativeTimeline.Last.Snapshot);
 
 			if (authoritativeEventQueue.Count > 0)
 			{
@@ -51,11 +50,14 @@ namespace Nostradamus.Client
 				authoritativeTimeline.AddPoint(actor.Scene.Time + actor.Scene.DeltaTime, actor.Snapshot.Extrapolate(actor.Scene.DeltaTime));
 			}
 
-			actor.RollbackSnapshot(currentSnapshot);
+			actor.SetSnapshot(currentSnapshot);
 		}
 
 		public bool IsSynchronized(int time)
 		{
+			if (predictiveTimeline == null)
+				return true;
+
 			var authoritativeSnapshot = authoritativeTimeline.Last.Snapshot;
 			var predictiveSnapshot = predictiveTimeline.InterpolatePoint(time).Snapshot;
 
@@ -71,16 +73,30 @@ namespace Nostradamus.Client
 			predictiveTimeline = new Timeline(string.Format("Predictive-{0}", time));
 			predictiveTimeline.AddPoint(time, snapshot.Clone());
 
-			actor.RollbackSnapshot(snapshot.Clone());
+			actor.SetSnapshot(snapshot.Clone());
 			return true;
 		}
 
-		public void AddPredictiveTimepoint(int time)
+		public void AddPredictiveTimepoint(int time, bool isReplay)
 		{
 			if (predictiveTimeline == null)
-				return;
+			{
+				var point = authoritativeTimeline.InterpolatePoint(time);
 
-			predictiveTimeline.AddPoint(time, actor.Snapshot);
+				actor.SetSnapshot(point.Snapshot.Clone());
+			}
+			else if (!isReplay && authoritativeTimeline.Last.Snapshot.IsApproximate(actor.Snapshot))
+			{
+				var point = authoritativeTimeline.Last;
+
+				actor.SetSnapshot(point.Snapshot.Clone());
+
+				predictiveTimeline = null;
+			}
+			else
+			{
+				predictiveTimeline.AddPoint(time, actor.Snapshot);
+			}
 		}
 
 		public void AddPredictiveCommand(Command command)

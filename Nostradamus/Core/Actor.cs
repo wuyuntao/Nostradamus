@@ -37,7 +37,7 @@ namespace Nostradamus
 			this.snapshot = snapshot;
 		}
 
-		internal protected virtual void RollbackSnapshot(ISnapshotArgs snapshot)
+		internal protected virtual void SetSnapshot(ISnapshotArgs snapshot)
 		{
 			if (snapshot == null)
 				throw new InvalidOperationException("Snapshot cannot be null");

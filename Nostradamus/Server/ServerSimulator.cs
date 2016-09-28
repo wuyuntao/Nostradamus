@@ -24,7 +24,7 @@ namespace Nostradamus.Server
 			clientSyncFrames.Enqueue(frame);
 		}
 
-		public ServerSyncFrame Update(int deltaTime)
+		public ServerSyncFrame Simulate(int deltaTime)
 		{
 			serverSyncFrame = new ServerSyncFrame(time, deltaTime);
 

@@ -16,7 +16,7 @@ namespace Nostradamus.Tests.Server
 			var simulator = new ServerSimulator(scene);
 
 			// Time: 0 - 20
-			var frame0 = simulator.Update(20);
+			var frame0 = simulator.Simulate(20);
 			Assert.AreEqual(0, scene.Time);
 			Assert.AreEqual(20, scene.DeltaTime);
 			Assert.AreEqual(0, frame0.Time);
@@ -35,7 +35,7 @@ namespace Nostradamus.Tests.Server
 			simulator.AddClientSyncFrame(clientFrame);
 
 			// Time: 20 - 40
-			var frame20 = simulator.Update(20);
+			var frame20 = simulator.Simulate(20);
 			Assert.AreEqual(20, scene.Time);
 			Assert.AreEqual(20, scene.DeltaTime);
 			Assert.AreEqual(20, frame20.Time);
