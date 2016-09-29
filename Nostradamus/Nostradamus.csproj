@@ -110,6 +110,8 @@
     <Compile Include="Core\Snapshot.cs" />
     <Compile Include="Client\ActorContext.cs" />
     <Compile Include="Core\Scene.cs" />
+    <Compile Include="Networking\Messages.cs" />
+    <Compile Include="Networking\ReliableUdpServer.cs" />
     <Compile Include="Physics\PhysicsSceneDesc.cs" />
     <Compile Include="Physics\PhysicsScene.cs" />
     <Compile Include="Physics\RigidBodyActor.cs" />
@@ -126,9 +128,7 @@
     <Compile Include="Server\ServerSimulator.cs" />
     <Compile Include="Utils\Disposable.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Networking\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
