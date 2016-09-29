@@ -155,7 +155,7 @@ namespace Nostradamus.Client
 					while (commands.Count > 0 && commands.Peek().Time <= time)
 					{
 						var command = commands.Dequeue();
-						var newCommand = new Command(command.ActorId, time, deltaTime, command.Sequence, command.Args);
+						var newCommand = new Command(command.ActorId, time, deltaTime, command.Sequence, command.GetArgs());
 
 						syncFrame.Commands.Add(newCommand);
 					}

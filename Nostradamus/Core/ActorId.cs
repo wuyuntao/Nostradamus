@@ -1,52 +1,49 @@
-﻿using System;
+﻿using ProtoBuf;
+using System;
 
 namespace Nostradamus
 {
-	public class ActorId : IEquatable<ActorId>
+	[ProtoContract]
+	public sealed class ActorId : IEquatable<ActorId>
 	{
-		private readonly int value;
-		private readonly string description;
+		[ProtoMember(1)]
+		public int Value { get; set; }
+
+		[ProtoMember(2, IsRequired = false)]
+		public string Description { get; set; }
 
 		internal ActorId(int value, string description = null)
 		{
-			this.value = value;
-			this.description = description;
+			Value = value;
+			Description = description;
 		}
+
+		public ActorId() { }
 
 		public override bool Equals(object obj)
 		{
-			if( !( obj is ActorId ) )
+			if (!(obj is ActorId))
 				return false;
 
-			return Equals( (ActorId)obj );
+			return Equals((ActorId)obj);
 		}
 
 		public bool Equals(ActorId other)
 		{
-			return value.Equals( other.value );
+			return Value.Equals(other.Value);
 		}
 
 		public override int GetHashCode()
 		{
-			return value.GetHashCode();
+			return Value.GetHashCode();
 		}
 
 		public override string ToString()
 		{
-			if( string.IsNullOrEmpty( description ) )
-				return string.Format( "{0} #{1}", GetType().Name, value );
+			if (string.IsNullOrEmpty(Description))
+				return string.Format("{0} #{1}", GetType().Name, Value);
 			else
-				return string.Format( "{0} #{1} ({2})", GetType().Name, value, description );
+				return string.Format("{0} #{1} ({2})", GetType().Name, Value, Description);
 		}
-
-		//public int Value
-		//{
-		//	get { return value; }
-		//}
-
-		//public string Description
-		//{
-		//	get { return description; }
-		//}
 	}
 }

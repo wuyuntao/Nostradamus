@@ -1,24 +1,45 @@
-﻿namespace Nostradamus
+﻿using ProtoBuf;
+
+namespace Nostradamus
 {
 	public interface IEventArgs
 	{
 	}
 
+	[ProtoContract]
 	public sealed class Event
 	{
-		public readonly ActorId ActorId;
-		public readonly ClientId ClientId;
-		public readonly int Time;
-		public readonly int LastCommandSeq;
-		public readonly IEventArgs Args;
+		[ProtoMember(1)]
+		public ActorId ActorId { get; set; }
 
-		public Event(ActorId actorId, ClientId clientId, int time, int lastCommandSeq, IEventArgs args)
+		[ProtoMember(3)]
+		public int Time { get; set; }
+
+		[ProtoMember(4)]
+		public int LastCommandSeq { get; set; }
+
+		[ProtoMember(5, DynamicType = true)]
+		public object Args { get; set; }
+
+		public Event(ActorId actorId, int time, int lastCommandSeq, IEventArgs args)
 		{
 			ActorId = actorId;
-			ClientId = clientId;
 			Time = time;
 			LastCommandSeq = lastCommandSeq;
 			Args = args;
+		}
+
+		public Event() { }
+
+		public IEventArgs GetArgs()
+		{
+			return (IEventArgs)Args;
+		}
+
+		public TArgs GetArgs<TArgs>()
+			where TArgs : IEventArgs
+		{
+			return (TArgs)Args;
 		}
 	}
 }

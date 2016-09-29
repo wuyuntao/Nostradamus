@@ -1,11 +1,15 @@
-﻿using System;
+﻿using ProtoBuf;
 
 namespace Nostradamus.Tests.Snapshots
 {
+	[ProtoContract]
 	class ActorSnapshot : ISnapshotArgs
 	{
-		public float PositionX;
-		public float PositionY;
+		[ProtoMember(1)]
+		public float PositionX { get; set; }
+
+		[ProtoMember(2)]
+		public float PositionY { get; set; }
 
 		ISnapshotArgs ISnapshotArgs.Clone()
 		{

@@ -55,7 +55,7 @@ namespace Nostradamus.Server
 					var actorContext = GetActorContext(command.ActorId);
 					if (actorContext != null)
 					{
-						actorContext.Actor.OnCommandReceived(command.Args);
+						actorContext.Actor.OnCommandReceived(command.GetArgs());
 					}
 					else
 						logger.Warn("Cannot find actor '{0}'  of command {1}", command.ActorId, command.Args);

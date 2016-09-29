@@ -1,20 +1,27 @@
-﻿using System.Collections.Generic;
+﻿using ProtoBuf;
+using System.Collections.Generic;
 
 namespace Nostradamus.Client
 {
+	[ProtoContract]
 	public sealed class ClientSyncFrame
 	{
-		public readonly ClientId ClientId;
-		public readonly int Time;
-		public readonly List<Command> Commands = new List<Command>();
+		[ProtoMember(1)]
+		public ClientId ClientId { get; set; }
 
-		public ClientSyncFrame(ClientId clientId, int time, IEnumerable<Command> commands = null)
+		[ProtoMember(2)]
+		public int Time { get; set; }
+
+		[ProtoMember(3)]
+		public List<Command> Commands { get; set; }
+
+		public ClientSyncFrame(ClientId clientId, int time)
 		{
 			ClientId = clientId;
 			Time = time;
-
-			if (commands != null)
-				Commands.AddRange(commands);
+			Commands = new List<Command>();
 		}
+
+		public ClientSyncFrame() { }
 	}
 }

@@ -48,7 +48,7 @@ namespace Nostradamus.Client
 				{
 					var @event = authoritativeEventQueue.Dequeue();
 
-					actor.ApplyEvent(@event.Args);
+					actor.ApplyEvent(@event.GetArgs());
 				}
 
 				authoritativeTimeline.AddPoint(actor.Scene.Time + actor.Scene.DeltaTime, actor.Snapshot);
@@ -114,7 +114,7 @@ namespace Nostradamus.Client
 				predictiveTimeline = new Timeline(string.Format("Predictive-{0}-{1}", command.Sequence, command.Time));
 			}
 
-			actor.OnCommandReceived(command.Args);
+			actor.OnCommandReceived(command.GetArgs());
 		}
 	}
 }

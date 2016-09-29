@@ -50,7 +50,7 @@ namespace Nostradamus
 		{
 			lastCommandSeq = command.Sequence;
 
-			OnCommandReceived(command.Args);
+			OnCommandReceived(command.GetArgs());
 
 			lastCommandSeq = 0;
 		}

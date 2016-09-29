@@ -1,17 +1,23 @@
 ﻿using BulletSharp.Math;
+using ProtoBuf;
 using System;
 
 namespace Nostradamus.Physics
 {
+	[ProtoContract]
 	public class RigidBodySnapshot : ISnapshotArgs
 	{
-		public Vector3 Position;
+		[ProtoMember(1)]
+		public Vector3 Position { get; set; }
 
-		public Quaternion Rotation;
+		[ProtoMember(2)]
+		public Quaternion Rotation { get; set; }
 
-		public Vector3 LinearVelocity;
+		[ProtoMember(3)]
+		public Vector3 LinearVelocity { get; set; }
 
-		public Vector3 AngularVelocity;
+		[ProtoMember(4)]
+		public Vector3 AngularVelocity { get; set; }
 
 		ISnapshotArgs ISnapshotArgs.Clone()
 		{
