@@ -57,9 +57,9 @@ namespace Nostradamus
 			get { return actors.Values; }
 		}
 
-		internal Event CreateEvent(Actor actor, int lastCommandSeq, IEventArgs @event)
+		internal Event CreateEvent(Actor actor, IEventArgs @event)
 		{
-			var e = new Event(actor.Id, Time, lastCommandSeq, @event);
+			var e = new Event(actor.Id, Time, @event);
 
 			if (OnEventCreated != null)
 				OnEventCreated(e);

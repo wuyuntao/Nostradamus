@@ -9,8 +9,8 @@ namespace Nostradamus.Physics
 		private readonly PhysicsScene scene;
 		private readonly RigidBody rigidBody;
 
-		protected RigidBodyActor(PhysicsScene scene, ActorId id, ClientId ownerId, RigidBodyDesc parameters, RigidBodySnapshot snapshot)
-			: base(scene, id, ownerId, snapshot)
+		protected RigidBodyActor(PhysicsScene scene, ActorId id, RigidBodyDesc parameters, RigidBodySnapshot snapshot)
+			: base(scene, id, snapshot)
 		{
 			this.scene = scene;
 			this.rigidBody = CreateRigidBody(parameters);
@@ -36,7 +36,7 @@ namespace Nostradamus.Physics
 			}
 		}
 
-		protected internal override ISnapshotArgs OnEventApplied(IEventArgs @event)
+		protected override ISnapshotArgs OnEventApplied(IEventArgs @event)
 		{
 			if (@event is RigidBodyMovedEvent)
 			{
@@ -60,15 +60,13 @@ namespace Nostradamus.Physics
 			SyncSnapshotFromRigidBody((RigidBodySnapshot)Snapshot);
 		}
 
-		protected internal override void SetSnapshot(ISnapshotArgs snapshot)
+		protected override void OnSnapshotRecovered(ISnapshotArgs snapshot)
 		{
 			var s = (RigidBodySnapshot)snapshot;
 
-			base.SetSnapshot(snapshot);
-
 			SyncRigidBodyFromSnapshot(s);
 		}
-
+		
 		private void SyncSnapshotFromRigidBody(RigidBodySnapshot snapshot)
 		{
 			snapshot.Position = rigidBody.CenterOfMassPosition;

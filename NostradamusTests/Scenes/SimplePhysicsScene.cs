@@ -28,19 +28,19 @@ namespace Nostradamus.Tests.Scenes
 			};
 		}
 
-		protected internal override void OnUpdate()
+		protected override void OnUpdate()
 		{
 			if (Time == 0)
 			{
 				var cubeId = CreateActorId("Cube");
 				var cubePosition = new Vector3(0.1f, 1.5f, 0.1f);
-				cube = new SimpleCube(this, cubeId, null, cubePosition);
+				cube = new SimpleCube(this, cubeId, cubePosition);
 
 				AddActor(cube);
 
 				var ballId = CreateActorId("Ball");
 				var ballPosition = new Vector3(-0.1f, 6f, -0.1f);
-				ball = new SimpleBall(this, ballId, new ClientId(1), ballPosition);
+				ball = new SimpleBall(this, ballId, ballPosition);
 
 				AddActor(ball);
 			}

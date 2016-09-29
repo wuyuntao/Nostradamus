@@ -3,6 +3,7 @@ using NUnit.Framework;
 
 namespace Nostradamus.Tests
 {
+	/*
 	public class TimelineTest
 	{
 		[Test]
@@ -81,4 +82,5 @@ namespace Nostradamus.Tests
 			// Reset client state since client's state is same as server's
 		}
 	}
+	*/
 }

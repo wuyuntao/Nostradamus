@@ -1,17 +1,14 @@
-﻿using System;
-using BulletSharp;
+﻿using BulletSharp;
 using BulletSharp.Math;
 using Nostradamus.Physics;
-using Nostradamus.Tests.Events;
+using System;
 
 namespace Nostradamus.Tests.Actors
 {
 	class SimpleCube : RigidBodyActor
 	{
-		public SimpleCube(PhysicsScene scene, ActorId id, ClientId clientId, Vector3 initialPosition)
-			: base(scene, id, clientId
-					, CreateRigidBodyDesc(initialPosition)
-					, CreateRigidBodySnapshot(initialPosition))
+		public SimpleCube(PhysicsScene scene, ActorId id, Vector3 initialPosition)
+			: base(scene, id, CreateRigidBodyDesc(initialPosition), CreateRigidBodySnapshot(initialPosition))
 		{
 		}
 
@@ -38,18 +35,9 @@ namespace Nostradamus.Tests.Actors
 			};
 		}
 
-		protected internal override void OnCommandReceived(ICommandArgs command)
+		protected override void OnCommandReceived(ICommandArgs command)
 		{
 			throw new NotSupportedException(command.GetType().FullName);
-		}
-
-		protected internal override ISnapshotArgs OnEventApplied(IEventArgs @event)
-		{
-			var snapshot = base.OnEventApplied(@event);
-			if (snapshot == null)
-				throw new NotSupportedException(@event.GetType().FullName);
-
-			return snapshot;
 		}
 	}
 }

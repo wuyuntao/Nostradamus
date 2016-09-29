@@ -1,4 +1,6 @@
-﻿namespace Nostradamus
+﻿using ProtoBuf;
+
+namespace Nostradamus
 {
 	public interface ISnapshotArgs
 	{
@@ -11,15 +13,37 @@
 		bool IsApproximate(ISnapshotArgs snapshot);
 	}
 
-	class Snapshot
+	[ProtoContract]
+	public sealed class Snapshot
 	{
-		public readonly int Time;
-		public readonly ISnapshotArgs Args;
+		[ProtoMember(1)]
+		public ActorId ActorId { get; set; }
 
-		public Snapshot(int time, ISnapshotArgs args)
+		[ProtoMember(2)]
+		public int Time { get; set; }
+
+		[ProtoMember(3)]
+
+		public object Args { get; set; }
+
+		public Snapshot(ActorId actorId, int time, ISnapshotArgs args)
 		{
+			ActorId = actorId;
 			Time = time;
 			Args = args;
+		}
+
+		public Snapshot() { }
+
+		public ISnapshotArgs GetArgs()
+		{
+			return (ISnapshotArgs)Args;
+		}
+
+		public TArgs GetArgs<TArgs>()
+			where TArgs : ISnapshotArgs
+		{
+			return (TArgs)Args;
 		}
 	}
 }

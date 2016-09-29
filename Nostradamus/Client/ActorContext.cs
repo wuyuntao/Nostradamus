@@ -40,7 +40,7 @@ namespace Nostradamus.Client
 		{
 			var currentSnapshot = actor.Snapshot;
 
-			actor.SetSnapshot(authoritativeTimeline.Last.Snapshot);
+			actor.RecoverSnapshot(authoritativeTimeline.Last.Snapshot);
 
 			if (authoritativeEventQueue.Count > 0)
 			{
@@ -58,7 +58,7 @@ namespace Nostradamus.Client
 				authoritativeTimeline.AddPoint(actor.Scene.Time + actor.Scene.DeltaTime, actor.Snapshot.Extrapolate(actor.Scene.DeltaTime));
 			}
 
-			actor.SetSnapshot(currentSnapshot);
+			actor.RecoverSnapshot(currentSnapshot);
 		}
 
 		public bool IsSynchronized(int time)
@@ -81,7 +81,7 @@ namespace Nostradamus.Client
 			predictiveTimeline = new Timeline(string.Format("Predictive-{0}", time));
 			predictiveTimeline.AddPoint(time, snapshot.Clone());
 
-			actor.SetSnapshot(snapshot.Clone());
+			actor.RecoverSnapshot(snapshot.Clone());
 			return true;
 		}
 
@@ -91,13 +91,13 @@ namespace Nostradamus.Client
 			{
 				var point = authoritativeTimeline.InterpolatePoint(time);
 
-				actor.SetSnapshot(point.Snapshot.Clone());
+				actor.RecoverSnapshot(point.Snapshot.Clone());
 			}
 			else if (!isReplay && authoritativeTimeline.Last.Snapshot.IsApproximate(actor.Snapshot))
 			{
 				var point = authoritativeTimeline.Last;
 
-				actor.SetSnapshot(point.Snapshot.Clone());
+				actor.RecoverSnapshot(point.Snapshot.Clone());
 
 				predictiveTimeline = null;
 			}

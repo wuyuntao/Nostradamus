@@ -1,9 +1,8 @@
-﻿using System;
-using BulletSharp;
+﻿using BulletSharp;
 using BulletSharp.Math;
 using Nostradamus.Physics;
 using Nostradamus.Tests.Commnads;
-using Nostradamus.Tests.Events;
+using System;
 
 namespace Nostradamus.Tests.Actors
 {
@@ -11,10 +10,8 @@ namespace Nostradamus.Tests.Actors
 	{
 		bool hasMoved;
 
-		public SimpleBall(PhysicsScene scene, ActorId id, ClientId clientId, Vector3 initialPosition)
-			: base(scene, id, clientId
-					, CreateRigidBodyDesc(initialPosition)
-					, CreateRigidBodySnapshot(initialPosition))
+		public SimpleBall(PhysicsScene scene, ActorId id, Vector3 initialPosition)
+			: base(scene, id, CreateRigidBodyDesc(initialPosition), CreateRigidBodySnapshot(initialPosition))
 		{
 		}
 
@@ -41,7 +38,7 @@ namespace Nostradamus.Tests.Actors
 			};
 		}
 
-		protected internal override void OnCommandReceived(ICommandArgs command)
+		protected override void OnCommandReceived(ICommandArgs command)
 		{
 			if (command is MoveBallCommand)
 			{
@@ -67,7 +64,7 @@ namespace Nostradamus.Tests.Actors
 				throw new NotSupportedException(command.GetType().FullName);
 		}
 
-		protected internal override ISnapshotArgs OnEventApplied(IEventArgs @event)
+		protected override ISnapshotArgs OnEventApplied(IEventArgs @event)
 		{
 			var snapshot = base.OnEventApplied(@event);
 			if (snapshot == null)

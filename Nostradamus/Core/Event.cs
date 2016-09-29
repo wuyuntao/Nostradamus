@@ -15,17 +15,13 @@ namespace Nostradamus
 		[ProtoMember(3)]
 		public int Time { get; set; }
 
-		[ProtoMember(4)]
-		public int LastCommandSeq { get; set; }
-
 		[ProtoMember(5, DynamicType = true)]
 		public object Args { get; set; }
 
-		public Event(ActorId actorId, int time, int lastCommandSeq, IEventArgs args)
+		public Event(ActorId actorId, int time, IEventArgs args)
 		{
 			ActorId = actorId;
 			Time = time;
-			LastCommandSeq = lastCommandSeq;
 			Args = args;
 		}
 

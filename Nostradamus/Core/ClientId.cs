@@ -12,7 +12,7 @@ namespace Nostradamus
 		[ProtoMember(2, IsRequired = false)]
 		public string Description { get; set; }
 
-		internal ClientId(int value, string description = null)
+		public ClientId(int value, string description = null)
 		{
 			Value = value;
 			Description = description;

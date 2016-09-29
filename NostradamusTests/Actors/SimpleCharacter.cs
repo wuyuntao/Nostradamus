@@ -9,11 +9,15 @@ namespace Nostradamus.Tests.Actors
 	{
 		private bool hasMoved;
 
-		public SimpleCharacter(Scene scene, ActorId id, ClientId clientId, ISnapshotArgs snapshot)
-			: base(scene, id, clientId, snapshot)
+		public SimpleCharacter(Scene scene, ActorId id, ISnapshotArgs snapshot)
+			: base(scene, id, snapshot)
 		{ }
 
-		protected internal override void OnCommandReceived(ICommandArgs command)
+		protected override void OnSnapshotRecovered(ISnapshotArgs snapshot)
+		{
+		}
+
+		protected override void OnCommandReceived(ICommandArgs command)
 		{
 			if (command is MoveActorCommand)
 			{
@@ -37,7 +41,7 @@ namespace Nostradamus.Tests.Actors
 				throw new NotSupportedException(command.GetType().FullName);
 		}
 
-		protected internal override ISnapshotArgs OnEventApplied(IEventArgs @event)
+		protected override ISnapshotArgs OnEventApplied(IEventArgs @event)
 		{
 			if (@event is ActorMovedEvent)
 			{
@@ -53,7 +57,7 @@ namespace Nostradamus.Tests.Actors
 				throw new NotSupportedException(@event.GetType().FullName);
 		}
 
-		protected internal override void OnUpdate()
+		protected override void OnUpdate()
 		{
 			hasMoved = false;
 		}

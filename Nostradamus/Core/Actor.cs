@@ -10,54 +10,46 @@ namespace Nostradamus
 
 		private readonly Scene scene;
 		private readonly ActorId id;
-		private readonly ClientId ownerId;
 		private ISnapshotArgs snapshot;
-		private int lastCommandSeq;
 
-		protected Actor(Scene scene, ActorId id, ClientId ownerId, ISnapshotArgs snapshot)
+		protected Actor(Scene scene, ActorId id, ISnapshotArgs snapshot)
 		{
 			this.scene = scene;
 			this.id = id;
-			this.ownerId = ownerId;
 			this.snapshot = snapshot;
 		}
 
-		protected internal virtual ISnapshotArgs CreateSnapshot()
+		internal ISnapshotArgs CreateSnapshot()
 		{
 			return snapshot.Clone();
 		}
 
-		protected internal virtual void ApplyEvent(IEventArgs @event)
+		internal void RecoverSnapshot(ISnapshotArgs snapshot)
+		{
+			if (snapshot == null)
+				throw new InvalidOperationException("Snapshot cannot be null");
+
+			this.snapshot = snapshot;
+
+			OnSnapshotRecovered(snapshot);
+		}
+
+		protected internal void ApplyEvent(IEventArgs @event)
 		{
 			var snapshot = OnEventApplied(@event);
 			if (snapshot == null)
 				throw new InvalidOperationException("Snapshot cannot be null");
 
-			scene.CreateEvent(this, lastCommandSeq, @event);
+			scene.CreateEvent(this, @event);
 
 			this.snapshot = snapshot;
 		}
 
-		protected internal virtual void SetSnapshot(ISnapshotArgs snapshot)
-		{
-			if (snapshot == null)
-				throw new InvalidOperationException("Snapshot cannot be null");
-
-			this.snapshot = snapshot;
-		}
-
-		internal void ReceiveCommand(Command command)
-		{
-			lastCommandSeq = command.Sequence;
-
-			OnCommandReceived(command.GetArgs());
-
-			lastCommandSeq = 0;
-		}
+		protected abstract void OnSnapshotRecovered(ISnapshotArgs snapshot);
 
 		protected internal abstract void OnCommandReceived(ICommandArgs command);
 
-		protected internal abstract ISnapshotArgs OnEventApplied(IEventArgs @event);
+		protected abstract ISnapshotArgs OnEventApplied(IEventArgs @event);
 
 		protected internal abstract void OnUpdate();
 
@@ -66,17 +58,12 @@ namespace Nostradamus
 			get { return scene; }
 		}
 
-		protected internal ActorId Id
+		public ActorId Id
 		{
 			get { return id; }
 		}
 
-		protected internal ClientId OwnerId
-		{
-			get { return ownerId; }
-		}
-
-		protected internal ISnapshotArgs Snapshot
+		public ISnapshotArgs Snapshot
 		{
 			get { return snapshot; }
 		}
