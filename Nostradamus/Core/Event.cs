@@ -12,16 +12,12 @@ namespace Nostradamus
 		[ProtoMember(1)]
 		public ActorId ActorId { get; set; }
 
-		[ProtoMember(3)]
-		public int Time { get; set; }
-
-		[ProtoMember(5, DynamicType = true)]
+		[ProtoMember(2, DynamicType = true)]
 		public object Args { get; set; }
 
-		public Event(ActorId actorId, int time, IEventArgs args)
+		public Event(ActorId actorId, IEventArgs args)
 		{
 			ActorId = actorId;
-			Time = time;
 			Args = args;
 		}
 

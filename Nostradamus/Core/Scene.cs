@@ -59,7 +59,7 @@ namespace Nostradamus
 
 		internal Event CreateEvent(Actor actor, IEventArgs @event)
 		{
-			var e = new Event(actor.Id, Time, @event);
+			var e = new Event(actor.Id, @event);
 
 			if (OnEventCreated != null)
 				OnEventCreated(e);

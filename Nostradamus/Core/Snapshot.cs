@@ -19,17 +19,13 @@ namespace Nostradamus
 		[ProtoMember(1)]
 		public ActorId ActorId { get; set; }
 
-		[ProtoMember(2)]
-		public int Time { get; set; }
-
-		[ProtoMember(3)]
+		[ProtoMember(2, DynamicType = true)]
 
 		public object Args { get; set; }
 
-		public Snapshot(ActorId actorId, int time, ISnapshotArgs args)
+		public Snapshot(ActorId actorId, ISnapshotArgs args)
 		{
 			ActorId = actorId;
-			Time = time;
 			Args = args;
 		}
 
