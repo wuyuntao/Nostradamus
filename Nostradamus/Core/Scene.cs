@@ -1,6 +1,7 @@
 ﻿using NLog;
 using Nostradamus.Utils;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Nostradamus
 {
@@ -8,63 +9,30 @@ namespace Nostradamus
 	{
 		protected static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-		private int maxActorId;
-		private readonly Dictionary<ActorId, Actor> actors = new Dictionary<ActorId, Actor>();
+		private readonly Dictionary<ActorId, ActorContext> actors = new Dictionary<ActorId, ActorContext>();
 
-		internal delegate void EventDelegate(Event @event);
-		internal delegate void ActorDelegate(Actor actor);
-
-		internal event EventDelegate OnEventCreated;
-		internal event ActorDelegate OnActorAdded;
-		internal event ActorDelegate OnActorRemoved;
-
-		public ActorId CreateActorId(string description = null)
+		internal ActorContext CreateActorContext(Actor actor)
 		{
-			return new ActorId(++maxActorId, description);
-		}
+			var context = new ActorContext(actor);
 
-		internal Actor GetActor(ActorId actorId)
-		{
-			Actor actor;
-			actors.TryGetValue(actorId, out actor);
-			return actor;
-		}
+			actors.Add(actor.Id, context);
 
-		public virtual void AddActor(Actor actor)
-		{
-			actors.Add(actor.Id, actor);
-
-			if (OnActorAdded != null)
-				OnActorAdded(actor);
-		}
-
-		public virtual void RemoveActor(Actor actor)
-		{
-			actors.Remove(actor.Id);
-
-			if (OnActorRemoved != null)
-				OnActorRemoved(actor);
+			return context;
 		}
 
 		protected internal virtual void OnUpdate()
 		{
-			foreach (var actor in actors.Values)
-				actor.OnUpdate();
+			foreach (var context in actors.Values)
+				context.Actor.OnUpdate();
 		}
 
 		public IEnumerable<Actor> Actors
 		{
-			get { return actors.Values; }
-		}
-
-		internal Event CreateEvent(Actor actor, IEventArgs @event)
-		{
-			var e = new Event(actor.Id, @event);
-
-			if (OnEventCreated != null)
-				OnEventCreated(e);
-
-			return e;
+			get
+			{
+				return from context in actors.Values
+					   select context.Actor;
+			}
 		}
 
 		public int Time { get; internal set; }

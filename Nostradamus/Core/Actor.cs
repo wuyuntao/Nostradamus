@@ -11,12 +11,14 @@ namespace Nostradamus
 		private readonly Scene scene;
 		private readonly ActorId id;
 		private ISnapshotArgs snapshot;
+		private ActorContext context;
 
 		protected Actor(Scene scene, ActorId id, ISnapshotArgs snapshot)
 		{
 			this.scene = scene;
 			this.id = id;
 			this.snapshot = snapshot;
+			this.context = scene.CreateActorContext(this);
 		}
 
 		internal ISnapshotArgs CreateSnapshot()
@@ -40,7 +42,7 @@ namespace Nostradamus
 			if (snapshot == null)
 				throw new InvalidOperationException("Snapshot cannot be null");
 
-			scene.CreateEvent(this, @event);
+			context.EnqueueEvent(@event);
 
 			this.snapshot = snapshot;
 		}
