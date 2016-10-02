@@ -1,4 +1,5 @@
-﻿using ProtoBuf;
+﻿using Nostradamus.Server;
+using ProtoBuf;
 
 namespace Nostradamus.Networking
 {
@@ -10,16 +11,9 @@ namespace Nostradamus.Networking
 	}
 
 	[ProtoContract]
-	class LoginRequest
+	class Login
 	{
 		[ProtoMember(1)]
 		public ClientId ClientId { get; set; }
-	}
-
-	[ProtoContract]
-	class LoginResponse
-	{
-		[ProtoMember(1)]
-		public bool Success { get; set; }
 	}
 }

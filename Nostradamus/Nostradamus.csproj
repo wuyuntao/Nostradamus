@@ -112,6 +112,7 @@
     <Compile Include="Core\Snapshot.cs" />
     <Compile Include="Core\Scene.cs" />
     <Compile Include="Networking\Messages.cs" />
+    <Compile Include="Networking\ReliableUdpClient.cs" />
     <Compile Include="Networking\ReliableUdpServer.cs" />
     <Compile Include="Physics\PhysicsScene.cs" />
     <Compile Include="Physics\PhysicsSceneDesc.cs" />

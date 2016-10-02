@@ -2,7 +2,7 @@
 
 namespace Nostradamus.Physics
 {
-	public class PhysicsScene : Scene
+	public abstract class PhysicsScene : Scene
 	{
 		private DefaultCollisionConfiguration collisionConf;
 		private CollisionDispatcher dispatcher;

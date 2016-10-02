@@ -10,6 +10,7 @@ namespace Nostradamus.Client
 		private readonly ClientId clientId;
 		private readonly int reconciliationDeltaTime;
 
+		private FullSyncFrame fullSyncFrame;
 		private Queue<DeltaSyncFrame> deltaSyncFrames = new Queue<DeltaSyncFrame>();
 		private int maxCommandSeq;
 		private CommandFrame commandFrame;
@@ -24,6 +25,13 @@ namespace Nostradamus.Client
 		internal override ActorContext CreateActorContext(Actor actor)
 		{
 			return new ClientActorContext(actor);
+		}
+
+		public void ReceiveFullSyncFrame(FullSyncFrame frame)
+		{
+			fullSyncFrame = frame;
+			deltaSyncFrames.Clear();
+			unacknowledgedCommands.Clear();
 		}
 
 		public void ReceiveDeltaSyncFrame(DeltaSyncFrame frame)
@@ -43,15 +51,31 @@ namespace Nostradamus.Client
 
 		public void Simulate(int deltaTime)
 		{
+			if (fullSyncFrame != null)
+				ApplyFullSync();
+
 			if (deltaSyncFrames.Count > 0)
-				Synchronize();
+				ApplyDeltaSync();
 
 			UpdateScene(commandFrame != null ? commandFrame.Commands : null, Time, deltaTime, false);
 
 			Time += deltaTime;
 		}
 
-		private void Synchronize()
+		private void ApplyFullSync()
+		{
+			if (fullSyncFrame != null)
+				throw new InvalidOperationException("Already full synced");
+
+			Time = fullSyncFrame.Time;
+
+			foreach (var snapshot in fullSyncFrame.Snapshots)
+			{
+				Scene.CreateActorContext(snapshot.ActorId, snapshot.GetArgs());
+			}
+		}
+
+		private void ApplyDeltaSync()
 		{
 			int lastFrameTime = 0;
 			int lastCommandSeq = 0;
@@ -200,6 +224,11 @@ namespace Nostradamus.Client
 			commandFrame = null;
 
 			return frame;
+		}
+
+		public ClientId ClientId
+		{
+			get { return clientId; }
 		}
 
 		private IEnumerable<ClientActorContext> ActorContexts

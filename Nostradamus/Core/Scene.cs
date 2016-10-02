@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Nostradamus
 {
-	public class Scene : Disposable
+	public abstract class Scene : Disposable
 	{
 		protected static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -38,6 +38,13 @@ namespace Nostradamus
 			return context;
 		}
 
+		internal ActorContext CreateActorContext(ActorId actorId, ISnapshotArgs snapshot)
+		{
+			Actor actor = CreateActor(actorId, snapshot);
+
+			return CreateActorContext(actor);
+		}
+
 		internal ActorContext GetActorContext(ActorId actorId)
 		{
 			ActorContext actor;
@@ -55,6 +62,8 @@ namespace Nostradamus
 
 			OnUpdate();
 		}
+
+		protected abstract Actor CreateActor(ActorId actorId, ISnapshotArgs snapshot);
 
 		protected internal virtual void OnUpdate()
 		{ }

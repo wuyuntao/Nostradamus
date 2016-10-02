@@ -18,10 +18,10 @@ namespace Nostradamus.Networking
 		private readonly ServerSimulator simulator;
 		private readonly NetServer server;
 		private readonly SortedList<ClientId, Client> clients = new SortedList<ClientId, Client>();
-		private int simulateDeltaTime;
+		private readonly int simulateDeltaTime;
 		private bool stopRequest;
 
-		public ReliableUdpServer(ServerSimulator simulator, int simulateDeltaTime, string appIdentifier, int listeningPort)
+		public ReliableUdpServer(ServerSimulator simulator, int simulateDeltaTime, int listeningPort, string appIdentifier = "Nostradamus")
 		{
 			this.simulator = simulator;
 			this.simulateDeltaTime = simulateDeltaTime;
@@ -69,7 +69,7 @@ namespace Nostradamus.Networking
 				simulator.Simulate(simulateDeltaTime);
 
 				var deltaSyncFrame = simulator.FetchDeltaSyncFrame();
-				SendDeltaSyncFrame(deltaSyncFrame);
+				SendMessageToAll(deltaSyncFrame);
 			}
 		}
 
@@ -95,9 +95,9 @@ namespace Nostradamus.Networking
 							{
 								OnServerMessage_ClientSyncFrame(msg, (CommandFrame)envelope.Message);
 							}
-							else if (envelope.Message is LoginRequest)
+							else if (envelope.Message is Login)
 							{
-								OnServerMessage_LoginRequest(msg, (LoginRequest)envelope.Message);
+								OnServerMessage_LoginRequest(msg, (Login)envelope.Message);
 							}
 							else
 								logger.Error("Unexpected message: {0}", envelope.Message);
@@ -132,9 +132,13 @@ namespace Nostradamus.Networking
 			logger.Trace("Status of {0} changed to {1}", msg.SenderConnection, status);
 		}
 
-		private void OnServerMessage_LoginRequest(NetIncomingMessage msg, LoginRequest message)
+		private void OnServerMessage_LoginRequest(NetIncomingMessage msg, Login message)
 		{
-			clients.Add(message.ClientId, new Client(message.ClientId, msg.SenderConnection));
+			var client = new Client(message.ClientId, msg.SenderConnection);
+			clients.Add(message.ClientId, client);
+
+			var frame = simulator.FetchFullSyncFrame();
+			SendMessage(client, frame);
 		}
 
 		private void OnServerMessage_ClientSyncFrame(NetIncomingMessage msg, CommandFrame frame)
@@ -142,11 +146,24 @@ namespace Nostradamus.Networking
 			simulator.ReceiveCommandFrame(frame);
 		}
 
-		private void SendDeltaSyncFrame(DeltaSyncFrame frame)
+		private void SendMessage(Client client, object message)
 		{
 			using (var stream = new MemoryStream())
 			{
-				Serializer.Serialize(stream, new MessageEnvelope() { Message = frame });
+				Serializer.Serialize(stream, new MessageEnvelope() { Message = message });
+
+				var msg = server.CreateMessage();
+				msg.Write(stream.ToArray());
+
+				client.Connection.SendMessage(msg, NetDeliveryMethod.ReliableOrdered, 0);
+			}
+		}
+
+		private void SendMessageToAll(object message)
+		{
+			using (var stream = new MemoryStream())
+			{
+				Serializer.Serialize(stream, new MessageEnvelope() { Message = message });
 
 				var msg = server.CreateMessage();
 				msg.Write(stream.ToArray());

@@ -1,4 +1,5 @@
-﻿using BulletSharp;
+﻿using System;
+using BulletSharp;
 using BulletSharp.Math;
 using Nostradamus.Physics;
 using Nostradamus.Tests.Actors;
@@ -14,14 +15,13 @@ namespace Nostradamus.Tests.Scenes
 			: base(simulator, CreatePhysicsSceneDesc())
 		{
 			var clientId = new ClientId(1);
-
 			var cubeId = new ActorId(1, "Cube");
 			var cubePosition = new Vector3(0.1f, 1.5f, 0.1f);
 			cube = new SimpleCube(this, cubeId, clientId, cubePosition);
 
 			var ballId = new ActorId(2, "Ball");
 			var ballPosition = new Vector3(-0.1f, 6f, -0.1f);
-			ball = new SimpleBall(this, ballId, clientId, ballPosition);
+			ball = new SimpleBall(this, ballId, null, ballPosition);
 		}
 
 		private static PhysicsSceneDesc CreatePhysicsSceneDesc()
@@ -36,6 +36,27 @@ namespace Nostradamus.Tests.Scenes
 			{
 				Colliders = new[] { ground },
 			};
+		}
+
+		protected override Actor CreateActor(ActorId actorId, ISnapshotArgs snapshot)
+		{
+			switch (actorId.Value)
+			{
+				case 1:
+					var clientId = new ClientId(1);
+					var cubePosition = new Vector3(0.1f, 1.5f, 0.1f);
+					cube = new SimpleCube(this, actorId, clientId, cubePosition);
+					return cube;
+
+				case 2:
+					var ballId = new ActorId(2, "Ball");
+					var ballPosition = new Vector3(-0.1f, 6f, -0.1f);
+					ball = new SimpleBall(this, actorId, null, ballPosition);
+					return ball;
+
+				default:
+					throw new NotSupportedException(actorId.ToString());
+			}
 		}
 
 		public SimpleBall Ball
