@@ -11,12 +11,12 @@ namespace NostradamusExamples
 			//var t1 = new ServerSimulatorTest();
 			//t1.TestSimpleScene();
 
-			var t2 = new ClientSimulatorTest();
+			//var t2 = new ClientSimulatorTest();
 			//t2.TestSimpleScene();
-			t2.TestSimpleSceneWithServer();
+			//t2.TestSimpleSceneWithServer();
 
-			//var t = new PhysicsSceneTest();
-			//t.TestSimplePhysicsScene();
+			var t3 = new PhysicsSceneTest();
+			t3.TestSimplePhysicsScene();
 		}
 	}
 }

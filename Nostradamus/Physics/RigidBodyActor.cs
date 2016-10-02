@@ -1,39 +1,48 @@
 ﻿using BulletSharp;
 using BulletSharp.Math;
-using System;
 
 namespace Nostradamus.Physics
 {
 	public abstract class RigidBodyActor : Actor
 	{
 		private readonly PhysicsScene scene;
-		private readonly RigidBody rigidBody;
+		private RigidBody rigidBody;
 
 		protected RigidBodyActor(PhysicsScene scene, ActorId id, ClientId ownerId, RigidBodyDesc parameters, RigidBodySnapshot snapshot)
 			: base(scene, id, ownerId, snapshot)
 		{
 			this.scene = scene;
-			this.rigidBody = CreateRigidBody(parameters);
+
+			InitializeRigidBody(parameters);
 		}
 
-		private RigidBody CreateRigidBody(RigidBodyDesc p)
+		private void InitializeRigidBody(RigidBodyDesc desc)
 		{
 			var localInertia = Vector3.Zero;
-			if (!p.IsKinematic)
-				p.Shape.CalculateLocalInertia(p.Mass, out localInertia);
+			if (!desc.IsKinematic)
+				desc.Shape.CalculateLocalInertia(desc.Mass, out localInertia);
 
-			var motionState = new DefaultMotionState(p.StartTransform, p.CenterOfMassOffset);
+			var motionState = new DefaultMotionState(desc.StartTransform, desc.CenterOfMassOffset);
 
-			using (var rbInfo = new RigidBodyConstructionInfo(p.Mass, motionState, p.Shape, localInertia))
+			using (var rbInfo = new RigidBodyConstructionInfo(desc.Mass, motionState, desc.Shape, localInertia))
 			{
-				var body = new RigidBody(rbInfo);
-				body.UserObject = this;
+				rigidBody = new RigidBody(rbInfo);
+				rigidBody.UserObject = this;
 
-				if (p.IsKinematic)
-					body.CollisionFlags |= CollisionFlags.KinematicObject;
+				if (desc.IsKinematic)
+					rigidBody.CollisionFlags |= CollisionFlags.KinematicObject;
 
-				return body;
+				scene.World.AddRigidBody(rigidBody);
 			}
+		}
+
+		protected override void DisposeManaged()
+		{
+			scene.World.RemoveRigidBody(rigidBody);
+
+			SafeDispose(ref rigidBody);
+
+			base.DisposeManaged();
 		}
 
 		protected override ISnapshotArgs OnEventApplied(IEventArgs @event)
@@ -66,7 +75,7 @@ namespace Nostradamus.Physics
 
 			SyncRigidBodyFromSnapshot(s);
 		}
-		
+
 		private void SyncSnapshotFromRigidBody(RigidBodySnapshot snapshot)
 		{
 			snapshot.Position = rigidBody.CenterOfMassPosition;
