@@ -10,13 +10,15 @@ namespace Nostradamus
 
 		private readonly Scene scene;
 		private readonly ActorId id;
+		private readonly ClientId ownerId;
 		private ISnapshotArgs snapshot;
 		private ActorContext context;
 
-		protected Actor(Scene scene, ActorId id, ISnapshotArgs snapshot)
+		protected Actor(Scene scene, ActorId id, ClientId ownerId, ISnapshotArgs snapshot)
 		{
 			this.scene = scene;
 			this.id = id;
+			this.ownerId = ownerId;
 			this.snapshot = snapshot;
 			this.context = scene.CreateActorContext(this);
 		}
@@ -55,6 +57,14 @@ namespace Nostradamus
 
 		protected internal abstract void OnUpdate();
 
+		public override string ToString()
+		{
+			if (string.IsNullOrEmpty(id.Description))
+				return string.Format("{0} #{1}", GetType().Name, id.Value);
+			else
+				return string.Format("{0} #{1} ({2})", GetType().Name, id.Value, id.Description);
+		}
+
 		protected internal Scene Scene
 		{
 			get { return scene; }
@@ -63,6 +73,11 @@ namespace Nostradamus
 		public ActorId Id
 		{
 			get { return id; }
+		}
+
+		public ClientId OwnerId
+		{
+			get { return ownerId; }
 		}
 
 		public ISnapshotArgs Snapshot

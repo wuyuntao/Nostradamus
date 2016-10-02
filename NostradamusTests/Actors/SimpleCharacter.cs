@@ -9,8 +9,8 @@ namespace Nostradamus.Tests.Actors
 	{
 		private bool hasMoved;
 
-		public SimpleCharacter(Scene scene, ActorId id, ISnapshotArgs snapshot)
-			: base(scene, id, snapshot)
+		public SimpleCharacter(Scene scene, ActorId id, ClientId ownerId, ISnapshotArgs snapshot)
+			: base(scene, id, ownerId, snapshot)
 		{ }
 
 		protected override void OnSnapshotRecovered(ISnapshotArgs snapshot)
@@ -19,13 +19,13 @@ namespace Nostradamus.Tests.Actors
 
 		protected override void OnCommandReceived(ICommandArgs command)
 		{
-			if (command is MoveActorCommand)
+			if (command is MoveCharacterCommand)
 			{
 				if (hasMoved)
 					return;
 
-				var s = (ActorSnapshot)Snapshot;
-				var c = (MoveActorCommand)command;
+				var s = (CharacterSnapshot)Snapshot;
+				var c = (MoveCharacterCommand)command;
 
 				var e = new ActorMovedEvent()
 				{
@@ -45,7 +45,7 @@ namespace Nostradamus.Tests.Actors
 		{
 			if (@event is ActorMovedEvent)
 			{
-				var s = (ActorSnapshot)Snapshot.Clone();
+				var s = (CharacterSnapshot)Snapshot.Clone();
 				var e = (ActorMovedEvent)@event;
 
 				s.PositionX = e.PositionX;

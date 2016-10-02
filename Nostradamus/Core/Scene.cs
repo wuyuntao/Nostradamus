@@ -9,22 +9,55 @@ namespace Nostradamus
 	{
 		protected static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
+		private readonly Simulator simulator;
 		private readonly Dictionary<ActorId, ActorContext> actors = new Dictionary<ActorId, ActorContext>();
+
+		public Scene(Simulator simulator)
+		{
+			this.simulator = simulator;
+
+			simulator.InitializeScene(this);
+		}
+
+		protected override void DisposeManaged()
+		{
+			foreach (var context in actors.Values)
+				context.Actor.Dispose();
+
+			actors.Clear();
+
+			base.DisposeManaged();
+		}
 
 		internal ActorContext CreateActorContext(Actor actor)
 		{
-			var context = new ActorContext(actor);
+			var context = simulator.CreateActorContext(actor);
 
 			actors.Add(actor.Id, context);
 
 			return context;
 		}
 
-		protected internal virtual void OnUpdate()
+		internal ActorContext GetActorContext(ActorId actorId)
 		{
-			foreach (var context in actors.Values)
-				context.Actor.OnUpdate();
+			ActorContext actor;
+			actors.TryGetValue(actorId, out actor);
+			return actor;
 		}
+
+		internal void Update(int time, int deltaTime)
+		{
+			Time = time;
+			DeltaTime = deltaTime;
+
+			foreach (var context in actors.Values)
+				context.Update();
+
+			OnUpdate();
+		}
+
+		protected internal virtual void OnUpdate()
+		{ }
 
 		public IEnumerable<Actor> Actors
 		{
@@ -33,6 +66,11 @@ namespace Nostradamus
 				return from context in actors.Values
 					   select context.Actor;
 			}
+		}
+
+		internal IEnumerable<ActorContext> ActorContexts
+		{
+			get { return actors.Values; }
 		}
 
 		public int Time { get; internal set; }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Nostradamus.Server
 {
 	[ProtoContract]
-	public sealed class ServerSyncFrame
+	public sealed class DeltaSyncFrame
 	{
 		[ProtoMember(1)]
 		public int Time { get; set; }
@@ -18,7 +18,7 @@ namespace Nostradamus.Server
 		[ProtoMember(4, IsRequired = false)]
 		public SortedList<ClientId, int> LastCommandSeqs { get; set; }
 
-		public ServerSyncFrame(int time, int deltaTime)
+		public DeltaSyncFrame(int time, int deltaTime)
 		{
 			Time = time;
 			DeltaTime = deltaTime;
@@ -26,13 +26,6 @@ namespace Nostradamus.Server
 			LastCommandSeqs = new SortedList<ClientId, int>();
 		}
 
-		public ServerSyncFrame() { }
-
-		public int GetLastCommandSeq(ClientId clientId)
-		{
-			int sequence;
-			LastCommandSeqs.TryGetValue(clientId, out sequence);
-			return sequence;
-		}
+		public DeltaSyncFrame() { }
 	}
 }

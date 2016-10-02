@@ -10,22 +10,26 @@ namespace Nostradamus
 	public sealed class Command
 	{
 		[ProtoMember(1)]
-		public ActorId ActorId { get; set; }
+		public ClientId ClientId { get; set; }
 
 		[ProtoMember(2)]
-		public int Time { get; set; }
+		public ActorId ActorId { get; set; }
 
 		[ProtoMember(3)]
-		public int DeltaTime { get; set; }
-
-		[ProtoMember(4)]
 		public int Sequence { get; set; }
 
-		[ProtoMember(5, DynamicType = true)]
+		[ProtoMember(4)]
+		public int Time { get; set; }
+
+		[ProtoMember(5)]
+		public int DeltaTime { get; set; }
+
+		[ProtoMember(6, DynamicType = true)]
 		public object Args { get; set; }
 
-		public Command(ActorId actorId, int time, int deltaTime, int sequence, ICommandArgs args)
+		public Command(ClientId clientId, ActorId actorId, int sequence, int time, int deltaTime, ICommandArgs args)
 		{
+			ClientId = clientId;
 			ActorId = actorId;
 			Time = time;
 			DeltaTime = deltaTime;
@@ -34,6 +38,11 @@ namespace Nostradamus
 		}
 
 		public Command() { }
+
+		public override string ToString()
+		{
+			return string.Format("{0} ({1}, {2}, #{3})", GetType().Name, ClientId, ActorId, Sequence);
+		}
 
 		public ICommandArgs GetArgs()
 		{

@@ -66,8 +66,10 @@ namespace Nostradamus.Networking
 				for (var msg = server.ReadMessage(); msg != null; msg = server.ReadMessage())
 					OnServerMessage(msg);
 
-				var syncFrame = simulator.Simulate(simulateDeltaTime);
-				SendServerSyncFrame(syncFrame);
+				simulator.Simulate(simulateDeltaTime);
+
+				var deltaSyncFrame = simulator.FetchDeltaSyncFrame();
+				SendDeltaSyncFrame(deltaSyncFrame);
 			}
 		}
 
@@ -89,9 +91,9 @@ namespace Nostradamus.Networking
 						{
 							var envelope = Serializer.Deserialize<MessageEnvelope>(stream);
 
-							if (envelope.Message is ClientSyncFrame)
+							if (envelope.Message is CommandFrame)
 							{
-								OnServerMessage_ClientSyncFrame(msg, (ClientSyncFrame)envelope.Message);
+								OnServerMessage_ClientSyncFrame(msg, (CommandFrame)envelope.Message);
 							}
 							else if (envelope.Message is LoginRequest)
 							{
@@ -135,12 +137,12 @@ namespace Nostradamus.Networking
 			clients.Add(message.ClientId, new Client(message.ClientId, msg.SenderConnection));
 		}
 
-		private void OnServerMessage_ClientSyncFrame(NetIncomingMessage msg, ClientSyncFrame frame)
+		private void OnServerMessage_ClientSyncFrame(NetIncomingMessage msg, CommandFrame frame)
 		{
-			simulator.AddClientSyncFrame(frame);
+			simulator.ReceiveCommandFrame(frame);
 		}
 
-		private void SendServerSyncFrame(ServerSyncFrame frame)
+		private void SendDeltaSyncFrame(DeltaSyncFrame frame)
 		{
 			using (var stream = new MemoryStream())
 			{

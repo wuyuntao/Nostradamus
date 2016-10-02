@@ -8,15 +8,15 @@ namespace NostradamusExamples
 	{
 		static void Main(string[] args)
 		{
-			//var t = new ServerSimulatorTest();
-			//t.TestSimpleScene();
+			//var t1 = new ServerSimulatorTest();
+			//t1.TestSimpleScene();
 
-			//var t = new ClientSimulatorTest();
-			//t.TestSimpleScene();
-			//t.TestSimpleSceneWithServer();
+			var t2 = new ClientSimulatorTest();
+			//t2.TestSimpleScene();
+			t2.TestSimpleSceneWithServer();
 
-			var t = new PhysicsSceneTest();
-			t.TestSimplePhysicsScene();
+			//var t = new PhysicsSceneTest();
+			//t.TestSimplePhysicsScene();
 		}
 	}
 }

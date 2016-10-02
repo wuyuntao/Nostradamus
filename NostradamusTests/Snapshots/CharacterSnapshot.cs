@@ -3,7 +3,7 @@
 namespace Nostradamus.Tests.Snapshots
 {
 	[ProtoContract]
-	class ActorSnapshot : ISnapshotArgs
+	class CharacterSnapshot : ISnapshotArgs
 	{
 		[ProtoMember(1)]
 		public float PositionX { get; set; }
@@ -13,14 +13,14 @@ namespace Nostradamus.Tests.Snapshots
 
 		ISnapshotArgs ISnapshotArgs.Clone()
 		{
-			return new ActorSnapshot() { PositionX = PositionX, PositionY = PositionY };
+			return new CharacterSnapshot() { PositionX = PositionX, PositionY = PositionY };
 		}
 
 		ISnapshotArgs ISnapshotArgs.Interpolate(ISnapshotArgs snapshot, float factor)
 		{
-			var s = (ActorSnapshot)snapshot;
+			var s = (CharacterSnapshot)snapshot;
 
-			return new ActorSnapshot()
+			return new CharacterSnapshot()
 			{
 				PositionX = PositionX + (s.PositionX - PositionX) * factor,
 				PositionY = PositionY + (s.PositionY - PositionY) * factor,
@@ -29,12 +29,12 @@ namespace Nostradamus.Tests.Snapshots
 
 		ISnapshotArgs ISnapshotArgs.Extrapolate(int deltaTime)
 		{
-			return new ActorSnapshot() { PositionX = PositionX, PositionY = PositionY };
+			return new CharacterSnapshot() { PositionX = PositionX, PositionY = PositionY };
 		}
 
 		bool ISnapshotArgs.IsApproximate(ISnapshotArgs snapshot)
 		{
-			var s = (ActorSnapshot)snapshot;
+			var s = (CharacterSnapshot)snapshot;
 
 			var distanceSqrt = (PositionX - s.PositionX) * (PositionX - s.PositionX) + (PositionY - s.PositionY) * (PositionY - s.PositionY);
 

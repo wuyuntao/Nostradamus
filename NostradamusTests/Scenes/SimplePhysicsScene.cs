@@ -10,9 +10,19 @@ namespace Nostradamus.Tests.Scenes
 		private SimpleBall ball;
 		private SimpleCube cube;
 
-		public SimplePhysicsScene()
-			: base(CreatePhysicsSceneDesc())
-		{ }
+		public SimplePhysicsScene(Simulator simulator)
+			: base(simulator, CreatePhysicsSceneDesc())
+		{
+			var clientId = new ClientId(1);
+
+			var cubeId = new ActorId(1, "Cube");
+			var cubePosition = new Vector3(0.1f, 1.5f, 0.1f);
+			cube = new SimpleCube(this, cubeId, clientId, cubePosition);
+
+			var ballId = new ActorId(2, "Ball");
+			var ballPosition = new Vector3(-0.1f, 6f, -0.1f);
+			ball = new SimpleBall(this, ballId, clientId, ballPosition);
+		}
 
 		private static PhysicsSceneDesc CreatePhysicsSceneDesc()
 		{
@@ -26,26 +36,6 @@ namespace Nostradamus.Tests.Scenes
 			{
 				Colliders = new[] { ground },
 			};
-		}
-
-		protected override void OnUpdate()
-		{
-			if (Time == 0)
-			{
-				var cubeId = CreateActorId("Cube");
-				var cubePosition = new Vector3(0.1f, 1.5f, 0.1f);
-				cube = new SimpleCube(this, cubeId, cubePosition);
-
-				AddActor(cube);
-
-				var ballId = CreateActorId("Ball");
-				var ballPosition = new Vector3(-0.1f, 6f, -0.1f);
-				ball = new SimpleBall(this, ballId, ballPosition);
-
-				AddActor(ball);
-			}
-
-			base.OnUpdate();
 		}
 
 		public SimpleBall Ball

@@ -12,11 +12,12 @@ namespace Nostradamus.Tests.Physics
 		[Test]
 		public void TestSimplePhysicsScene()
 		{
-			var scene = new SimplePhysicsScene();
-			var simulator = new ServerSimulator(scene);
+			var simulator = new ServerSimulator();
+			var scene = new SimplePhysicsScene(simulator);
 
 			// Time: 0
-			var frame0 = simulator.Simulate(50);
+			simulator.Simulate(50);
+			var frame0 = simulator.FetchDeltaSyncFrame();
 			Assert.AreEqual(0, scene.Time);
 			Assert.AreEqual(50, scene.DeltaTime);
 			Assert.AreEqual(0, frame0.Time);
@@ -42,7 +43,8 @@ namespace Nostradamus.Tests.Physics
 			Assert.That(cubeSnapshot0.Position.Z, Is.EqualTo(cubeEvent0.Position.Z).Within(FloatAppromiateThreshold));
 
 			// Time: 50
-			var frame50 = simulator.Simulate(50);
+			simulator.Simulate(50);
+			var frame50 = simulator.FetchDeltaSyncFrame();
 			Assert.AreEqual(50, scene.Time);
 			Assert.AreEqual(50, scene.DeltaTime);
 			Assert.AreEqual(50, frame50.Time);
@@ -68,7 +70,8 @@ namespace Nostradamus.Tests.Physics
 			Assert.That(cubeSnapshot50.Position.Z, Is.EqualTo(cubeEvent50.Position.Z).Within(FloatAppromiateThreshold));
 
 			// Time: 100
-			var frame100 = simulator.Simulate(50);
+			simulator.Simulate(50);
+			var frame100 = simulator.FetchDeltaSyncFrame();
 			Assert.AreEqual(100, scene.Time);
 			Assert.AreEqual(50, scene.DeltaTime);
 			Assert.AreEqual(100, frame100.Time);

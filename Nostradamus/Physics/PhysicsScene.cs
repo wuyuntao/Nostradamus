@@ -9,7 +9,8 @@ namespace Nostradamus.Physics
 		private DbvtBroadphase broadphase;
 		private DiscreteDynamicsWorld world;
 
-		public PhysicsScene(PhysicsSceneDesc desc)
+		public PhysicsScene(Simulator simulator, PhysicsSceneDesc desc)
+			: base(simulator)
 		{
 			// TODO: Enable custom initialization of physics world
 			collisionConf = new DefaultCollisionConfiguration();
@@ -47,26 +48,6 @@ namespace Nostradamus.Physics
 				rigidBody.CollisionFlags |= CollisionFlags.StaticObject;
 
 				world.AddRigidBody(rigidBody);
-			}
-		}
-
-		public override void AddActor(Actor actor)
-		{
-			base.AddActor(actor);
-
-			if (actor is RigidBodyActor)
-			{
-				world.AddRigidBody(((RigidBodyActor)actor).RigidBody);
-			}
-		}
-
-		public override void RemoveActor(Actor actor)
-		{
-			base.RemoveActor(actor);
-
-			if (actor is RigidBodyActor)
-			{
-				world.RemoveRigidBody(((RigidBodyActor)actor).RigidBody);
 			}
 		}
 

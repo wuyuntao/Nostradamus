@@ -1,93 +1,86 @@
 ﻿using Nostradamus.Client;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Nostradamus.Server
 {
 	public sealed class ServerSimulator : Simulator
 	{
-		private int time;
-		private ServerSyncFrame serverSyncFrame;
-		private readonly Queue<ClientSyncFrame> clientSyncFrames = new Queue<ClientSyncFrame>();
-		private readonly Dictionary<ActorId, ActorContext> actorContexts = new Dictionary<ActorId, ActorContext>();
+		private DeltaSyncFrame deltaSyncFrame;
+		private readonly Queue<CommandFrame> clientSyncFrames = new Queue<CommandFrame>();
 
-		public ServerSimulator(Scene scene)
-			: base(scene)
+		public ServerSimulator()
+		{ }
+
+		internal override ActorContext CreateActorContext(Actor actor)
 		{
-			Scene.OnActorAdded += Scene_OnActorAdded;
-			Scene.OnEventCreated += Scene_OnEventCreated;
+			return new ServerActorContext(actor);
 		}
 
-		protected override void DisposeManaged()
+		public void ReceiveCommandFrame(CommandFrame frame)
 		{
-			foreach (var actorContext in actorContexts.Values)
-				actorContext.Dispose();
-
-			actorContexts.Clear();
-
-			base.DisposeManaged();
-		}
-
-		public void AddClientSyncFrame(ClientSyncFrame frame)
-		{
-			clientSyncFrames.Enqueue(frame);
-		}
-
-		public ServerSyncFrame Simulate(int deltaTime)
-		{
-			serverSyncFrame = new ServerSyncFrame(time, deltaTime);
-
-			Scene.Time = time;
-			Scene.DeltaTime = deltaTime;
-
-			while (clientSyncFrames.Count > 0)
+			foreach (var command in frame.Commands)
 			{
-				var frame = clientSyncFrames.Dequeue();
-				var lastCommandSeq = serverSyncFrame.GetLastCommandSeq(frame.ClientId);
-
-				foreach (var command in frame.Commands)
+				// TODO: Avoid get actor context for every command
+				var actorContext = Scene.GetActorContext(command.ActorId);
+				if (actorContext == null)
 				{
-					if (command.Sequence <= lastCommandSeq)
-					{
-						logger.Warn("Received unordered command: {0} <= {1}", command.Sequence, lastCommandSeq);
-						continue;
-					}
-
-					var actorContext = GetActorContext(command.ActorId);
-					if (actorContext != null)
-					{
-						actorContext.Actor.OnCommandReceived(command.GetArgs());
-					}
-					else
-						logger.Warn("Cannot find actor '{0}'  of command {1}", command.ActorId, command.Args);
-
-					lastCommandSeq = command.Sequence;
+					logger.Warn("Cannot find actor '{0}' to enqueue command '{1}'",
+							command.ActorId, command.GetArgs());
 				}
+				else if (actorContext.Actor.OwnerId != frame.ClientId)
+				{
+					logger.Warn("Client id not match. '{0}' != '{1}'",
+							actorContext.Actor.OwnerId, frame.ClientId);
+				}
+				else
+				{
+					actorContext.EnqueueCommand(command);
+				}
+			}
+		}
 
-				if (lastCommandSeq > 0)
-					serverSyncFrame.LastCommandSeqs[frame.ClientId] = lastCommandSeq;
+		public void Simulate(int deltaTime)
+		{
+			Scene.Update(Time, deltaTime);
+
+			Time += deltaTime;
+		}
+
+		public DeltaSyncFrame FetchDeltaSyncFrame()
+		{
+			var frame = new DeltaSyncFrame(Scene.Time, Scene.DeltaTime);
+
+			foreach (var actorContext in ActorContexts)
+			{
+				frame.Events.AddRange(actorContext.DequeueEvents());
+
+				if (actorContext.LastCommandSeq != null)
+				{
+					frame.LastCommandSeqs[actorContext.Actor.OwnerId] = actorContext.LastCommandSeq.Value;
+				}
 			}
 
-			Scene.OnUpdate();
-
-			time += deltaTime;
-
-			return serverSyncFrame;
-		}
-		private void Scene_OnActorAdded(Actor actor)
-		{
-			actorContexts.Add(actor.Id, new ActorContext(actor));
+			return frame;
 		}
 
-		private void Scene_OnEventCreated(Event @event)
+		public FullSyncFrame FetchFullSyncFrame()
 		{
-			serverSyncFrame.Events.Add(@event);
+			var frame = new FullSyncFrame(Scene.Time, Scene.DeltaTime);
+
+			frame.Snapshots.AddRange(from actorContext in ActorContexts
+									 select actorContext.CreateSnapshot());
+
+			return frame;
 		}
 
-		private ActorContext GetActorContext(ActorId id)
+		private IEnumerable<ServerActorContext> ActorContexts
 		{
-			ActorContext sync;
-			actorContexts.TryGetValue(id, out sync);
-			return sync;
+			get
+			{
+				return from context in Scene.ActorContexts
+					   select (ServerActorContext)context;
+			}
 		}
 	}
 }

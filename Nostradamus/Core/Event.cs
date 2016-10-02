@@ -23,6 +23,11 @@ namespace Nostradamus
 
 		public Event() { }
 
+		public override string ToString()
+		{
+			return string.Format("{0} ({1})", GetType().Name, ActorId);
+		}
+
 		public IEventArgs GetArgs()
 		{
 			return (IEventArgs)Args;

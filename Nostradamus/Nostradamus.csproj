@@ -100,28 +100,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client\ClientActorContext.cs" />
     <Compile Include="Client\ClientSimulator.cs" />
+    <Compile Include="Client\CommandFrame.cs" />
     <Compile Include="Core\Actor.cs" />
     <Compile Include="Core\ActorContext.cs" />
     <Compile Include="Core\ClientId.cs" />
     <Compile Include="Core\ActorId.cs" />
-    <Compile Include="Client\ClientSyncFrame.cs" />
     <Compile Include="Core\Command.cs" />
     <Compile Include="Core\Simulator.cs" />
     <Compile Include="Core\Snapshot.cs" />
-    <Compile Include="Client\ActorContext.cs" />
     <Compile Include="Core\Scene.cs" />
     <Compile Include="Networking\Messages.cs" />
     <Compile Include="Networking\ReliableUdpServer.cs" />
-    <Compile Include="Physics\PhysicsSceneDesc.cs" />
     <Compile Include="Physics\PhysicsScene.cs" />
+    <Compile Include="Physics\PhysicsSceneDesc.cs" />
     <Compile Include="Physics\RigidBodyActor.cs" />
+    <Compile Include="Physics\RigidBodyDesc.cs" />
     <Compile Include="Physics\RigidBodyMovedEvent.cs" />
     <Compile Include="Physics\RigidBodySnapshot.cs" />
-    <Compile Include="Physics\RigidBodyDesc.cs" />
     <Compile Include="Physics\SceneColliderDesc.cs" />
-    <Compile Include="Server\ActorContext.cs" />
-    <Compile Include="Server\ServerSyncFrame.cs" />
+    <Compile Include="Server\FullSyncFrame.cs" />
+    <Compile Include="Server\ServerActorContext.cs" />
+    <Compile Include="Server\DeltaSyncFrame.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Core\Timeline.cs" />
     <Compile Include="Core\Event.cs" />

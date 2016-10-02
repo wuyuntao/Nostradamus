@@ -9,8 +9,8 @@ namespace Nostradamus.Physics
 		private readonly PhysicsScene scene;
 		private readonly RigidBody rigidBody;
 
-		protected RigidBodyActor(PhysicsScene scene, ActorId id, RigidBodyDesc parameters, RigidBodySnapshot snapshot)
-			: base(scene, id, snapshot)
+		protected RigidBodyActor(PhysicsScene scene, ActorId id, ClientId ownerId, RigidBodyDesc parameters, RigidBodySnapshot snapshot)
+			: base(scene, id, ownerId, snapshot)
 		{
 			this.scene = scene;
 			this.rigidBody = CreateRigidBody(parameters);

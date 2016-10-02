@@ -10,10 +10,11 @@ namespace Nostradamus.Tests.Actors
 	{
 		bool hasMoved;
 
-		public SimpleBall(PhysicsScene scene, ActorId id, Vector3 initialPosition)
-			: base(scene, id, CreateRigidBodyDesc(initialPosition), CreateRigidBodySnapshot(initialPosition))
-		{
-		}
+		public SimpleBall(PhysicsScene scene, ActorId id, ClientId ownerId, Vector3 initialPosition)
+			: base(scene, id, ownerId,
+					CreateRigidBodyDesc(initialPosition),
+					CreateRigidBodySnapshot(initialPosition))
+		{ }
 
 		private static RigidBodyDesc CreateRigidBodyDesc(Vector3 initialPosition)
 		{

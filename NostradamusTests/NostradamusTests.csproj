@@ -102,7 +102,7 @@
     <Compile Include="Actors\SimpleBall.cs" />
     <Compile Include="Actors\SimpleCube.cs" />
     <Compile Include="Client\ClientSimulatorTest.cs" />
-    <Compile Include="Commnads\MoveActorCommand.cs" />
+    <Compile Include="Commnads\MoveCharacterCommand.cs" />
     <Compile Include="Commnads\MoveBallCommand.cs" />
     <Compile Include="Events\ActorMovedEvent.cs" />
     <Compile Include="Physics\PhysicsSceneTest.cs" />
@@ -111,7 +111,7 @@
     <Compile Include="Scenes\SimplePhysicsScene.cs" />
     <Compile Include="Scenes\SimpleScene.cs" />
     <Compile Include="Server\ServerSimulatorTest.cs" />
-    <Compile Include="Snapshots\ActorSnapshot.cs" />
+    <Compile Include="Snapshots\CharacterSnapshot.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Networking\" />
