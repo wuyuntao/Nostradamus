@@ -5,7 +5,7 @@ using System;
 
 namespace Nostradamus.Tests.Actors
 {
-	class SimpleCharacter : Actor
+	public class SimpleCharacter : Actor
 	{
 		private bool hasMoved;
 

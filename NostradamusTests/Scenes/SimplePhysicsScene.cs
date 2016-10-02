@@ -6,7 +6,7 @@ using Nostradamus.Tests.Actors;
 
 namespace Nostradamus.Tests.Scenes
 {
-	class SimplePhysicsScene : PhysicsScene
+	public class SimplePhysicsScene : PhysicsScene
 	{
 		private SimpleBall ball;
 		private SimpleCube cube;

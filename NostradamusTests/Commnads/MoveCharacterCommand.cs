@@ -3,7 +3,7 @@
 namespace Nostradamus.Tests.Commnads
 {
 	[ProtoContract]
-	class MoveCharacterCommand : ICommandArgs
+	public class MoveCharacterCommand : ICommandArgs
 	{
 		[ProtoMember(1)]
 		public float DeltaX { get; set; }

@@ -2,7 +2,7 @@
 using Nostradamus.Tests.Physics;
 using Nostradamus.Tests.Server;
 
-namespace NostradamusExamples
+namespace Nostradamus.Examples
 {
 	class Program
 	{
@@ -15,8 +15,10 @@ namespace NostradamusExamples
 			//t2.TestSimpleScene();
 			//t2.TestSimpleSceneWithServer();
 
-			var t3 = new PhysicsSceneTest();
-			t3.TestSimplePhysicsScene();
+			//var t3 = new PhysicsSceneTest();
+			//t3.TestSimplePhysicsScene();
+
+			SimpleServerExample.Run();
 		}
 	}
 }

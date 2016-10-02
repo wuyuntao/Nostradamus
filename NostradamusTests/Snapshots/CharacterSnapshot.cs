@@ -3,7 +3,7 @@
 namespace Nostradamus.Tests.Snapshots
 {
 	[ProtoContract]
-	class CharacterSnapshot : ISnapshotArgs
+	public class CharacterSnapshot : ISnapshotArgs
 	{
 		[ProtoMember(1)]
 		public float PositionX { get; set; }

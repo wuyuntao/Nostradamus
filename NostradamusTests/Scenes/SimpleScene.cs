@@ -4,7 +4,7 @@ using Nostradamus.Tests.Snapshots;
 
 namespace Nostradamus.Tests.Scenes
 {
-	class SimpleScene : Scene
+	public class SimpleScene : Scene
 	{
 		private SimpleCharacter character;
 

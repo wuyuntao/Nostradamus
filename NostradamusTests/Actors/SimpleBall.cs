@@ -6,7 +6,7 @@ using System;
 
 namespace Nostradamus.Tests.Actors
 {
-	class SimpleBall : RigidBodyActor
+	public class SimpleBall : RigidBodyActor
 	{
 		bool hasMoved;
 

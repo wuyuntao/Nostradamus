@@ -3,7 +3,7 @@
 namespace Nostradamus.Tests.Events
 {
 	[ProtoContract]
-	class ActorMovedEvent : IEventArgs
+	public class ActorMovedEvent : IEventArgs
 	{
 		[ProtoMember(1)]
 		public float PositionX { get; set; }

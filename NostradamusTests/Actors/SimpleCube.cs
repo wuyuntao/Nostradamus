@@ -5,7 +5,7 @@ using System;
 
 namespace Nostradamus.Tests.Actors
 {
-	class SimpleCube : RigidBodyActor
+	public class SimpleCube : RigidBodyActor
 	{
 		public SimpleCube(PhysicsScene scene, ActorId id, ClientId ownerId, Vector3 initialPosition)
 			: base(scene, id, ownerId,

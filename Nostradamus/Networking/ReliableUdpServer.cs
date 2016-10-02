@@ -59,7 +59,7 @@ namespace Nostradamus.Networking
 			for (var i = 0; !stopRequest; i++)
 			{
 				var simulateTime = simulateDeltaTime * i;
-				var waitTime = (int)timer.ElapsedMilliseconds - simulateTime;
+				var waitTime = simulateTime - (int)timer.ElapsedMilliseconds;
 				if (waitTime > 0)
 					Thread.Sleep(waitTime);
 

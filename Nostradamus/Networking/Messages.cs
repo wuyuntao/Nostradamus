@@ -6,7 +6,7 @@ namespace Nostradamus.Networking
 	[ProtoContract]
 	class MessageEnvelope
 	{
-		[ProtoMember(1)]
+		[ProtoMember(1, DynamicType = true)]
 		public object Message;
 	}
 

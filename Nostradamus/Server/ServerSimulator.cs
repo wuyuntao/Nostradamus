@@ -44,6 +44,8 @@ namespace Nostradamus.Server
 		{
 			Scene.Update(Time, deltaTime);
 
+			logger.Debug("Simulated {0} / {1}", Time, deltaTime);
+
 			Time += deltaTime;
 		}
 
