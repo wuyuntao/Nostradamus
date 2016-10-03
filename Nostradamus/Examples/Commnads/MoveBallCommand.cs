@@ -1,7 +1,6 @@
-﻿using BulletSharp.Math;
-using ProtoBuf;
+﻿using ProtoBuf;
 
-namespace Nostradamus.Tests.Commnads
+namespace Nostradamus.Examples
 {
 	[ProtoContract]
 	public class MoveBallCommand : ICommandArgs

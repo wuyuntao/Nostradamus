@@ -1,5 +1,4 @@
-﻿using Nostradamus.Tests.Snapshots;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace Nostradamus.Tests
 {

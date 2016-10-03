@@ -111,6 +111,15 @@
     <Compile Include="Core\Simulator.cs" />
     <Compile Include="Core\Snapshot.cs" />
     <Compile Include="Core\Scene.cs" />
+    <Compile Include="Examples\Actors\SimpleBall.cs" />
+    <Compile Include="Examples\Actors\SimpleCharacter.cs" />
+    <Compile Include="Examples\Actors\SimpleCube.cs" />
+    <Compile Include="Examples\Commnads\MoveBallCommand.cs" />
+    <Compile Include="Examples\Commnads\MoveCharacterCommand.cs" />
+    <Compile Include="Examples\Events\ActorMovedEvent.cs" />
+    <Compile Include="Examples\Scenes\SimplePhysicsScene.cs" />
+    <Compile Include="Examples\Scenes\SimpleScene.cs" />
+    <Compile Include="Examples\Snapshots\CharacterSnapshot.cs" />
     <Compile Include="Networking\Messages.cs" />
     <Compile Include="Networking\ReliableUdpClient.cs" />
     <Compile Include="Networking\ReliableUdpServer.cs" />

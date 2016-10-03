@@ -1,8 +1,6 @@
 ﻿using Nostradamus.Client;
+using Nostradamus.Examples;
 using Nostradamus.Server;
-using Nostradamus.Tests.Commnads;
-using Nostradamus.Tests.Scenes;
-using Nostradamus.Tests.Snapshots;
 using NUnit.Framework;
 
 namespace Nostradamus.Tests.Server

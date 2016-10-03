@@ -1,6 +1,5 @@
 ﻿using Nostradamus.Networking;
 using Nostradamus.Server;
-using Nostradamus.Tests.Scenes;
 using System;
 
 namespace Nostradamus.Examples

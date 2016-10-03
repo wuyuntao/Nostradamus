@@ -1,6 +1,6 @@
 ﻿using ProtoBuf;
 
-namespace Nostradamus.Tests.Snapshots
+namespace Nostradamus.Examples
 {
 	[ProtoContract]
 	public class CharacterSnapshot : ISnapshotArgs

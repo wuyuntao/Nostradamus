@@ -1,6 +1,6 @@
 ﻿using ProtoBuf;
 
-namespace Nostradamus.Tests.Events
+namespace Nostradamus.Examples
 {
 	[ProtoContract]
 	public class ActorMovedEvent : IEventArgs

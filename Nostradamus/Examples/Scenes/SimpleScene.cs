@@ -1,8 +1,6 @@
 ﻿using System;
-using Nostradamus.Tests.Actors;
-using Nostradamus.Tests.Snapshots;
 
-namespace Nostradamus.Tests.Scenes
+namespace Nostradamus.Examples
 {
 	public class SimpleScene : Scene
 	{

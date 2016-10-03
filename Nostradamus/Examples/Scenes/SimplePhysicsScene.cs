@@ -1,10 +1,9 @@
-﻿using System;
-using BulletSharp;
+﻿using BulletSharp;
 using BulletSharp.Math;
 using Nostradamus.Physics;
-using Nostradamus.Tests.Actors;
+using System;
 
-namespace Nostradamus.Tests.Scenes
+namespace Nostradamus.Examples
 {
 	public class SimplePhysicsScene : PhysicsScene
 	{

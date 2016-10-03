@@ -1,10 +1,9 @@
 ﻿using BulletSharp;
 using BulletSharp.Math;
 using Nostradamus.Physics;
-using Nostradamus.Tests.Commnads;
 using System;
 
-namespace Nostradamus.Tests.Actors
+namespace Nostradamus.Examples
 {
 	public class SimpleBall : RigidBodyActor
 	{
@@ -39,7 +38,7 @@ namespace Nostradamus.Tests.Actors
 			};
 		}
 
-		protected override void OnCommandReceived(ICommandArgs command)
+		protected internal override void OnCommandReceived(ICommandArgs command)
 		{
 			if (command is MoveBallCommand)
 			{

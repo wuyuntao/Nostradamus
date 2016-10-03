@@ -3,7 +3,7 @@ using BulletSharp.Math;
 using Nostradamus.Physics;
 using System;
 
-namespace Nostradamus.Tests.Actors
+namespace Nostradamus.Examples
 {
 	public class SimpleCube : RigidBodyActor
 	{
@@ -36,7 +36,7 @@ namespace Nostradamus.Tests.Actors
 			};
 		}
 
-		protected override void OnCommandReceived(ICommandArgs command)
+		protected internal override void OnCommandReceived(ICommandArgs command)
 		{
 			throw new NotSupportedException(command.GetType().FullName);
 		}

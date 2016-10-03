@@ -1,6 +1,6 @@
 ﻿using ProtoBuf;
 
-namespace Nostradamus.Tests.Commnads
+namespace Nostradamus.Examples
 {
 	[ProtoContract]
 	public class MoveCharacterCommand : ICommandArgs

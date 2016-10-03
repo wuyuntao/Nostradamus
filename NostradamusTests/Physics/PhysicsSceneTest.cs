@@ -1,6 +1,6 @@
-﻿using Nostradamus.Physics;
+﻿using Nostradamus.Examples;
+using Nostradamus.Physics;
 using Nostradamus.Server;
-using Nostradamus.Tests.Scenes;
 using NUnit.Framework;
 
 namespace Nostradamus.Tests.Physics

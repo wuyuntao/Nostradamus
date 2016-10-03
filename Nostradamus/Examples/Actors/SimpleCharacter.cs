@@ -1,9 +1,6 @@
-﻿using Nostradamus.Tests.Commnads;
-using Nostradamus.Tests.Events;
-using Nostradamus.Tests.Snapshots;
-using System;
+﻿using System;
 
-namespace Nostradamus.Tests.Actors
+namespace Nostradamus.Examples
 {
 	public class SimpleCharacter : Actor
 	{
@@ -17,7 +14,7 @@ namespace Nostradamus.Tests.Actors
 		{
 		}
 
-		protected override void OnCommandReceived(ICommandArgs command)
+		protected internal override void OnCommandReceived(ICommandArgs command)
 		{
 			if (command is MoveCharacterCommand)
 			{
@@ -57,7 +54,7 @@ namespace Nostradamus.Tests.Actors
 				throw new NotSupportedException(@event.GetType().FullName);
 		}
 
-		protected override void OnUpdate()
+		protected internal override void OnUpdate()
 		{
 			hasMoved = false;
 		}
