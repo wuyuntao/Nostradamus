@@ -4,14 +4,14 @@ using ProtoBuf;
 namespace Nostradamus.Networking
 {
 	[ProtoContract]
-	class MessageEnvelope
+	public class MessageEnvelope
 	{
 		[ProtoMember(1, DynamicType = true)]
 		public object Message;
 	}
 
 	[ProtoContract]
-	class Login
+	public class Login
 	{
 		[ProtoMember(1)]
 		public ClientId ClientId { get; set; }

@@ -8,7 +8,7 @@ namespace Nostradamus.Tests.Commnads
 		[ProtoMember(1)]
 		public float DeltaX { get; set; }
 
-		[ProtoMember(1)]
+		[ProtoMember(2)]
 		public float DeltaY { get; set; }
 	}
 }

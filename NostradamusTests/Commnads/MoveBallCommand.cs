@@ -7,6 +7,12 @@ namespace Nostradamus.Tests.Commnads
 	public class MoveBallCommand : ICommandArgs
 	{
 		[ProtoMember(1)]
-		public Vector3 InputAxis { get; set; }
+		public float InputX { get; set; }
+
+		[ProtoMember(2)]
+		public float InputY { get; set; }
+
+		[ProtoMember(3)]
+		public float InputZ { get; set; }
 	}
 }

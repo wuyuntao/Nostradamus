@@ -47,13 +47,13 @@ namespace Nostradamus.Tests.Actors
 					return;
 
 				var c = (MoveBallCommand)command;
-				var horizontal = new Vector3(c.InputAxis.X, 0, c.InputAxis.Z) * 1000;
+				var horizontal = new Vector3(c.InputX, 0, c.InputZ) * 1000;
 				if (horizontal.LengthSquared > 0)
 				{
 					ApplyCentralForce(horizontal);
 				}
 
-				var vertical = new Vector3(0, c.InputAxis.Y, 0) * 2000;
+				var vertical = new Vector3(0, c.InputY, 0) * 2000;
 				if (vertical.LengthSquared > 0)
 				{
 					ApplyCentralForce(vertical);
