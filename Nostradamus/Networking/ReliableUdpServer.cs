@@ -2,7 +2,6 @@
 using NLog;
 using Nostradamus.Client;
 using Nostradamus.Server;
-using ProtoBuf;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

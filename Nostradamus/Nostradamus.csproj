@@ -84,15 +84,17 @@
       <HintPath>..\packages\BulletSharp.0.8\lib\net40-client\BulletSharp.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="FlatBuffers">
+      <HintPath>..\Lib\FlatBuffers\$(Configuration)\FlatBuffers.dll</HintPath>
+    </Reference>
+    <Reference Include="FlatBuffersSchema">
+      <HintPath>..\Lib\FlatBuffersSchema\$(Configuration)\FlatBuffersSchema.dll</HintPath>
+    </Reference>
     <Reference Include="Lidgren.Network">
       <HintPath>..\Lib\Lidgren.Network\$(Configuration)\Lidgren.Network.dll</HintPath>
     </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.4.3.9\lib\net45\NLog.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="protobuf-net, Version=2.1.0.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
-      <HintPath>..\packages\protobuf-net.2.1.0\lib\net45\protobuf-net.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -123,6 +125,7 @@
     <Compile Include="Networking\Messages.cs" />
     <Compile Include="Networking\ReliableUdpClient.cs" />
     <Compile Include="Networking\ReliableUdpServer.cs" />
+    <Compile Include="Networking\Serializer.cs" />
     <Compile Include="Physics\PhysicsScene.cs" />
     <Compile Include="Physics\PhysicsSceneDesc.cs" />
     <Compile Include="Physics\RigidBodyActor.cs" />

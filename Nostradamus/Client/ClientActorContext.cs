@@ -27,7 +27,7 @@ namespace Nostradamus.Client
 
 			foreach (var e in events)
 			{
-				Actor.ApplyEvent(e.GetArgs());
+				Actor.ApplyEvent(e.Args);
 			}
 
 			authoritativeTimeline.AddPoint(Actor.Scene.Time + Actor.Scene.DeltaTime, Actor.Snapshot);

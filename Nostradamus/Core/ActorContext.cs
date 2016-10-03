@@ -57,7 +57,7 @@ namespace Nostradamus
 			lastCommandSeq = null;
 			foreach (var command in queuedCommands)
 			{
-				actor.OnCommandReceived(command.GetArgs());
+				actor.OnCommandReceived(command.Args);
 
 				lastCommandSeq = command.Sequence;
 

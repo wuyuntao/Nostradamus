@@ -71,7 +71,7 @@ namespace Nostradamus.Client
 
 			foreach (var snapshot in fullSyncFrame.Snapshots)
 			{
-				Scene.CreateActorContext(snapshot.ActorId, snapshot.GetArgs());
+				Scene.CreateActorContext(snapshot.ActorId, snapshot.Args);
 			}
 		}
 

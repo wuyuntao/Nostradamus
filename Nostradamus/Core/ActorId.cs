@@ -1,15 +1,11 @@
-﻿using ProtoBuf;
-using System;
+﻿using System;
 
 namespace Nostradamus
 {
-	[ProtoContract]
 	public sealed class ActorId : IEquatable<ActorId>, IComparable<ActorId>
 	{
-		[ProtoMember(1)]
 		public int Value { get; set; }
 
-		[ProtoMember(2, IsRequired = false)]
 		public string Description { get; set; }
 
 		public ActorId(int value, string description = null)
@@ -17,8 +13,6 @@ namespace Nostradamus
 			Value = value;
 			Description = description;
 		}
-
-		public ActorId() { }
 
 		public override bool Equals(object obj)
 		{

@@ -26,7 +26,7 @@ namespace Nostradamus.Server
 				if (actorContext == null)
 				{
 					logger.Warn("Cannot find actor '{0}' to enqueue command '{1}'",
-							command.ActorId, command.GetArgs());
+							command.ActorId, command.Args);
 				}
 				else if (actorContext.Actor.OwnerId != frame.ClientId)
 				{
