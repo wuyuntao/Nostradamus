@@ -86,21 +86,18 @@ namespace Nostradamus.Networking
 
 				case NetIncomingMessageType.Data:
 					{
-						using (var stream = new MemoryStream(msg.Data))
-						{
-							var envelope = Serializer.Deserialize<MessageEnvelope>(stream);
+						var envelope = Serializer.Deserialize<MessageEnvelope>(msg.Data);
 
-							if (envelope.Message is CommandFrame)
-							{
-								OnServerMessage_ClientSyncFrame(msg, (CommandFrame)envelope.Message);
-							}
-							else if (envelope.Message is Login)
-							{
-								OnServerMessage_LoginRequest(msg, (Login)envelope.Message);
-							}
-							else
-								logger.Error("Unexpected message: {0}", envelope.Message);
+						if (envelope.Message is CommandFrame)
+						{
+							OnServerMessage_ClientSyncFrame(msg, (CommandFrame)envelope.Message);
 						}
+						else if (envelope.Message is Login)
+						{
+							OnServerMessage_LoginRequest(msg, (Login)envelope.Message);
+						}
+						else
+							logger.Error("Unexpected message: {0}", envelope.Message);
 					}
 					break;
 
@@ -147,30 +144,24 @@ namespace Nostradamus.Networking
 
 		private void SendMessage(Client client, object message)
 		{
-			using (var stream = new MemoryStream())
-			{
-				Serializer.Serialize(stream, new MessageEnvelope() { Message = message });
+			var bytes = Serializer.Serialize(new MessageEnvelope() { Message = message });
 
-				var msg = server.CreateMessage();
-				msg.Write(stream.ToArray());
+			var msg = server.CreateMessage();
+			msg.Write(bytes);
 
-				client.Connection.SendMessage(msg, NetDeliveryMethod.ReliableOrdered, 0);
-			}
+			client.Connection.SendMessage(msg, NetDeliveryMethod.ReliableOrdered, 0);
 		}
 
 		private void SendMessageToAll(object message)
 		{
-			using (var stream = new MemoryStream())
+			var bytes = Serializer.Serialize(new MessageEnvelope() { Message = message });
+
+			var msg = server.CreateMessage();
+			msg.Write(bytes);
+
+			foreach (var client in clients.Values)
 			{
-				Serializer.Serialize(stream, new MessageEnvelope() { Message = message });
-
-				var msg = server.CreateMessage();
-				msg.Write(stream.ToArray());
-
-				foreach (var client in clients.Values)
-				{
-					client.Connection.SendMessage(msg, NetDeliveryMethod.ReliableOrdered, 0);
-				}
+				client.Connection.SendMessage(msg, NetDeliveryMethod.ReliableOrdered, 0);
 			}
 		}
 

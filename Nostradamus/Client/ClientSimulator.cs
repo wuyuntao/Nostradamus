@@ -41,7 +41,7 @@ namespace Nostradamus.Client
 
 		public void ReceiveCommand(ActorId actorId, ICommandArgs commandArgs)
 		{
-			var command = new Command(clientId, actorId, ++maxCommandSeq, Scene.Time, Scene.DeltaTime, commandArgs);
+			var command = new Command(actorId, ++maxCommandSeq, Scene.Time, Scene.DeltaTime, commandArgs);
 
 			if (commandFrame == null)
 				commandFrame = new CommandFrame(clientId);

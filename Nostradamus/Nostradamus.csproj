@@ -118,10 +118,29 @@
     <Compile Include="Examples\Actors\SimpleCube.cs" />
     <Compile Include="Examples\Commnads\MoveBallCommand.cs" />
     <Compile Include="Examples\Commnads\MoveCharacterCommand.cs" />
-    <Compile Include="Examples\Events\ActorMovedEvent.cs" />
+    <Compile Include="Examples\Events\CharacterMovedEvent.cs" />
     <Compile Include="Examples\Scenes\SimplePhysicsScene.cs" />
     <Compile Include="Examples\Scenes\SimpleScene.cs" />
     <Compile Include="Examples\Snapshots\CharacterSnapshot.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Examples\Schema\CharacterMovedEvent.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Examples\Schema\CharacterSnapshot.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Examples\Schema\MoveBallCommand.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Examples\Schema\MoveCharacterCommand.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Schema\ActorId.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Schema\ClientId.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Schema\Command.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Schema\CommandFrame.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Schema\CommandSeq.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Schema\DeltaSyncFrame.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Schema\Event.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Schema\FullSyncFrame.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Schema\Login.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Schema\MessageEnvelope.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Schema\Quaternion.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Schema\RigidBodyMovedEvent.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Schema\RigidBodySnapshot.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Schema\Snapshot.cs" />
+    <Compile Include="GeneratedCode\Nostradamus\Schema\Vector3.cs" />
     <Compile Include="Networking\Messages.cs" />
     <Compile Include="Networking\ReliableUdpClient.cs" />
     <Compile Include="Networking\ReliableUdpServer.cs" />
@@ -151,6 +170,8 @@
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
+    <None Include="Nostradamus.fbs" />
+    <None Include="NostradamusExamples.fbs" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

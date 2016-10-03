@@ -24,7 +24,7 @@ namespace Nostradamus.Examples
 				var s = (CharacterSnapshot)Snapshot;
 				var c = (MoveCharacterCommand)command;
 
-				var e = new ActorMovedEvent()
+				var e = new CharacterMovedEvent()
 				{
 					PositionX = s.PositionX + c.DeltaX * Scene.DeltaTime / 1000f,
 					PositionY = s.PositionY + c.DeltaY * Scene.DeltaTime / 1000f,
@@ -40,10 +40,10 @@ namespace Nostradamus.Examples
 
 		protected override ISnapshotArgs OnEventApplied(IEventArgs @event)
 		{
-			if (@event is ActorMovedEvent)
+			if (@event is CharacterMovedEvent)
 			{
 				var s = (CharacterSnapshot)Snapshot.Clone();
-				var e = (ActorMovedEvent)@event;
+				var e = (CharacterMovedEvent)@event;
 
 				s.PositionX = e.PositionX;
 				s.PositionY = e.PositionY;

@@ -1,7 +1,7 @@
 ﻿
 namespace Nostradamus.Examples
 {
-	public class ActorMovedEvent : IEventArgs
+	public class CharacterMovedEvent : IEventArgs
 	{
 		public float PositionX { get; set; }
 

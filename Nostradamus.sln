@@ -9,11 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NostradamusTests", "Nostrad
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NostradamusExamples", "NostradamusExamples\NostradamusExamples.csproj", "{FA223692-059E-4590-ACB6-00007BE2DE2D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{48DA268C-021F-4044-AE8D-E971D4D518C3}"
-	ProjectSection(SolutionItems) = preProject
-		Rebracer.xml = Rebracer.xml
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

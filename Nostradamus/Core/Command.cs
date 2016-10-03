@@ -7,8 +7,6 @@ namespace Nostradamus
 
 	public sealed class Command
 	{
-		public ClientId ClientId { get; set; }
-
 		public ActorId ActorId { get; set; }
 
 		public int Sequence { get; set; }
@@ -19,9 +17,8 @@ namespace Nostradamus
 
 		public ICommandArgs Args { get; set; }
 
-		public Command(ClientId clientId, ActorId actorId, int sequence, int time, int deltaTime, ICommandArgs args)
+		public Command(ActorId actorId, int sequence, int time, int deltaTime, ICommandArgs args)
 		{
-			ClientId = clientId;
 			ActorId = actorId;
 			Time = time;
 			DeltaTime = deltaTime;
@@ -31,7 +28,7 @@ namespace Nostradamus
 
 		public override string ToString()
 		{
-			return string.Format("{0} ({1}, {2}, #{3})", GetType().Name, ClientId, ActorId, Sequence);
+			return string.Format("{0} ({1}, #{2})", GetType().Name, ActorId, Sequence);
 		}
 	}
 }

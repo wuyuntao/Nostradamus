@@ -1,4 +1,5 @@
-﻿using Nostradamus.Tests.Client;
+﻿using Nostradamus.Networking;
+using Nostradamus.Tests.Client;
 using Nostradamus.Tests.Physics;
 using Nostradamus.Tests.Server;
 
@@ -8,17 +9,19 @@ namespace Nostradamus.Examples
 	{
 		static void Main(string[] args)
 		{
-			//var t1 = new ServerSimulatorTest();
-			//t1.TestSimpleScene();
+            Serializer.Initialize();
 
-			//var t2 = new ClientSimulatorTest();
-			//t2.TestSimpleScene();
-			//t2.TestSimpleSceneWithServer();
+            //var t1 = new ServerSimulatorTest();
+            //t1.TestSimpleScene();
 
-			//var t3 = new PhysicsSceneTest();
-			//t3.TestSimplePhysicsScene();
+            //var t2 = new ClientSimulatorTest();
+            //t2.TestSimpleScene();
+            //t2.TestSimpleSceneWithServer();
 
-			SimpleServerExample.Run();
+            //var t3 = new PhysicsSceneTest();
+            //t3.TestSimplePhysicsScene();
+
+            SimpleServerExample.Run();
 		}
 	}
 }

@@ -28,7 +28,7 @@ namespace Nostradamus.Tests.Server
 
 			var commandArgs = new MoveCharacterCommand() { DeltaX = 1, DeltaY = 1 };
 			var clientId = new ClientId(1);
-			var command = new Command(clientId, scene.Character.Id, 1, 20, 20, commandArgs);
+			var command = new Command(scene.Character.Id, 1, 20, 20, commandArgs);
 			var clientFrame = new CommandFrame(clientId);
 			clientFrame.Commands.Add(command);
 			simulator.ReceiveCommandFrame(clientFrame);

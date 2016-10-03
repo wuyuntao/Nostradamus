@@ -1,0 +1,22 @@
+namespace Nostradamus.Examples.Schema;
+
+table MoveBallCommand {
+	inputX: float;
+	inputY: float;
+	inputZ: float;
+}
+
+table MoveCharacterCommand {
+	deltaX: float;
+	deltaY: float;
+}
+
+table CharacterMovedEvent {
+	positionX: float;
+	positionY: float;
+}
+
+table CharacterSnapshot {
+	positionX: float;
+	positionY: float;	
+}

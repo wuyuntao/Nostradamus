@@ -84,21 +84,18 @@ namespace Nostradamus.Networking
 
 				case NetIncomingMessageType.Data:
 					{
-						using (var stream = new MemoryStream(msg.Data))
-						{
-							var envelope = Serializer.Deserialize<MessageEnvelope>(stream);
+						var envelope = Serializer.Deserialize<MessageEnvelope>(msg.Data);
 
-							if (envelope.Message is DeltaSyncFrame)
-							{
-								OnServerMessage_DeltaSyncFrame(msg, (DeltaSyncFrame)envelope.Message);
-							}
-							else if (envelope.Message is FullSyncFrame)
-							{
-								OnServerMessage_FullSyncFrame(msg, (FullSyncFrame)envelope.Message);
-							}
-							else
-								logger.Error("Unexpected message: {0}", envelope.Message);
+						if (envelope.Message is DeltaSyncFrame)
+						{
+							OnServerMessage_DeltaSyncFrame(msg, (DeltaSyncFrame)envelope.Message);
 						}
+						else if (envelope.Message is FullSyncFrame)
+						{
+							OnServerMessage_FullSyncFrame(msg, (FullSyncFrame)envelope.Message);
+						}
+						else
+							logger.Error("Unexpected message: {0}", envelope.Message);
 					}
 					break;
 
@@ -153,15 +150,12 @@ namespace Nostradamus.Networking
 
 		private void SendMessage(object message)
 		{
-			using (var stream = new MemoryStream())
-			{
-				Serializer.Serialize(stream, new MessageEnvelope() { Message = message });
+			var bytes = Serializer.Serialize(new MessageEnvelope() { Message = message });
 
-				var msg = client.CreateMessage();
-				msg.Write(stream.ToArray());
+			var msg = client.CreateMessage();
+			msg.Write(bytes);
 
-				client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered, 0);
-			}
+			client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered, 0);
 		}
 	}
 }

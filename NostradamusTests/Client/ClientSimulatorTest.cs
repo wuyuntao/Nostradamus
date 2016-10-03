@@ -46,7 +46,7 @@ namespace Nostradamus.Tests.Client
 
 			// Time: 40 - 60
 			var serverFrame50 = new DeltaSyncFrame(50, 50);
-			var eventArgs = new ActorMovedEvent() { PositionX = 0.05f, PositionY = 0.05f };
+			var eventArgs = new CharacterMovedEvent() { PositionX = 0.05f, PositionY = 0.05f };
 			var @event = new Event(scene.Character.Id, eventArgs);
 			serverFrame50.Events.Add(@event);
 			serverFrame50.LastCommandSeqs.Add(clientId, 1);
