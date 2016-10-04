@@ -64,18 +64,17 @@ namespace Nostradamus.Client
 
 		private void ApplyFullSync()
 		{
-			if (fullSyncFrame != null)
-				throw new InvalidOperationException("Already full synced");
-
 			Time = fullSyncFrame.Time;
 
 			foreach (var snapshot in fullSyncFrame.Snapshots)
 			{
 				Scene.CreateActorContext(snapshot.ActorId, snapshot.Args);
 			}
-		}
 
-		private void ApplyDeltaSync()
+            fullSyncFrame = null;
+        }
+
+        private void ApplyDeltaSync()
 		{
 			int lastFrameTime = 0;
 			int lastCommandSeq = 0;

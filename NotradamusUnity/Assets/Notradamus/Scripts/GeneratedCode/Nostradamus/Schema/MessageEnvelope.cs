@@ -15,22 +15,23 @@ public struct MessageEnvelope : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p.bb_pos = _i; __p.bb = _bb; }
   public MessageEnvelope __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
-  public int Id { get { int o = __p.__offset(4); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
+  public string Id { get { int o = __p.__offset(4); return o != 0 ? __p.__string(o + __p.bb_pos) : null; } }
+  public ArraySegment<byte>? GetIdBytes() { return __p.__vector_as_arraysegment(4); }
   public byte Data(int j) { int o = __p.__offset(6); return o != 0 ? __p.bb.Get(__p.__vector(o) + j * 1) : (byte)0; }
   public int DataLength { get { int o = __p.__offset(6); return o != 0 ? __p.__vector_len(o) : 0; } }
   public ArraySegment<byte>? GetDataBytes() { return __p.__vector_as_arraysegment(6); }
 
   public static Offset<MessageEnvelope> CreateMessageEnvelope(FlatBufferBuilder builder,
-      int id = 0,
+      StringOffset idOffset = default(StringOffset),
       VectorOffset dataOffset = default(VectorOffset)) {
     builder.StartObject(2);
     MessageEnvelope.AddData(builder, dataOffset);
-    MessageEnvelope.AddId(builder, id);
+    MessageEnvelope.AddId(builder, idOffset);
     return MessageEnvelope.EndMessageEnvelope(builder);
   }
 
   public static void StartMessageEnvelope(FlatBufferBuilder builder) { builder.StartObject(2); }
-  public static void AddId(FlatBufferBuilder builder, int id) { builder.AddInt(0, id, 0); }
+  public static void AddId(FlatBufferBuilder builder, StringOffset idOffset) { builder.AddOffset(0, idOffset.Value, 0); }
   public static void AddData(FlatBufferBuilder builder, VectorOffset dataOffset) { builder.AddOffset(1, dataOffset.Value, 0); }
   public static VectorOffset CreateDataVector(FlatBufferBuilder builder, byte[] data) { builder.StartVector(1, data.Length, 1); for (int i = data.Length - 1; i >= 0; i--) builder.AddByte(data[i]); return builder.EndVector(); }
   public static void StartDataVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(1, numElems, 1); }

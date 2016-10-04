@@ -11,7 +11,7 @@ namespace Nostradamus.Networking
 {
     public class Serializer
     {
-        private static Dictionary<int, Serializer> serializers = new Dictionary<int, Serializer>();
+        private static Dictionary<string, Serializer> serializers = new Dictionary<string, Serializer>();
 
         private Func<object, byte[]> serialize;
         private Func<byte[], object> deserialize;
@@ -49,7 +49,7 @@ namespace Nostradamus.Networking
             serializers.Add(key, serializer);
         }
 
-        public static Serializer GetSerializer(int key)
+        public static Serializer GetSerializer(string key)
         {
             Serializer serializer;
             if (!serializers.TryGetValue(key, out serializer))
@@ -58,9 +58,9 @@ namespace Nostradamus.Networking
             return serializer;
         }
 
-        private static int GetTypeKey(Type type)
+        private static string GetTypeKey(Type type)
         {
-            return type.GetHashCode();
+            return type.FullName;
         }
 
         public static byte[] Serialize<T>(T obj)
@@ -98,8 +98,9 @@ namespace Nostradamus.Networking
             var serializer = GetSerializer(key);
             var data = serializer.serialize(envelope.Message);
 
+            var oId = fbb.CreateString(key);
             var voData = Nostradamus.Schema.MessageEnvelope.CreateDataVector(fbb, data);
-            var oEnvelope = Nostradamus.Schema.MessageEnvelope.CreateMessageEnvelope(fbb, key, voData);
+            var oEnvelope = Nostradamus.Schema.MessageEnvelope.CreateMessageEnvelope(fbb, oId, voData);
 
             return oEnvelope;
         }

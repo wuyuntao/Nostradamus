@@ -11,7 +11,7 @@ table ClientId {
 }
 
 table MessageEnvelope {
-	id: int;
+	id: string;
 	data: [ubyte];
 }
 

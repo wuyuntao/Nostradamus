@@ -14,6 +14,7 @@ namespace Nostradamus.Server
 		{
 			Time = time;
 			DeltaTime = deltaTime;
+            Snapshots = new List<Snapshot>();
 		}
 	}
 }
