@@ -67,33 +67,6 @@ namespace Nostradamus.Physics
                 return null;
         }
 
-        protected internal override void OnUpdate()
-        {
-            SyncSnapshotFromRigidBody((RigidBodySnapshot)Snapshot);
-        }
-
-        protected override void OnSnapshotRecovered(ISnapshotArgs snapshot)
-        {
-            var s = (RigidBodySnapshot)snapshot;
-
-            SyncRigidBodyFromSnapshot(s);
-        }
-
-        private void SyncSnapshotFromRigidBody(RigidBodySnapshot snapshot)
-        {
-            snapshot.Position = rigidBody.CenterOfMassPosition;
-            snapshot.Rotation = Quaternion.RotationMatrix(rigidBody.CenterOfMassTransform);
-            snapshot.LinearVelocity = rigidBody.LinearVelocity;
-            snapshot.AngularVelocity = rigidBody.AngularVelocity;
-        }
-
-        private void SyncRigidBodyFromSnapshot(RigidBodySnapshot snapshot)
-        {
-            rigidBody.CenterOfMassTransform = Matrix.RotationQuaternion(snapshot.Rotation) * Matrix.Translation(snapshot.Position);
-            rigidBody.LinearVelocity = snapshot.LinearVelocity;
-            rigidBody.AngularVelocity = snapshot.AngularVelocity;
-        }
-
         protected void ApplyCentralForce(Vector3 force)
         {
             rigidBody.ApplyCentralForce(force);
@@ -102,7 +75,16 @@ namespace Nostradamus.Physics
             logger.Debug("{0} applied central force {1}", this, force);
         }
 
-        internal void ApplyMovedEvent()
+        internal void OnPrePhysicsUpdate()
+        {
+            var snapshot = (RigidBodySnapshot)Snapshot;
+
+            rigidBody.CenterOfMassTransform = Matrix.RotationQuaternion(snapshot.Rotation) * Matrix.Translation(snapshot.Position);
+            rigidBody.LinearVelocity = snapshot.LinearVelocity;
+            rigidBody.AngularVelocity = snapshot.AngularVelocity;
+        }
+
+        internal void OnPostPhysicsUpdate()
         {
             // TODO: Check threshold with dead reckoning algorithm to reduce the frequency of triggering event
 

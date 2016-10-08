@@ -36,9 +36,15 @@ namespace Nostradamus.Examples
             };
         }
 
+        protected override void OnSnapshotRecovered(ISnapshotArgs snapshot)
+        { }
+
         protected internal override void OnCommandReceived(ICommandArgs command)
         {
             throw new NotSupportedException(command.GetType().FullName);
         }
+
+        protected internal override void OnUpdate()
+        { }
     }
 }
