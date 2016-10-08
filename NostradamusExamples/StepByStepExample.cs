@@ -30,11 +30,8 @@ namespace Nostradamus.Examples
                     elapsedTime += 10;
                     logger.Info("Time elapsed {0}ms", elapsedTime);
 
-                    if (elapsedTime % 50 == 0)
-                        serverStep.Set();
-
-                    if (elapsedTime % 20 == 0)
-                        clientStep.Set();
+                    serverStep.Set();
+                    clientStep.Set();
                 }
                 else if (key.Key == ConsoleKey.Escape)
                 {
@@ -50,9 +47,10 @@ namespace Nostradamus.Examples
             var scene = new SimplePhysicsScene(simulator);
             using (var server = new ReliableUdpServer(simulator, 50, 9000))
             {
+                var nextTime = 10;
+                WaitUntilTime(serverStep, nextTime);
                 server.Start();
 
-                var nextTime = 0;
                 while (!stopRequest)
                 {
                     WaitUntilTime(serverStep, nextTime);
@@ -73,7 +71,7 @@ namespace Nostradamus.Examples
             var serverAddress = new IPEndPoint(IPAddress.Loopback, 9000);
             using (var client = new ReliableUdpClient(simulator, 20, serverAddress))
             {
-                var nextTime = 100;
+                var nextTime = 40;
                 WaitUntilTime(clientStep, nextTime);
                 client.Start();
 

@@ -17,7 +17,8 @@ namespace Nostradamus.Networking
         private readonly int simulateDeltaTime;
         private readonly IPEndPoint serverEndPoint;
         private readonly NetClient client;
-        private bool stopRequest;
+        private bool isStarted;
+        private bool hasStopRequest;
 
         public ReliableUdpClient(ClientSimulator simulator, int simulateDeltaTime, IPEndPoint serverEndPoint, string appIdentifier = "Nostradamus", int simulateLatency = 0, int simulateLoss = 0)
         {
@@ -54,25 +55,28 @@ namespace Nostradamus.Networking
 
         public void Stop()
         {
-            if (stopRequest)
+            if (hasStopRequest)
                 throw new InvalidOperationException("Already stopped");
 
-            stopRequest = true;
+            hasStopRequest = true;
         }
 
         public void Update()
         {
-            if (stopRequest)
+            if (hasStopRequest)
                 return;
 
             for (var msg = client.ReadMessage(); msg != null; msg = client.ReadMessage())
                 OnClientMessage(msg);
 
-            simulator.Simulate(simulateDeltaTime);
+            if (isStarted)
+            {
+                simulator.Simulate(simulateDeltaTime);
 
-            var commandFrame = simulator.FetchCommandFrame();
-            if (commandFrame != null)
-                SendMessage(commandFrame);
+                var commandFrame = simulator.FetchCommandFrame();
+                if (commandFrame != null)
+                    SendMessage(commandFrame);
+            }
         }
 
         private void OnClientMessage(NetIncomingMessage msg)
@@ -134,6 +138,8 @@ namespace Nostradamus.Networking
         private void OnServerMessage_FullSyncFrame(NetIncomingMessage msg, FullSyncFrame message)
         {
             simulator.ReceiveFullSyncFrame(message);
+
+            isStarted = true;
         }
 
         private void OnClientMessage_StatusChanged(NetIncomingMessage msg, NetConnectionStatus status)
