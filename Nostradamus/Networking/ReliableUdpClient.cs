@@ -2,13 +2,14 @@
 using NLog;
 using Nostradamus.Client;
 using Nostradamus.Server;
+using Nostradamus.Utils;
 using System;
 using System.Diagnostics;
 using System.Net;
 
 namespace Nostradamus.Networking
 {
-    class ReliableUdpClient
+    public class ReliableUdpClient : Disposable
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -30,6 +31,14 @@ namespace Nostradamus.Networking
             clientConf.SimulatedLoss = simulateLoss;
 
             client = new NetClient(clientConf);
+        }
+
+        protected override void DisposeManaged()
+        {
+            client.Shutdown(string.Empty);
+            simulator.Dispose();
+
+            base.DisposeManaged();
         }
 
         public void Start()

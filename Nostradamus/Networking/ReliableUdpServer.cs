@@ -2,14 +2,14 @@
 using NLog;
 using Nostradamus.Client;
 using Nostradamus.Server;
+using Nostradamus.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 
 namespace Nostradamus.Networking
 {
-    public sealed class ReliableUdpServer
+    public sealed class ReliableUdpServer : Disposable
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -30,6 +30,14 @@ namespace Nostradamus.Networking
             server = new NetServer(serverConf);
         }
 
+        protected override void DisposeManaged()
+        {
+            server.Shutdown(string.Empty);
+            simulator.Dispose();
+
+            base.DisposeManaged();
+        }
+
         public void Start()
         {
             if (server.Status != NetPeerStatus.NotRunning)
@@ -38,8 +46,6 @@ namespace Nostradamus.Networking
             var timer = Stopwatch.StartNew();
 
             server.Start();
-
-            ThreadPool.QueueUserWorkItem(LoopThread, timer);
         }
 
         public void Stop()
@@ -50,25 +56,15 @@ namespace Nostradamus.Networking
             stopRequest = true;
         }
 
-        private void LoopThread(object state)
+        public void Update()
         {
-            var timer = (Stopwatch)state;
+            for (var msg = server.ReadMessage(); msg != null; msg = server.ReadMessage())
+                OnServerMessage(msg);
 
-            for (var i = 0; !stopRequest; i++)
-            {
-                var simulateTime = simulateDeltaTime * i;
-                var waitTime = simulateTime - (int)timer.ElapsedMilliseconds;
-                if (waitTime > 0)
-                    Thread.Sleep(waitTime);
+            simulator.Simulate(simulateDeltaTime);
 
-                for (var msg = server.ReadMessage(); msg != null; msg = server.ReadMessage())
-                    OnServerMessage(msg);
-
-                simulator.Simulate(simulateDeltaTime);
-
-                var deltaSyncFrame = simulator.FetchDeltaSyncFrame();
-                SendMessageToAll(deltaSyncFrame);
-            }
+            var deltaSyncFrame = simulator.FetchDeltaSyncFrame();
+            SendMessageToAll(deltaSyncFrame);
         }
 
         private void OnServerMessage(NetIncomingMessage msg)

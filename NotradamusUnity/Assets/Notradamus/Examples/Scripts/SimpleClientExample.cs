@@ -27,5 +27,10 @@ namespace Nostradamus.Examples
         {
             client.Update();
         }
+
+        void OnDestroy()
+        {
+            client.Dispose();
+        }
     }
 }

@@ -2,13 +2,15 @@
 using Nostradamus.Tests.Client;
 using Nostradamus.Tests.Physics;
 using Nostradamus.Tests.Server;
+using System;
+using System.Threading;
 
 namespace Nostradamus.Examples
 {
-	class Program
-	{
-		static void Main(string[] args)
-		{
+    class Program
+    {
+        static void Main(string[] args)
+        {
             Serializer.Initialize();
 
             //var t1 = new ServerSimulatorTest();
@@ -21,7 +23,18 @@ namespace Nostradamus.Examples
             //var t3 = new PhysicsSceneTest();
             //t3.TestSimplePhysicsScene();
 
-            SimpleServerExample.Run();
-		}
-	}
+            ThreadPool.QueueUserWorkItem(s =>
+            {
+                SimpleServerExample.Run();
+            });
+
+            //ThreadPool.QueueUserWorkItem(s =>
+            //{
+            //    Thread.Sleep(3000);
+            //    SimpleClientExample.Run();
+            //});
+
+            Console.ReadLine();
+        }
+    }
 }

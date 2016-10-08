@@ -40,9 +40,9 @@ namespace Nostradamus
 
 		internal ActorContext CreateActorContext(ActorId actorId, ISnapshotArgs snapshot)
 		{
-			Actor actor = CreateActor(actorId, snapshot);
+			var actor = CreateActor(actorId, snapshot);
 
-			return CreateActorContext(actor);
+            return actor.Context;
 		}
 
 		internal ActorContext GetActorContext(ActorId actorId)
