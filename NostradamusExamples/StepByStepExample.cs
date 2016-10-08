@@ -13,6 +13,9 @@ namespace Nostradamus.Examples
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
         private static readonly AutoResetEvent serverStep = new AutoResetEvent(false);
         private static readonly AutoResetEvent clientStep = new AutoResetEvent(false);
+
+        private static SimplePhysicsScene clientScene;
+        private static ClientSimulator clientSimulator;
         private static int elapsedTime;
         private static bool stopRequest;
 
@@ -25,18 +28,44 @@ namespace Nostradamus.Examples
             {
                 var key = Console.ReadKey();
 
-                if (key.Key == ConsoleKey.Spacebar)
+                switch (key.Key)
                 {
-                    elapsedTime += 10;
-                    logger.Info("Time elapsed {0}ms", elapsedTime);
 
-                    serverStep.Set();
-                    clientStep.Set();
-                }
-                else if (key.Key == ConsoleKey.Escape)
-                {
-                    stopRequest = true;
-                    break;
+                    case ConsoleKey.Spacebar:
+                        elapsedTime += 10;
+                        logger.Info("Time elapsed {0}ms", elapsedTime);
+
+                        serverStep.Set();
+                        clientStep.Set();
+                        break;
+
+                    case ConsoleKey.Escape:
+                        stopRequest = true;
+                        return;
+
+                    case ConsoleKey.LeftArrow:
+                        if (clientSimulator != null)
+                            clientSimulator.ReceiveCommand(clientScene.Ball.Id, new MoveBallCommand() { InputX = -1 });
+                        break;
+
+                    case ConsoleKey.UpArrow:
+                        if (clientSimulator != null)
+                            clientSimulator.ReceiveCommand(clientScene.Ball.Id, new MoveBallCommand() { InputY = 1 });
+                        break;
+
+                    case ConsoleKey.RightArrow:
+                        if (clientSimulator != null)
+                            clientSimulator.ReceiveCommand(clientScene.Ball.Id, new MoveBallCommand() { InputX = 1 });
+                        break;
+
+                    case ConsoleKey.DownArrow:
+                        if (clientSimulator != null)
+                            clientSimulator.ReceiveCommand(clientScene.Ball.Id, new MoveBallCommand() { InputY = -1 });
+                        break;
+
+                    default:
+                        logger.Warn("Unsupported input: {0}", key);
+                        break;
                 }
             }
         }
@@ -66,10 +95,10 @@ namespace Nostradamus.Examples
         private static void RunClient(object state)
         {
             var clientId = new ClientId(1);
-            var simulator = new ClientSimulator(clientId, 50);
-            var scene = new SimplePhysicsScene(simulator);
+            clientSimulator = new ClientSimulator(clientId, 50);
+            clientScene = new SimplePhysicsScene(clientSimulator);
             var serverAddress = new IPEndPoint(IPAddress.Loopback, 9000);
-            using (var client = new ReliableUdpClient(simulator, 20, serverAddress))
+            using (var client = new ReliableUdpClient(clientSimulator, 20, serverAddress))
             {
                 var nextTime = 40;
                 WaitUntilTime(clientStep, nextTime);
