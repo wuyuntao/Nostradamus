@@ -1,6 +1,7 @@
 ﻿using NLog;
 using Nostradamus.Client;
 using Nostradamus.Networking;
+using Nostradamus.Physics;
 using Nostradamus.Server;
 using System;
 using System.Net;
@@ -41,6 +42,7 @@ namespace Nostradamus.Examples
                         {
                             logger.Info("++++ Begin server update at {0}ms", serverNextTime);
                             server.Update();
+                            PrintActorSnapshots(serverScene);
                             logger.Info("++++ End server update at {0}ms", serverNextTime);
 
                             serverNextTime += 50;
@@ -53,15 +55,16 @@ namespace Nostradamus.Examples
                                 client.Start();
 
                                 logger.Info("Client started at {0}ms", clientNextTime);
-                                clientNextTime += 50;
+                                clientNextTime += 20;
                             }
                             else
                             {
                                 logger.Info("---- Begin Client update at {0}ms", clientNextTime);
                                 client.Update();
+                                PrintActorSnapshots(clientScene);
                                 logger.Info("---- End Client update at {0}ms", clientNextTime);
 
-                                clientNextTime += 50;
+                                clientNextTime += 20;
                             }
                         }
 
@@ -102,6 +105,16 @@ namespace Nostradamus.Examples
 
             client.Stop();
             client.Dispose();
+        }
+
+        private static void PrintActorSnapshots(SimplePhysicsScene scene)
+        {
+            foreach (var actor in scene.Actors)
+            {
+                var snapshot = (RigidBodySnapshot)actor.Snapshot;
+
+                logger.Debug("{0}: Position: {1}, Rotation: {2}", actor, snapshot.Position, snapshot.Rotation);
+            }
         }
     }
 }
