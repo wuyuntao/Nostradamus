@@ -61,7 +61,6 @@ namespace Nostradamus.Physics
                 logger.Debug("{0} applied {1}: Position: {2}, Rotation: {3}, LinearVelocity: {4}, AngularVelocity: {5}"
                         , this, @event.GetType().Name, e.Position, e.Rotation, e.LinearVelocity, e.AngularVelocity);
 
-
                 return s;
             }
             else
@@ -99,6 +98,8 @@ namespace Nostradamus.Physics
         {
             rigidBody.ApplyCentralForce(force);
             rigidBody.Activate();
+
+            logger.Debug("{0} applied central force {1}", this, force);
         }
 
         internal void ApplyMovedEvent()
