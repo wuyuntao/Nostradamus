@@ -28,12 +28,13 @@ namespace Nostradamus.Examples
                 SimpleServerExample.Run();
             });
 
-            //ThreadPool.QueueUserWorkItem(s =>
-            //{
-            //    Thread.Sleep(3000);
-            //    SimpleClientExample.Run();
-            //});
+            ThreadPool.QueueUserWorkItem(s =>
+            {
+                Thread.Sleep(3000);
+                SimpleClientExample.Run();
+            });
 
+            Console.WriteLine("Press any key to stop...");
             Console.ReadLine();
         }
     }
