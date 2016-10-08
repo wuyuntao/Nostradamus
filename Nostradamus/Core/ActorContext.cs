@@ -23,7 +23,7 @@ namespace Nostradamus
 
 		public Snapshot CreateSnapshot()
 		{
-			return new Snapshot(actor.Id, actor.CreateSnapshot());
+			return new Snapshot(actor.Id, actor.Snapshot.Clone());
 		}
 
 		public void EnqueueCommand(Command command)

@@ -51,7 +51,7 @@ namespace Nostradamus.Physics
             {
                 var e = (RigidBodyMovedEvent)@event;
 
-                var s = (RigidBodySnapshot)CreateSnapshot();
+                var s = (RigidBodySnapshot)Snapshot.Clone();
 
                 s.Position = e.Position;
                 s.Rotation = e.Rotation;

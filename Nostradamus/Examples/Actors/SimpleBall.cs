@@ -38,10 +38,6 @@ namespace Nostradamus.Examples
             };
         }
 
-        protected override void OnSnapshotRecovered(ISnapshotArgs snapshot)
-        {
-        }
-
         protected internal override void OnCommandReceived(ICommandArgs command)
         {
             if (command is MoveBallCommand)
