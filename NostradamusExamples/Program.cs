@@ -23,16 +23,18 @@ namespace Nostradamus.Examples
             //var t3 = new PhysicsSceneTest();
             //t3.TestSimplePhysicsScene();
 
-            ThreadPool.QueueUserWorkItem(s =>
-            {
-                SimpleServerExample.Run();
-            });
+            //ThreadPool.QueueUserWorkItem(s =>
+            //{
+            //    SimpleServerExample.Run();
+            //});
 
-            ThreadPool.QueueUserWorkItem(s =>
-            {
-                Thread.Sleep(3000);
-                SimpleClientExample.Run();
-            });
+            //ThreadPool.QueueUserWorkItem(s =>
+            //{
+            //    Thread.Sleep(3000);
+            //    SimpleClientExample.Run();
+            //});
+
+            StepByStepExample.Run();
 
             Console.WriteLine("Press any key to stop...");
             Console.ReadLine();
