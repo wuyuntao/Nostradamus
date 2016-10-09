@@ -4,78 +4,68 @@ using System.Collections.Generic;
 
 namespace Nostradamus
 {
-	abstract class ActorContext
-	{
-		private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+    abstract class ActorContext
+    {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-		private Actor actor;
-		private int? lastCommandSeq;
-		private Queue<Command> queuedCommands = new Queue<Command>();
-		private Queue<Event> queuedEvents = new Queue<Event>();
+        private Actor actor;
+        private int? lastCommandSeq;
+        private Queue<Command> queuedCommands = new Queue<Command>();
+        private Queue<Event> queuedEvents = new Queue<Event>();
 
-		protected ActorContext(Actor actor)
-		{
-			if (actor == null)
-				throw new ArgumentNullException("actor");
+        protected ActorContext(Actor actor)
+        {
+            if (actor == null)
+                throw new ArgumentNullException("actor");
 
-			this.actor = actor;
-		}
+            this.actor = actor;
+        }
 
-		public Snapshot CreateSnapshot()
-		{
-			return new Snapshot(actor.Id, actor.Snapshot.Clone());
-		}
+        public void EnqueueCommand(Command command)
+        {
+            queuedCommands.Enqueue(command);
+        }
 
-		public void EnqueueCommand(Command command)
-		{
-			queuedCommands.Enqueue(command);
-		}
+        public void EnqueueEvent(IEventArgs eventArgs)
+        {
+            var @event = new Event(actor.Id, eventArgs);
 
-		public IEnumerable<Command> DequeueCommands()
-		{
-			while (queuedCommands.Count > 0)
-				yield return queuedCommands.Dequeue();
-		}
+            queuedEvents.Enqueue(@event);
 
-		public void EnqueueEvent(IEventArgs eventArgs)
-		{
-			var @event = new Event(actor.Id, eventArgs);
+            logger.Debug("{0} applied event {1}", actor, @event);
+        }
 
-			queuedEvents.Enqueue(@event);
+        public IEnumerable<Event> DequeueEvents()
+        {
+            while (queuedEvents.Count > 0)
+                yield return queuedEvents.Dequeue();
+        }
 
-			logger.Debug("{0} applied event {1}", actor, @event);
-		}
+        public void Update()
+        {
+            lastCommandSeq = null;
+            while (queuedCommands.Count > 0)
+            {
+                var command = queuedCommands.Dequeue();
 
-		public IEnumerable<Event> DequeueEvents()
-		{
-			while (queuedEvents.Count > 0)
-				yield return queuedEvents.Dequeue();
-		}
+                actor.OnCommandReceived(command.Args);
 
-		public void Update()
-		{
-			lastCommandSeq = null;
-			foreach (var command in queuedCommands)
-			{
-				actor.OnCommandReceived(command.Args);
+                lastCommandSeq = command.Sequence;
 
-				lastCommandSeq = command.Sequence;
+                logger.Debug("{0} received command {1}", actor, command);
+            }
 
-				logger.Debug("{0} received command {1}", actor, command);
-			}
-			queuedCommands.Clear();
+            actor.OnUpdate();
+        }
 
-			actor.OnUpdate();
-		}
+        public Actor Actor
+        {
+            get { return actor; }
+        }
 
-		public Actor Actor
-		{
-			get { return actor; }
-		}
-
-		public int? LastCommandSeq
-		{
-			get { return lastCommandSeq; }
-		}
-	}
+        public int? LastCommandSeq
+        {
+            get { return lastCommandSeq; }
+        }
+    }
 }
