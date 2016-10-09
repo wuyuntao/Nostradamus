@@ -260,7 +260,7 @@ namespace Nostradamus.Networking
             }
             var voLastCommandSeqs = Nostradamus.Schema.DeltaSyncFrame.CreateLastCommandSeqsVector(fbb, oLastCommandSeqs);
 
-            var oFrame = Nostradamus.Schema.DeltaSyncFrame.CreateDeltaSyncFrame(fbb, frame.Time, frame.DeltaTime, voEvents);
+            var oFrame = Nostradamus.Schema.DeltaSyncFrame.CreateDeltaSyncFrame(fbb, frame.Time, frame.DeltaTime, voEvents, voLastCommandSeqs);
             fbb.Finish(oFrame.Value);
 
             return fbb.SizedByteArray();

@@ -115,7 +115,7 @@ namespace Nostradamus.Examples
 
         private static void PrintActorSnapshots(SimplePhysicsScene scene, int time)
         {
-            logger.Debug("~~~~ Begin actor snapshots at {0}. Scene: {1} + {2}", time, scene.Time, scene.DeltaTime);
+            logger.Info("~~~~ Begin actor snapshots at {0}. Scene: {1} + {2}", time, scene.Time, scene.DeltaTime);
 
             foreach (var actor in scene.Actors)
             {
@@ -124,7 +124,7 @@ namespace Nostradamus.Examples
                 logger.Debug("{0}: Position: {1}, Rotation: {2}", actor, snapshot.Position, snapshot.Rotation);
             }
 
-            logger.Debug("~~~~ End actor snapshots at {0}. Scene: {1} + {2}", time, scene.Time, scene.DeltaTime);
+            logger.Info("~~~~ End actor snapshots at {0}. Scene: {1} + {2}", time, scene.Time, scene.DeltaTime);
         }
     }
 }

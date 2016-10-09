@@ -1,14 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using NLog;
+using System;
+using System.Collections.Generic;
 
 namespace Nostradamus.Client
 {
     class ClientActorContext : ActorContext
     {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         private const float PredictivePriorityIncreaseSpeed = 0.1f;
-        private const float PredictivePriorityDecreaseSpeed = 0.02f;
+        private const float PredictivePriorityDecreaseSpeed = 0.05f;
 
         private Timeline predictiveTimeline;
         private Queue<IEventArgs> predictiveEventQueue = new Queue<IEventArgs>();
+        private float predictivePriority;
 
         public ClientActorContext(Actor actor, ISnapshotArgs snapshot)
             : base(actor, snapshot)
@@ -76,6 +81,14 @@ namespace Nostradamus.Client
             }
 
             EnqueueCommand(command);
+
+            if (predictivePriority < 1)
+            {
+                var lastPredictivePriority = predictivePriority;
+                predictivePriority = Math.Min(1, predictivePriority + PredictivePriorityIncreaseSpeed);
+
+                logger.Debug("Predictive priority of {0} increased {1} -> {2}", Actor, lastPredictivePriority, predictivePriority);
+            }
         }
 
         public void CreatePredictiveTimepoint(int time, bool isReplay)
@@ -86,7 +99,7 @@ namespace Nostradamus.Client
 
                 Actor.Snapshot = point.Snapshot.Clone();
             }
-            else if (!isReplay && Timeline.Last.Snapshot.IsApproximate(Actor.Snapshot))
+            else if (!isReplay && (predictivePriority == 0 || Timeline.Last.Snapshot.IsApproximate(Actor.Snapshot)))
             {
                 var point = Timeline.Last;
 
@@ -96,7 +109,19 @@ namespace Nostradamus.Client
             }
             else
             {
-                predictiveTimeline.AddPoint(time, Actor.Snapshot.Clone());
+                var snapshot = Timeline.Last.Snapshot.Interpolate(Actor.Snapshot, predictivePriority);
+
+                predictiveTimeline.AddPoint(time, snapshot);
+
+                Actor.Snapshot = snapshot.Clone();
+            }
+
+            if (predictivePriority > 0)
+            {
+                var lastPredictivePriority = predictivePriority;
+                predictivePriority = Math.Max(0, predictivePriority - PredictivePriorityDecreaseSpeed);
+
+                logger.Debug("Predictive priority of {0} decreased {1} -> {2}", Actor, lastPredictivePriority, predictivePriority);
             }
         }
     }

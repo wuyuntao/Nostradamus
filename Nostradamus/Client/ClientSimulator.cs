@@ -64,6 +64,8 @@ namespace Nostradamus.Client
 
         private void ApplyFullSync()
         {
+            logger.Debug("ApplyFullSync: {0}ms", fullSyncFrame.Time);
+
             Time = fullSyncFrame.Time;
 
             foreach (var snapshot in fullSyncFrame.Snapshots)
@@ -76,6 +78,8 @@ namespace Nostradamus.Client
 
         private void ApplyDeltaSync()
         {
+            logger.Debug("ApplyDeltaSync: {0}ms", deltaSyncFrames.Peek().Time);
+
             int lastFrameTime = 0;
             int lastCommandSeq = 0;
             while (deltaSyncFrames.Count > 0)
@@ -91,7 +95,10 @@ namespace Nostradamus.Client
             }
 
             if (lastCommandSeq == 0)
+            {
+                logger.Debug("No command found");
                 return;
+            }
 
             var lastCommandTime = DequeueAcknowledgedCommands(lastCommandSeq);
 
