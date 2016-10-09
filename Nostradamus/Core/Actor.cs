@@ -20,7 +20,12 @@ namespace Nostradamus
             this.id = id;
             this.ownerId = ownerId;
             this.snapshot = snapshot;
-            this.context = scene.CreateActorContext(this);
+            this.context = scene.CreateActorContext(this, snapshot);
+        }
+
+        public ISnapshotArgs InterpolateSnapshot(int time)
+        {
+            return context.InterpolateSnapshot(time);
         }
 
         protected internal void ApplyEvent(IEventArgs @event)

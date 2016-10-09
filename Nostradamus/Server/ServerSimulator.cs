@@ -6,9 +6,9 @@ namespace Nostradamus.Server
 {
     public sealed class ServerSimulator : Simulator
     {
-        internal override ActorContext CreateActorContext(Actor actor)
+        internal override ActorContext CreateActorContext(Actor actor, ISnapshotArgs snapshot)
         {
-            return new ServerActorContext(actor);
+            return new ServerActorContext(actor, snapshot);
         }
 
         public void ReceiveCommandFrame(CommandFrame frame)
@@ -37,6 +37,9 @@ namespace Nostradamus.Server
         public void Simulate(int deltaTime)
         {
             Scene.Update(Time, deltaTime);
+
+            foreach (var context in ActorContexts)
+                context.CreateTimepoint();
 
             logger.Debug("Simulated {0} / {1}", Time, deltaTime);
 

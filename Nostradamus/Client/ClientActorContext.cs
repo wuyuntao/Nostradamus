@@ -7,30 +7,37 @@ namespace Nostradamus.Client
         private const float PredictivePriorityIncreaseSpeed = 0.1f;
         private const float PredictivePriorityDecreaseSpeed = 0.02f;
 
-        private Timeline authoritativeTimeline;
-
         private Timeline predictiveTimeline;
         private Queue<IEventArgs> predictiveEventQueue = new Queue<IEventArgs>();
 
-        public ClientActorContext(Actor actor)
-            : base(actor)
+        public ClientActorContext(Actor actor, ISnapshotArgs snapshot)
+            : base(actor, snapshot)
+        { }
+
+        public override ISnapshotArgs InterpolateSnapshot(int time)
         {
-            authoritativeTimeline = new Timeline();
-            authoritativeTimeline.AddPoint(actor.Scene.Time, actor.Snapshot.Clone());
+            if (predictiveTimeline != null)
+            {
+                var timepoint = predictiveTimeline.InterpolatePoint(time);
+                if (timepoint != null)
+                    return timepoint.Snapshot;
+            }
+
+            return base.InterpolateSnapshot(time);
         }
 
         public void CreateAuthoritativeTimepoint(IEnumerable<Event> events)
         {
             var currentSnapshot = Actor.Snapshot;
 
-            Actor.Snapshot = authoritativeTimeline.Last.Snapshot.Clone();
+            Actor.Snapshot = Timeline.Last.Snapshot.Clone();
 
             foreach (var e in events)
             {
                 Actor.ApplyEvent(e.Args);
             }
 
-            authoritativeTimeline.AddPoint(Actor.Scene.Time + Actor.Scene.DeltaTime, Actor.Snapshot);
+            Timeline.AddPoint(Actor.Scene.Time + Actor.Scene.DeltaTime, Actor.Snapshot);
 
             Actor.Snapshot = currentSnapshot;
         }
@@ -40,7 +47,7 @@ namespace Nostradamus.Client
             if (predictiveTimeline == null)
                 return true;
 
-            var authoritativeSnapshot = authoritativeTimeline.InterpolatePoint(authoritativeTimelienTime).Snapshot;
+            var authoritativeSnapshot = Timeline.InterpolatePoint(authoritativeTimelienTime).Snapshot;
             var predictiveSnapshot = predictiveTimeline.InterpolatePoint(predictiveTimelineTime).Snapshot;
 
             return authoritativeSnapshot.IsApproximate(predictiveSnapshot);
@@ -51,7 +58,7 @@ namespace Nostradamus.Client
             if (predictiveTimeline == null)
                 return false;
 
-            var snapshot = authoritativeTimeline.InterpolatePoint(authoritativeTime).Snapshot;
+            var snapshot = Timeline.InterpolatePoint(authoritativeTime).Snapshot;
 
             predictiveTimeline = new Timeline();
             predictiveTimeline.AddPoint(predictiveTime, snapshot.Clone());
@@ -75,13 +82,13 @@ namespace Nostradamus.Client
         {
             if (predictiveTimeline == null)
             {
-                var point = authoritativeTimeline.InterpolatePoint(time);
+                var point = Timeline.InterpolatePoint(time);
 
                 Actor.Snapshot = point.Snapshot.Clone();
             }
-            else if (!isReplay && authoritativeTimeline.Last.Snapshot.IsApproximate(Actor.Snapshot))
+            else if (!isReplay && Timeline.Last.Snapshot.IsApproximate(Actor.Snapshot))
             {
-                var point = authoritativeTimeline.Last;
+                var point = Timeline.Last;
 
                 Actor.Snapshot = point.Snapshot.Clone();
 

@@ -9,16 +9,28 @@ namespace Nostradamus
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         private Actor actor;
+        private Timeline timeline;
+
         private int? lastCommandSeq;
         private Queue<Command> queuedCommands = new Queue<Command>();
         private Queue<Event> queuedEvents = new Queue<Event>();
 
-        protected ActorContext(Actor actor)
+        protected ActorContext(Actor actor, ISnapshotArgs snapshot)
         {
             if (actor == null)
                 throw new ArgumentNullException("actor");
 
             this.actor = actor;
+
+            timeline = new Timeline();
+            timeline.AddPoint(actor.Scene.Time, snapshot);
+        }
+
+        public virtual ISnapshotArgs InterpolateSnapshot(int time)
+        {
+            var timepoint = timeline.InterpolatePoint(time);
+
+            return timepoint != null ? timepoint.Snapshot : null;
         }
 
         public void EnqueueCommand(Command command)
@@ -61,6 +73,11 @@ namespace Nostradamus
         public Actor Actor
         {
             get { return actor; }
+        }
+
+        protected Timeline Timeline
+        {
+            get { return timeline; }
         }
 
         public int? LastCommandSeq
