@@ -27,6 +27,7 @@ namespace Nostradamus.Examples
             var clientScene = new SimplePhysicsScene(clientSimulator);
             var client = new ReliableUdpClient(clientSimulator, 20, serverAddress);
             var clientNextTime = 60;
+            var clientRunning = false;
 
             while (true)
             {
@@ -42,7 +43,7 @@ namespace Nostradamus.Examples
                         {
                             logger.Info("++++ Begin server update at {0}ms", serverNextTime);
                             server.Update();
-                            PrintActorSnapshots(serverScene);
+                            PrintActorSnapshots(serverScene, serverScene.Time + serverScene.DeltaTime);
                             logger.Info("++++ End server update at {0}ms", serverNextTime);
 
                             serverNextTime += 50;
@@ -61,11 +62,16 @@ namespace Nostradamus.Examples
                             {
                                 logger.Info("---- Begin Client update at {0}ms", clientNextTime);
                                 client.Update();
-                                PrintActorSnapshots(clientScene);
+                                clientRunning = true;
                                 logger.Info("---- End Client update at {0}ms", clientNextTime);
 
+                                PrintActorSnapshots(clientScene, elapsedTime - 60);
                                 clientNextTime += 20;
                             }
+                        }
+                        else if (clientRunning)
+                        {
+                            PrintActorSnapshots(clientScene, elapsedTime - 60);
                         }
 
                         break;
@@ -107,14 +113,18 @@ namespace Nostradamus.Examples
             client.Dispose();
         }
 
-        private static void PrintActorSnapshots(SimplePhysicsScene scene)
+        private static void PrintActorSnapshots(SimplePhysicsScene scene, int time)
         {
+            logger.Debug("~~~~ Begin actor snapshots at {0}. Scene: {1} + {2}", time, scene.Time, scene.DeltaTime);
+
             foreach (var actor in scene.Actors)
             {
-                var snapshot = (RigidBodySnapshot)actor.Snapshot;
+                var snapshot = (RigidBodySnapshot)actor.InterpolateSnapshot(time);
 
                 logger.Debug("{0}: Position: {1}, Rotation: {2}", actor, snapshot.Position, snapshot.Rotation);
             }
+
+            logger.Debug("~~~~ End actor snapshots at {0}. Scene: {1} + {2}", time, scene.Time, scene.DeltaTime);
         }
     }
 }
