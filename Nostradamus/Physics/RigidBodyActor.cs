@@ -45,13 +45,13 @@ namespace Nostradamus.Physics
             base.DisposeManaged();
         }
 
-        protected internal override ISnapshotArgs OnEventApplied(ISnapshotArgs snapshot, IEventArgs @event)
+        protected internal override ISnapshotArgs OnEventApplied(IEventArgs @event)
         {
             if (@event is RigidBodyMovedEvent)
             {
                 var e = (RigidBodyMovedEvent)@event;
 
-                var s = (RigidBodySnapshot)snapshot.Clone();
+                var s = (RigidBodySnapshot)Snapshot.Clone();
 
                 s.Position = e.Position;
                 s.Rotation = e.Rotation;
@@ -64,7 +64,7 @@ namespace Nostradamus.Physics
                 return s;
             }
             else
-                return null;
+                return base.OnEventApplied(@event);
         }
 
         protected void ApplyCentralForce(Vector3 force)

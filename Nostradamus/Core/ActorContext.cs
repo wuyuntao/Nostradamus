@@ -9,11 +9,11 @@ namespace Nostradamus
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         private Actor actor;
+        private ISnapshotArgs actorSnapshot;
         private Timeline timeline;
 
         private int? lastCommandSeq;
         private Queue<Command> queuedCommands = new Queue<Command>();
-        private Queue<Event> queuedEvents = new Queue<Event>();
 
         protected ActorContext(Actor actor, ISnapshotArgs snapshot)
         {
@@ -21,9 +21,19 @@ namespace Nostradamus
                 throw new ArgumentNullException("actor");
 
             this.actor = actor;
+            this.actorSnapshot = snapshot;
 
             timeline = new Timeline();
             timeline.AddPoint(actor.Scene.Time, snapshot);
+        }
+
+        internal virtual void ApplyEvent(IEventArgs @event)
+        {
+            var newSnapshot = actor.OnEventApplied(@event);
+            if (newSnapshot == null)
+                throw new InvalidOperationException("Snapshot cannot be null");
+
+            actorSnapshot = newSnapshot;
         }
 
         public virtual ISnapshotArgs InterpolateSnapshot(int time)
@@ -36,21 +46,6 @@ namespace Nostradamus
         public void EnqueueCommand(Command command)
         {
             queuedCommands.Enqueue(command);
-        }
-
-        public void EnqueueEvent(IEventArgs eventArgs)
-        {
-            var @event = new Event(actor.Id, eventArgs);
-
-            queuedEvents.Enqueue(@event);
-
-            logger.Debug("{0} applied event {1}", actor, @event);
-        }
-
-        public IEnumerable<Event> DequeueEvents()
-        {
-            while (queuedEvents.Count > 0)
-                yield return queuedEvents.Dequeue();
         }
 
         public void Update()
@@ -73,6 +68,25 @@ namespace Nostradamus
         public Actor Actor
         {
             get { return actor; }
+        }
+
+        internal ISnapshotArgs ActorSnapshot
+        {
+            get
+            {
+                actor.Scene.Context.ThrowUnlessSimulating();
+
+                return actorSnapshot;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("snapshot");
+
+                actor.Scene.Context.ThrowUnlessSimulating();
+
+                actorSnapshot = value;
+            }
         }
 
         protected Timeline Timeline

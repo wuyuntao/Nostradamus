@@ -13,6 +13,7 @@ namespace Nostradamus
         private readonly Scene scene;
         private readonly SceneDesc sceneDesc;
         private int time;
+        private bool isSimulating;
 
         protected SceneContext(Scene scene, SceneDesc desc)
         {
@@ -42,9 +43,24 @@ namespace Nostradamus
             }
         }
 
-        public virtual void Simulate()
+        public void Simulate()
         {
+            isSimulating = true;
+
+            OnSimulate();
+
+            logger.Debug("Simulate done. {0}ms", Time);
+
             time += sceneDesc.SimulationDeltaTime;
+            isSimulating = false;
+        }
+
+        protected abstract void OnSimulate();
+
+        internal void ThrowUnlessSimulating()
+        {
+            if (!isSimulating)
+                throw new InvalidOperationException("Is not simulating");
         }
 
         protected Scene Scene

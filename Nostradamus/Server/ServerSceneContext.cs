@@ -33,16 +33,9 @@ namespace Nostradamus.Server
             }
         }
 
-        public override void Simulate()
+        protected override void OnSimulate()
         {
             Scene.Update(Time, SceneDesc.SimulationDeltaTime);
-
-            foreach (var context in ActorContexts)
-                context.CreateTimepoint();
-
-            logger.Debug("Simulated {0} / {1}", Time, SceneDesc.SimulationDeltaTime);
-
-            base.Simulate();
         }
 
         public FullSyncFrame FetchFullSyncFrame()

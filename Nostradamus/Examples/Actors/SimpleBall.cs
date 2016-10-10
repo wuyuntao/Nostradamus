@@ -61,16 +61,7 @@ namespace Nostradamus.Examples
                 hasMoved = true;
             }
             else
-                throw new NotSupportedException(command.GetType().FullName);
-        }
-
-        protected override ISnapshotArgs OnEventApplied(IEventArgs @event)
-        {
-            var snapshot = base.OnEventApplied(@event);
-            if (snapshot == null)
-                throw new NotSupportedException(@event.GetType().FullName);
-
-            return snapshot;
+                base.OnCommandReceived(command);
         }
 
         protected internal override void OnUpdate()

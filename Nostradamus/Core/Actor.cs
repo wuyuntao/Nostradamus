@@ -11,7 +11,6 @@ namespace Nostradamus
         private readonly Scene scene;
         private readonly ActorId id;
         private readonly ClientId ownerId;
-        private ISnapshotArgs snapshot;
         private ActorContext context;
 
         protected Actor(Scene scene, ActorId id, ClientId ownerId, ISnapshotArgs snapshot)
@@ -19,7 +18,6 @@ namespace Nostradamus
             this.scene = scene;
             this.id = id;
             this.ownerId = ownerId;
-            this.snapshot = snapshot;
             this.context = scene.CreateActorContext(this, snapshot);
         }
 
@@ -30,18 +28,18 @@ namespace Nostradamus
 
         protected internal void ApplyEvent(IEventArgs @event)
         {
-            var snapshot = OnEventApplied(@event);
-            if (snapshot == null)
-                throw new InvalidOperationException("Snapshot cannot be null");
-
-            context.EnqueueEvent(@event);
-
-            this.snapshot = snapshot;
+            context.ApplyEvent(@event);
         }
 
-        protected internal abstract void OnCommandReceived(ICommandArgs command);
+        protected internal virtual void OnCommandReceived(ICommandArgs command)
+        {
+            throw new NotSupportedException(command.GetType().FullName);
+        }
 
-        protected abstract ISnapshotArgs OnEventApplied(IEventArgs @event);
+        protected internal virtual ISnapshotArgs OnEventApplied(IEventArgs @event)
+        {
+            throw new NotSupportedException(@event.GetType().FullName);
+        }
 
         protected internal abstract void OnUpdate();
 
@@ -70,14 +68,7 @@ namespace Nostradamus
 
         public ISnapshotArgs Snapshot
         {
-            get { return snapshot; }
-            internal set
-            {
-                if (value == null)
-                    throw new ArgumentNullException("snapshot");
-
-                snapshot = value;
-            }
+            get { return context.ActorSnapshot; }
         }
 
         public ActorContext Context

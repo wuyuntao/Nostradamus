@@ -40,7 +40,7 @@ namespace Nostradamus.Client
             commandFrame.Commands.Add(command);
         }
 
-        public override void Simulate()
+        protected override void OnSimulate()
         {
             if (fullSyncFrame != null)
                 ApplyFullSync();
@@ -49,8 +49,6 @@ namespace Nostradamus.Client
                 ApplyDeltaSync();
 
             UpdateScene(commandFrame != null ? commandFrame.Commands : null, Time, SceneDesc.SimulationDeltaTime, false);
-
-            base.Simulate();
         }
 
         private void ApplyFullSync()
