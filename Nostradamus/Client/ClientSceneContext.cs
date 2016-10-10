@@ -1,4 +1,5 @@
-﻿using Nostradamus.Server;
+﻿using NLog;
+using Nostradamus.Server;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,8 @@ namespace Nostradamus.Client
 {
     public sealed class ClientSceneContext : SceneContext
     {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         private FullSyncFrame fullSyncFrame;
         private Queue<DeltaSyncFrame> deltaSyncFrames = new Queue<DeltaSyncFrame>();
         private int maxCommandSeq;

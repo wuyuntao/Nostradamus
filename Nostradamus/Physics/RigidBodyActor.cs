@@ -1,10 +1,13 @@
 ﻿using BulletSharp;
 using BulletSharp.Math;
+using NLog;
 
 namespace Nostradamus.Physics
 {
     public abstract class RigidBodyActor : Actor
     {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         private readonly PhysicsScene scene;
         private readonly RigidBody rigidBody;
 
@@ -75,16 +78,16 @@ namespace Nostradamus.Physics
             logger.Debug("{0} applied central force {1}", this, force);
         }
 
-        internal void OnPrePhysicsUpdate()
-        {
-            var snapshot = (RigidBodySnapshot)Snapshot;
+        //internal void OnPrePhysicsUpdate()
+        //{
+        //    var snapshot = (RigidBodySnapshot)Snapshot;
 
-            rigidBody.CenterOfMassTransform = Matrix.RotationQuaternion(snapshot.Rotation) * Matrix.Translation(snapshot.Position);
-            rigidBody.LinearVelocity = snapshot.LinearVelocity;
-            rigidBody.AngularVelocity = snapshot.AngularVelocity;
-        }
+        //    rigidBody.CenterOfMassTransform = Matrix.RotationQuaternion(snapshot.Rotation) * Matrix.Translation(snapshot.Position);
+        //    rigidBody.LinearVelocity = snapshot.LinearVelocity;
+        //    rigidBody.AngularVelocity = snapshot.AngularVelocity;
+        //}
 
-        internal void OnPostPhysicsUpdate()
+        internal void OnPhysicsUpdate()
         {
             // TODO: Check threshold with dead reckoning algorithm to reduce the frequency of triggering event
 

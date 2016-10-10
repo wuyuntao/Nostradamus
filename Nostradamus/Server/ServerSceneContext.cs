@@ -1,4 +1,5 @@
-﻿using Nostradamus.Client;
+﻿using NLog;
+using Nostradamus.Client;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,7 +7,9 @@ namespace Nostradamus.Server
 {
     public sealed class ServerSceneContext : SceneContext
     {
-        public ServerSceneContext(Scene scene, SceneDesc sceneDesc)
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
+        internal ServerSceneContext(Scene scene, SceneDesc sceneDesc)
             : base(scene, sceneDesc)
         { }
 
@@ -55,7 +58,7 @@ namespace Nostradamus.Server
 
             foreach (var context in ActorContexts)
             {
-                frame.Events.AddRange(context.DequeueEvents());
+                frame.Events.AddRange(context.FetchAllEvents());
 
                 if (context.LastCommandSeq != null)
                 {

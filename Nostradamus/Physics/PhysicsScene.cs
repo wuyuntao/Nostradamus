@@ -57,14 +57,11 @@ namespace Nostradamus.Physics
         {
             base.OnUpdate();
 
-            foreach (var actor in RigidBodies)
-                actor.OnPrePhysicsUpdate();
-
             // TODO: Is maxSubSteps and fixedTimestep necessary?
             world.StepSimulation(DeltaTime / 1000f);
 
             foreach (var actor in RigidBodies)
-                actor.OnPostPhysicsUpdate();
+                actor.OnPhysicsUpdate();
         }
 
         internal DiscreteDynamicsWorld World

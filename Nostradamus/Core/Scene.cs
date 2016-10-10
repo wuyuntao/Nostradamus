@@ -10,7 +10,7 @@ namespace Nostradamus
 {
     public abstract class Scene : Disposable
     {
-        protected static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         private readonly SceneDesc desc;
         private readonly SceneContext context;

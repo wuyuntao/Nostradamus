@@ -7,9 +7,9 @@ namespace Nostradamus.Server
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private readonly Queue<Event> queuedEvents = new Queue<Event>();
+        private readonly Queue<Event> eventsApplied = new Queue<Event>();
 
-        public ServerActorContext(Actor actor, ISnapshotArgs snapshot)
+        internal ServerActorContext(Actor actor, ISnapshotArgs snapshot)
             : base(actor, snapshot)
         { }
 
@@ -17,19 +17,21 @@ namespace Nostradamus.Server
         {
             base.ApplyEvent(eventArgs);
 
+            // Enqueue events
             var @event = new Event(Actor.Id, eventArgs);
 
-            queuedEvents.Enqueue(@event);
+            eventsApplied.Enqueue(@event);
 
             logger.Debug("{0} applied event {1}", Actor, @event);
 
-            Timeline.AddPoint(Actor.Scene.Time + Actor.Scene.DeltaTime, Actor.Snapshot);
+            // Save current snapshot to timeline
+            Timeline.AddPoint(Actor.Scene.Time + Actor.Scene.DeltaTime, ActorSnapshot);
         }
 
-        internal IEnumerable<Event> DequeueEvents()
+        internal IEnumerable<Event> FetchAllEvents()
         {
-            while (queuedEvents.Count > 0)
-                yield return queuedEvents.Dequeue();
+            while (eventsApplied.Count > 0)
+                yield return eventsApplied.Dequeue();
         }
     }
 }
