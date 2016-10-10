@@ -53,7 +53,7 @@ namespace Nostradamus
                 return string.Format("{0} #{1} ({2})", GetType().Name, id.Value, id.Description);
         }
 
-        protected internal Scene Scene
+        public Scene Scene
         {
             get { return scene; }
         }

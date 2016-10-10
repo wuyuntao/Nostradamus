@@ -32,7 +32,7 @@ namespace Nostradamus
 			this.scene = scene;
 		}
 
-		internal abstract ActorContext CreateActorContext(Actor actor);
+		internal abstract ActorContext CreateActorContext(Actor actor, ISnapshotArgs snapshot);
 
 		protected Scene Scene
 		{

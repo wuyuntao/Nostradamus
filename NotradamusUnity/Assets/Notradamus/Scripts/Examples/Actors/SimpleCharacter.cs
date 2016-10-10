@@ -10,10 +10,6 @@ namespace Nostradamus.Examples
 			: base(scene, id, ownerId, snapshot)
 		{ }
 
-		protected override void OnSnapshotRecovered(ISnapshotArgs snapshot)
-		{
-		}
-
 		protected internal override void OnCommandReceived(ICommandArgs command)
 		{
 			if (command is MoveCharacterCommand)

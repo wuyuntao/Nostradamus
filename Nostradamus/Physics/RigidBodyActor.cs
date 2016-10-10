@@ -99,7 +99,7 @@ namespace Nostradamus.Physics
             ApplyEvent(eventArgs);
         }
 
-        protected new PhysicsScene Scene
+        public new PhysicsScene Scene
         {
             get { return scene; }
         }

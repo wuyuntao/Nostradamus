@@ -23,7 +23,7 @@ namespace Nostradamus.Examples
 
         void Start()
         {
-            snapshot = (RigidBodySnapshot)actor.Snapshot;
+            snapshot = (RigidBodySnapshot)actor.InterpolateSnapshot(actor.Scene.Time);
 
             transform.position = snapshot.Position.ToUnity();
             transform.rotation = snapshot.Rotation.ToUnity();
@@ -31,7 +31,7 @@ namespace Nostradamus.Examples
 
         void FixedUpdate()
         {
-            snapshot = (RigidBodySnapshot)actor.Snapshot;
+            snapshot = (RigidBodySnapshot)actor.InterpolateSnapshot(actor.Scene.Time + actor.Scene.DeltaTime);
         }
 
         void Update()

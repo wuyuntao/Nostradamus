@@ -17,13 +17,14 @@ namespace Nostradamus.Examples
             if (simulator is ServerSimulator)
             {
                 var clientId = new ClientId(1);
+
                 var cubeId = new ActorId(1, "Cube");
                 var cubePosition = new Vector3(0.1f, 1.5f, 0.1f);
-                cube = new SimpleCube(this, cubeId, clientId, cubePosition);
+                cube = new SimpleCube(this, cubeId, null, cubePosition);
 
                 var ballId = new ActorId(2, "Ball");
                 var ballPosition = new Vector3(-0.1f, 6f, -0.1f);
-                ball = new SimpleBall(this, ballId, null, ballPosition);
+                ball = new SimpleBall(this, ballId, clientId, ballPosition);
             }
         }
 
@@ -46,15 +47,15 @@ namespace Nostradamus.Examples
             switch (actorId.Value)
             {
                 case 1:
-                    var clientId = new ClientId(1);
                     var cubePosition = new Vector3(0.1f, 1.5f, 0.1f);
-                    cube = new SimpleCube(this, actorId, clientId, cubePosition);
+                    cube = new SimpleCube(this, actorId, null, cubePosition);
                     return cube;
 
                 case 2:
+                    var clientId = new ClientId(1);
                     var ballId = new ActorId(2, "Ball");
                     var ballPosition = new Vector3(-0.1f, 6f, -0.1f);
-                    ball = new SimpleBall(this, actorId, null, ballPosition);
+                    ball = new SimpleBall(this, actorId, clientId, ballPosition);
                     return ball;
 
                 default:

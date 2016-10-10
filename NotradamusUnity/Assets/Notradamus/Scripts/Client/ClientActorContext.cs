@@ -1,96 +1,128 @@
-﻿using System.Collections.Generic;
+﻿using NLog;
+using System;
+using System.Collections.Generic;
 
 namespace Nostradamus.Client
 {
-	class ClientActorContext : ActorContext
-	{
-		private const float PredictivePriorityIncreaseSpeed = 0.1f;
-		private const float PredictivePriorityDecreaseSpeed = 0.02f;
+    class ClientActorContext : ActorContext
+    {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-		private Timeline authoritativeTimeline;
+        private const float PredictivePriorityIncreaseSpeed = 0.1f;
+        private const float PredictivePriorityDecreaseSpeed = 0.05f;
 
-		private Timeline predictiveTimeline;
-		private Queue<IEventArgs> predictiveEventQueue = new Queue<IEventArgs>();
+        private Timeline predictiveTimeline;
+        private Queue<IEventArgs> predictiveEventQueue = new Queue<IEventArgs>();
+        private float predictivePriority;
 
-		public ClientActorContext(Actor actor)
-			: base(actor)
-		{
-			authoritativeTimeline = new Timeline("Server");
-			authoritativeTimeline.AddPoint(actor.Scene.Time, actor.CreateSnapshot());
-		}
+        public ClientActorContext(Actor actor, ISnapshotArgs snapshot)
+            : base(actor, snapshot)
+        { }
 
-		public void CreateAuthoritativeTimepoint(IEnumerable<Event> events)
-		{
-			var currentSnapshot = Actor.Snapshot;
+        public override ISnapshotArgs InterpolateSnapshot(int time)
+        {
+            if (predictiveTimeline != null)
+            {
+                var timepoint = predictiveTimeline.InterpolatePoint(time);
+                if (timepoint != null)
+                    return timepoint.Snapshot;
+            }
 
-			Actor.RecoverSnapshot(authoritativeTimeline.Last.Snapshot);
+            return base.InterpolateSnapshot(time);
+        }
 
-			foreach (var e in events)
-			{
-				Actor.ApplyEvent(e.Args);
-			}
+        public void CreateAuthoritativeTimepoint(IEnumerable<Event> events)
+        {
+            var currentSnapshot = Actor.Snapshot;
 
-			authoritativeTimeline.AddPoint(Actor.Scene.Time + Actor.Scene.DeltaTime, Actor.Snapshot);
+            Actor.Snapshot = Timeline.Last.Snapshot.Clone();
 
-			Actor.RecoverSnapshot(currentSnapshot);
-		}
+            foreach (var e in events)
+            {
+                Actor.ApplyEvent(e.Args);
+            }
 
-		public bool IsSynchronized(int authoritativeTimelienTime, int predictiveTimelineTime)
-		{
-			if (predictiveTimeline == null)
-				return true;
+            Timeline.AddPoint(Actor.Scene.Time + Actor.Scene.DeltaTime, Actor.Snapshot);
 
-			var authoritativeSnapshot = authoritativeTimeline.InterpolatePoint(authoritativeTimelienTime).Snapshot;
-			var predictiveSnapshot = predictiveTimeline.InterpolatePoint(predictiveTimelineTime).Snapshot;
+            Actor.Snapshot = currentSnapshot;
+        }
 
-			return authoritativeSnapshot.IsApproximate(predictiveSnapshot);
-		}
+        public bool IsSynchronized(int authoritativeTimelienTime, int predictiveTimelineTime)
+        {
+            if (predictiveTimeline == null)
+                return true;
 
-		public bool Rollback(int authoritativeTime, int predictiveTime)
-		{
-			if (predictiveTimeline == null)
-				return false;
+            var authoritativeSnapshot = Timeline.InterpolatePoint(authoritativeTimelienTime).Snapshot;
+            var predictiveSnapshot = predictiveTimeline.InterpolatePoint(predictiveTimelineTime).Snapshot;
 
-			var snapshot = authoritativeTimeline.InterpolatePoint(authoritativeTime).Snapshot;
+            return authoritativeSnapshot.IsApproximate(predictiveSnapshot);
+        }
 
-			predictiveTimeline = new Timeline(string.Format("Predictive-{0}", predictiveTime));
-			predictiveTimeline.AddPoint(predictiveTime, snapshot.Clone());
+        public bool Rollback(int authoritativeTime, int predictiveTime)
+        {
+            if (predictiveTimeline == null)
+                return false;
 
-			Actor.RecoverSnapshot(snapshot.Clone());
+            var snapshot = Timeline.InterpolatePoint(authoritativeTime).Snapshot;
 
-			return true;
-		}
+            predictiveTimeline = new Timeline();
+            predictiveTimeline.AddPoint(predictiveTime, snapshot.Clone());
 
-		public void EnqueuePredictiveCommand(Command command)
-		{
-			if (predictiveTimeline == null)
-			{
-				predictiveTimeline = new Timeline(string.Format("Predictive-{0}", command.Time));
-			}
+            Actor.Snapshot = snapshot.Clone();
 
-			EnqueueCommand(command);
-		}
+            return true;
+        }
 
-		public void CreatePredictiveTimepoint(int time, bool isReplay)
-		{
-			if (predictiveTimeline == null)
-			{
-				var point = authoritativeTimeline.InterpolatePoint(time);
+        public void EnqueuePredictiveCommand(Command command)
+        {
+            if (predictiveTimeline == null)
+            {
+                predictiveTimeline = new Timeline();
+            }
 
-				Actor.RecoverSnapshot(point.Snapshot.Clone());
-			}
-			else if (!isReplay && authoritativeTimeline.Last.Snapshot.IsApproximate(Actor.Snapshot))
-			{
-				var point = authoritativeTimeline.Last;
+            EnqueueCommand(command);
 
-				Actor.RecoverSnapshot(point.Snapshot.Clone());
+            if (predictivePriority < 1)
+            {
+                var lastPredictivePriority = predictivePriority;
+                predictivePriority = Math.Min(1, predictivePriority + PredictivePriorityIncreaseSpeed);
 
-				predictiveTimeline = null;
-			}
-			else
-			{
-				predictiveTimeline.AddPoint(time, Actor.Snapshot.Clone());
-			}
-		}
-	}
+                logger.Debug("Predictive priority of {0} increased {1} -> {2}", Actor, lastPredictivePriority, predictivePriority);
+            }
+        }
+
+        public void CreatePredictiveTimepoint(int time, bool isReplay)
+        {
+            if (predictiveTimeline == null)
+            {
+                var point = Timeline.InterpolatePoint(time);
+
+                Actor.Snapshot = point.Snapshot.Clone();
+            }
+            else if (!isReplay && (predictivePriority == 0 || Timeline.Last.Snapshot.IsApproximate(Actor.Snapshot)))
+            {
+                var point = Timeline.Last;
+
+                Actor.Snapshot = point.Snapshot.Clone();
+
+                predictiveTimeline = null;
+            }
+            else
+            {
+                var snapshot = Timeline.Last.Snapshot.Interpolate(Actor.Snapshot, predictivePriority);
+
+                predictiveTimeline.AddPoint(time, snapshot);
+
+                Actor.Snapshot = snapshot.Clone();
+            }
+
+            if (predictivePriority > 0)
+            {
+                var lastPredictivePriority = predictivePriority;
+                predictivePriority = Math.Max(0, predictivePriority - PredictivePriorityDecreaseSpeed);
+
+                logger.Debug("Predictive priority of {0} decreased {1} -> {2}", Actor, lastPredictivePriority, predictivePriority);
+            }
+        }
+    }
 }

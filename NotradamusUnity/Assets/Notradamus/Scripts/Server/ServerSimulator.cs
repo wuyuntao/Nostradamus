@@ -4,85 +4,83 @@ using System.Linq;
 
 namespace Nostradamus.Server
 {
-	public sealed class ServerSimulator : Simulator
-	{
-		private DeltaSyncFrame deltaSyncFrame;
-		private readonly Queue<CommandFrame> clientSyncFrames = new Queue<CommandFrame>();
+    public sealed class ServerSimulator : Simulator
+    {
+        internal override ActorContext CreateActorContext(Actor actor, ISnapshotArgs snapshot)
+        {
+            return new ServerActorContext(actor, snapshot);
+        }
 
-		public ServerSimulator()
-		{ }
+        public void ReceiveCommandFrame(CommandFrame frame)
+        {
+            foreach (var command in frame.Commands)
+            {
+                // TODO: Avoid get actor context for every command
+                var context = Scene.GetActorContext(command.ActorId);
+                if (context == null)
+                {
+                    logger.Warn("Cannot find actor '{0}' to enqueue command '{1}'",
+                            command.ActorId, command.Args);
+                }
+                else if (context.Actor.OwnerId != frame.ClientId)
+                {
+                    logger.Warn("Client id not match. '{0}' != '{1}'",
+                            context.Actor.OwnerId, frame.ClientId);
+                }
+                else
+                {
+                    context.EnqueueCommand(command);
+                }
+            }
+        }
 
-		internal override ActorContext CreateActorContext(Actor actor)
-		{
-			return new ServerActorContext(actor);
-		}
+        public void Simulate(int deltaTime)
+        {
+            Scene.Update(Time, deltaTime);
 
-		public void ReceiveCommandFrame(CommandFrame frame)
-		{
-			foreach (var command in frame.Commands)
-			{
-				// TODO: Avoid get actor context for every command
-				var actorContext = Scene.GetActorContext(command.ActorId);
-				if (actorContext == null)
-				{
-					logger.Warn("Cannot find actor '{0}' to enqueue command '{1}'",
-							command.ActorId, command.Args);
-				}
-				else if (actorContext.Actor.OwnerId != frame.ClientId)
-				{
-					logger.Warn("Client id not match. '{0}' != '{1}'",
-							actorContext.Actor.OwnerId, frame.ClientId);
-				}
-				else
-				{
-					actorContext.EnqueueCommand(command);
-				}
-			}
-		}
+            foreach (var context in ActorContexts)
+                context.CreateTimepoint();
 
-		public void Simulate(int deltaTime)
-		{
-			Scene.Update(Time, deltaTime);
+            logger.Debug("Simulated {0} / {1}", Time, deltaTime);
 
-			logger.Debug("Simulated {0} / {1}", Time, deltaTime);
+            Time += deltaTime;
+        }
 
-			Time += deltaTime;
-		}
+        public FullSyncFrame FetchFullSyncFrame()
+        {
+            var frame = new FullSyncFrame(Scene.Time, Scene.DeltaTime);
 
-		public DeltaSyncFrame FetchDeltaSyncFrame()
-		{
-			var frame = new DeltaSyncFrame(Scene.Time, Scene.DeltaTime);
+            frame.Snapshots.AddRange(from context in ActorContexts
+                                     select context.Actor into actor
+                                     select new Snapshot(actor.Id, actor.Snapshot));
 
-			foreach (var actorContext in ActorContexts)
-			{
-				frame.Events.AddRange(actorContext.DequeueEvents());
+            return frame;
+        }
 
-				if (actorContext.LastCommandSeq != null)
-				{
-					frame.LastCommandSeqs[actorContext.Actor.OwnerId] = actorContext.LastCommandSeq.Value;
-				}
-			}
+        public DeltaSyncFrame FetchDeltaSyncFrame()
+        {
+            var frame = new DeltaSyncFrame(Scene.Time, Scene.DeltaTime);
 
-			return frame;
-		}
+            foreach (var context in ActorContexts)
+            {
+                frame.Events.AddRange(context.DequeueEvents());
 
-		public FullSyncFrame FetchFullSyncFrame()
-		{
-			var frame = new FullSyncFrame(Scene.Time, Scene.DeltaTime);
+                if (context.LastCommandSeq != null)
+                {
+                    frame.LastCommandSeqs[context.Actor.OwnerId] = context.LastCommandSeq.Value;
+                }
+            }
 
-			frame.Snapshots.AddRange(from actorContext in ActorContexts
-									 select actorContext.CreateSnapshot());
+            return frame;
+        }
 
-			return frame;
-		}
-
-		private IEnumerable<ServerActorContext> ActorContexts
-		{
-			get
-			{
-				return from context in Scene.ActorContexts
-					   select (ServerActorContext)context;
-			}
-		}
-	}
+        private IEnumerable<ServerActorContext> ActorContexts
+        {
+            get
+            {
+                return from context in Scene.ActorContexts
+                       select (ServerActorContext)context;
+            }
+        }
+    }
 }
