@@ -1,7 +1,6 @@
 ﻿using BulletSharp;
 using BulletSharp.Math;
 using Nostradamus.Physics;
-using Nostradamus.Server;
 using System;
 
 namespace Nostradamus.Examples
@@ -11,10 +10,10 @@ namespace Nostradamus.Examples
         private SimpleBall ball;
         private SimpleCube cube;
 
-        public SimplePhysicsScene(Simulator simulator)
-            : base(simulator, CreatePhysicsSceneDesc())
+        public SimplePhysicsScene(PhysicsSceneDesc desc)
+            : base(desc)
         {
-            if (simulator is ServerSimulator)
+            if (Desc.Mode == SceneMode.Server)
             {
                 var clientId = new ClientId(1);
 
@@ -28,7 +27,7 @@ namespace Nostradamus.Examples
             }
         }
 
-        private static PhysicsSceneDesc CreatePhysicsSceneDesc()
+        public static PhysicsSceneDesc CreateSceneDesc()
         {
             var ground = new SceneColliderDesc()
             {

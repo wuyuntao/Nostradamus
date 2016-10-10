@@ -80,7 +80,7 @@ namespace Nostradamus
             }
         }
 
-        internal ActorContext Context
+        public ActorContext Context
         {
             get { return context; }
         }

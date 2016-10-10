@@ -11,8 +11,8 @@ namespace Nostradamus.Physics
         private DbvtBroadphase broadphase;
         private DiscreteDynamicsWorld world;
 
-        public PhysicsScene(Simulator simulator, PhysicsSceneDesc desc)
-            : base(simulator)
+        public PhysicsScene(PhysicsSceneDesc desc)
+            : base(desc)
         {
             // TODO: Enable custom initialization of physics world
             collisionConf = new DefaultCollisionConfiguration();

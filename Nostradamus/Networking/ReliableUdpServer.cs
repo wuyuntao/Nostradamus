@@ -13,16 +13,16 @@ namespace Nostradamus.Networking
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private readonly ServerSimulator simulator;
+        private readonly Scene scene;
+        private readonly ServerSceneContext sceneContext;
         private readonly NetServer server;
         private readonly SortedList<ClientId, Client> clients = new SortedList<ClientId, Client>();
-        private readonly int simulateDeltaTime;
         private bool stopRequest;
 
-        public ReliableUdpServer(ServerSimulator simulator, int simulateDeltaTime, int listeningPort, string appIdentifier = "Nostradamus")
+        public ReliableUdpServer(Scene scene, int listeningPort, string appIdentifier = "Nostradamus")
         {
-            this.simulator = simulator;
-            this.simulateDeltaTime = simulateDeltaTime;
+            this.scene = scene;
+            this.sceneContext = (ServerSceneContext)scene.Context;
 
             var serverConf = new NetPeerConfiguration(appIdentifier);
             serverConf.Port = listeningPort;
@@ -33,7 +33,7 @@ namespace Nostradamus.Networking
         protected override void DisposeManaged()
         {
             server.Shutdown(string.Empty);
-            simulator.Dispose();
+            sceneContext.Dispose();
 
             base.DisposeManaged();
         }
@@ -61,9 +61,9 @@ namespace Nostradamus.Networking
             for (var msg = server.ReadMessage(); msg != null; msg = server.ReadMessage())
                 OnServerMessage(msg);
 
-            simulator.Simulate(simulateDeltaTime);
+            sceneContext.Simulate();
 
-            var deltaSyncFrame = simulator.FetchDeltaSyncFrame();
+            var deltaSyncFrame = sceneContext.FetchDeltaSyncFrame();
             SendMessageToAll(deltaSyncFrame);
         }
 
@@ -128,13 +128,13 @@ namespace Nostradamus.Networking
             var client = new Client(message.ClientId, msg.SenderConnection);
             clients.Add(message.ClientId, client);
 
-            var frame = simulator.FetchFullSyncFrame();
+            var frame = sceneContext.FetchFullSyncFrame();
             SendMessage(client, frame);
         }
 
         private void OnServerMessage_ClientSyncFrame(NetIncomingMessage msg, CommandFrame frame)
         {
-            simulator.ReceiveCommandFrame(frame);
+            sceneContext.ReceiveCommandFrame(frame);
         }
 
         private void SendMessage(Client client, object message)

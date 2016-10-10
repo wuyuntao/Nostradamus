@@ -1,5 +1,8 @@
 ﻿using NLog;
+using Nostradamus.Client;
+using Nostradamus.Server;
 using Nostradamus.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,14 +12,27 @@ namespace Nostradamus
     {
         protected static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private readonly Simulator simulator;
+        private readonly SceneDesc desc;
+        private readonly SceneContext context;
         private readonly Dictionary<ActorId, ActorContext> actors = new Dictionary<ActorId, ActorContext>();
 
-        public Scene(Simulator simulator)
+        public Scene(SceneDesc desc)
         {
-            this.simulator = simulator;
+            this.desc = desc;
 
-            simulator.InitializeScene(this);
+            switch (desc.Mode)
+            {
+                case SceneMode.Client:
+                    context = new ClientSceneContext(this, desc);
+                    break;
+
+                case SceneMode.Server:
+                    context = new ServerSceneContext(this, desc);
+                    break;
+
+                default:
+                    throw new NotSupportedException(desc.Mode.ToString());
+            }
         }
 
         protected override void DisposeManaged()
@@ -31,7 +47,7 @@ namespace Nostradamus
 
         internal ActorContext CreateActorContext(Actor actor, ISnapshotArgs snapshot)
         {
-            var context = simulator.CreateActorContext(actor, snapshot);
+            var context = this.context.CreateActorContext(actor, snapshot);
 
             actors.Add(actor.Id, context);
 
@@ -67,6 +83,16 @@ namespace Nostradamus
 
         protected internal virtual void OnUpdate()
         { }
+
+        public SceneDesc Desc
+        {
+            get { return desc; }
+        }
+
+        public SceneContext Context
+        {
+            get { return context; }
+        }
 
         public IEnumerable<Actor> Actors
         {

@@ -4,15 +4,14 @@ using System.Collections.Generic;
 
 namespace Nostradamus.Client
 {
-    class ClientActorContext : ActorContext
+    public sealed class ClientActorContext : ActorContext
     {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
         private const float PredictivePriorityIncreaseSpeed = 0.1f;
         private const float PredictivePriorityDecreaseSpeed = 0.05f;
 
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         private Timeline predictiveTimeline;
-        private Queue<IEventArgs> predictiveEventQueue = new Queue<IEventArgs>();
         private float predictivePriority;
 
         public ClientActorContext(Actor actor, ISnapshotArgs snapshot)

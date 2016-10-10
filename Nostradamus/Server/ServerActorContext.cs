@@ -1,6 +1,6 @@
 ﻿namespace Nostradamus.Server
 {
-    class ServerActorContext : ActorContext
+    public sealed class ServerActorContext : ActorContext
     {
         public ServerActorContext(Actor actor, ISnapshotArgs snapshot)
             : base(actor, snapshot)

@@ -11,10 +11,15 @@ namespace Nostradamus.Examples
         public static void Run()
         {
             var clientId = new ClientId(1);
-            var simulator = new ClientSimulator(clientId, 50);
-            var scene = new SimplePhysicsScene(simulator);
+            var sceneDesc = SimplePhysicsScene.CreateSceneDesc();
+            {
+                sceneDesc.Mode = SceneMode.Client;
+                sceneDesc.SimulationDeltaTime = 20;
+                sceneDesc.ReconciliationDeltaTime = 50;
+            };
+            var scene = new SimplePhysicsScene(sceneDesc);
             var serverAddress = new IPEndPoint(IPAddress.Loopback, 9000);
-            using (var client = new ReliableUdpClient(simulator, 20, serverAddress))
+            using (var client = new ReliableUdpClient(scene, serverAddress))
             {
                 client.Start();
 

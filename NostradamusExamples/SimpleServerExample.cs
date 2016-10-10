@@ -1,5 +1,4 @@
 ﻿using Nostradamus.Networking;
-using Nostradamus.Server;
 using System.Diagnostics;
 using System.Threading;
 
@@ -9,9 +8,14 @@ namespace Nostradamus.Examples
     {
         public static void Run()
         {
-            var simulator = new ServerSimulator();
-            var scene = new SimplePhysicsScene(simulator);
-            using (var server = new ReliableUdpServer(simulator, 50, 9000))
+            var sceneDesc = SimplePhysicsScene.CreateSceneDesc();
+            {
+                sceneDesc.Mode = SceneMode.Server;
+                sceneDesc.SimulationDeltaTime = 50;
+            };
+            var scene = new SimplePhysicsScene(sceneDesc);
+
+            using (var server = new ReliableUdpServer(scene, 9000))
             {
                 server.Start();
 

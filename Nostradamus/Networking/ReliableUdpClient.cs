@@ -13,17 +13,17 @@ namespace Nostradamus.Networking
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private readonly ClientSimulator simulator;
-        private readonly int simulateDeltaTime;
+        private readonly Scene scene;
+        private readonly ClientSceneContext sceneContext;
         private readonly IPEndPoint serverEndPoint;
         private readonly NetClient client;
         private bool isStarted;
         private bool hasStopRequest;
 
-        public ReliableUdpClient(ClientSimulator simulator, int simulateDeltaTime, IPEndPoint serverEndPoint, string appIdentifier = "Nostradamus", int simulateLatency = 0, int simulateLoss = 0)
+        public ReliableUdpClient(Scene scene, IPEndPoint serverEndPoint, string appIdentifier = "Nostradamus", int simulateLatency = 0, int simulateLoss = 0)
         {
-            this.simulator = simulator;
-            this.simulateDeltaTime = simulateDeltaTime;
+            this.scene = scene;
+            this.sceneContext = (ClientSceneContext)scene.Context;
             this.serverEndPoint = serverEndPoint;
 
             var clientConf = new NetPeerConfiguration(appIdentifier);
@@ -37,7 +37,7 @@ namespace Nostradamus.Networking
         protected override void DisposeManaged()
         {
             client.Shutdown(string.Empty);
-            simulator.Dispose();
+            sceneContext.Dispose();
 
             base.DisposeManaged();
         }
@@ -71,9 +71,9 @@ namespace Nostradamus.Networking
 
             if (isStarted)
             {
-                simulator.Simulate(simulateDeltaTime);
+                sceneContext.Simulate();
 
-                var commandFrame = simulator.FetchCommandFrame();
+                var commandFrame = sceneContext.FetchCommandFrame();
                 if (commandFrame != null)
                     SendMessage(commandFrame);
             }
@@ -132,12 +132,12 @@ namespace Nostradamus.Networking
 
         private void OnServerMessage_DeltaSyncFrame(NetIncomingMessage msg, DeltaSyncFrame message)
         {
-            simulator.ReceiveDeltaSyncFrame(message);
+            sceneContext.ReceiveDeltaSyncFrame(message);
         }
 
         private void OnServerMessage_FullSyncFrame(NetIncomingMessage msg, FullSyncFrame message)
         {
-            simulator.ReceiveFullSyncFrame(message);
+            sceneContext.ReceiveFullSyncFrame(message);
 
             isStarted = true;
         }
@@ -148,9 +148,8 @@ namespace Nostradamus.Networking
 
             switch (status)
             {
-
                 case NetConnectionStatus.Connected:
-                    SendMessage(new Login() { ClientId = simulator.ClientId });
+                    SendMessage(new Login() { ClientId = scene.Desc.ClientId });
                     break;
 
                 case NetConnectionStatus.Disconnected:

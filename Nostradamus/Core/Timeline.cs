@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Nostradamus
 {
-    class Timeline
+    public sealed class Timeline
     {
         private readonly LinkedList<Timepoint> points = new LinkedList<Timepoint>();
 

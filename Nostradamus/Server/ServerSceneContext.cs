@@ -4,12 +4,11 @@ using System.Linq;
 
 namespace Nostradamus.Server
 {
-    public sealed class ServerSimulator : Simulator
+    public sealed class ServerSceneContext : SceneContext
     {
-        internal override ActorContext CreateActorContext(Actor actor, ISnapshotArgs snapshot)
-        {
-            return new ServerActorContext(actor, snapshot);
-        }
+        public ServerSceneContext(Scene scene, SceneDesc sceneDesc)
+            : base(scene, sceneDesc)
+        { }
 
         public void ReceiveCommandFrame(CommandFrame frame)
         {
@@ -34,16 +33,16 @@ namespace Nostradamus.Server
             }
         }
 
-        public void Simulate(int deltaTime)
+        public override void Simulate()
         {
-            Scene.Update(Time, deltaTime);
+            Scene.Update(Time, SceneDesc.SimulationDeltaTime);
 
             foreach (var context in ActorContexts)
                 context.CreateTimepoint();
 
-            logger.Debug("Simulated {0} / {1}", Time, deltaTime);
+            logger.Debug("Simulated {0} / {1}", Time, SceneDesc.SimulationDeltaTime);
 
-            Time += deltaTime;
+            base.Simulate();
         }
 
         public FullSyncFrame FetchFullSyncFrame()

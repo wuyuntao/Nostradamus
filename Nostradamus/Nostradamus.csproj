@@ -103,14 +103,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client\ClientActorContext.cs" />
-    <Compile Include="Client\ClientSimulator.cs" />
+    <Compile Include="Client\ClientSceneContext.cs" />
     <Compile Include="Client\CommandFrame.cs" />
     <Compile Include="Core\Actor.cs" />
     <Compile Include="Core\ActorContext.cs" />
     <Compile Include="Core\ClientId.cs" />
     <Compile Include="Core\ActorId.cs" />
     <Compile Include="Core\Command.cs" />
-    <Compile Include="Core\Simulator.cs" />
+    <Compile Include="Core\SceneContext.cs" />
+    <Compile Include="Core\SceneDesc.cs" />
     <Compile Include="Core\Snapshot.cs" />
     <Compile Include="Core\Scene.cs" />
     <Compile Include="Examples\Actors\SimpleBall.cs" />
@@ -159,7 +160,7 @@
     <Compile Include="Core\Timeline.cs" />
     <Compile Include="Core\Event.cs" />
     <Compile Include="Core\Timepoint.cs" />
-    <Compile Include="Server\ServerSimulator.cs" />
+    <Compile Include="Server\ServerSceneContext.cs" />
     <Compile Include="Utils\Disposable.cs" />
   </ItemGroup>
   <ItemGroup />

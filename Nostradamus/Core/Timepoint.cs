@@ -1,6 +1,6 @@
 ﻿namespace Nostradamus
 {
-	class Timepoint
+	public sealed class Timepoint
 	{
 		private readonly Timeline timeline;
 		private readonly int time;

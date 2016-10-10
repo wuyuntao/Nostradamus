@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Nostradamus
 {
-    abstract class ActorContext
+    public abstract class ActorContext
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 

@@ -15,17 +15,28 @@ namespace Nostradamus.Examples
         public static void Run()
         {
             var elapsedTime = 0;
-            var serverSimulator = new ServerSimulator();
-            var serverScene = new SimplePhysicsScene(serverSimulator);
-            var server = new ReliableUdpServer(serverSimulator, 50, 9000);
+            var serverSceneDesc = SimplePhysicsScene.CreateSceneDesc();
+            {
+                serverSceneDesc.Mode = SceneMode.Server;
+                serverSceneDesc.SimulationDeltaTime = 50;
+            };
+            var serverScene = new SimplePhysicsScene(serverSceneDesc);
+            var serverSceneContext = (ServerSceneContext)serverScene.Context;
+            var server = new ReliableUdpServer(serverScene, 9000);
             server.Start();
             var serverNextTime = 0;
             var serverAddress = new IPEndPoint(IPAddress.Loopback, 9000);
 
             var clientId = new ClientId(1);
-            var clientSimulator = new ClientSimulator(clientId, 50);
-            var clientScene = new SimplePhysicsScene(clientSimulator);
-            var client = new ReliableUdpClient(clientSimulator, 20, serverAddress);
+            var clientSceneDesc = SimplePhysicsScene.CreateSceneDesc();
+            {
+                clientSceneDesc.Mode = SceneMode.Client;
+                clientSceneDesc.SimulationDeltaTime = 20;
+                clientSceneDesc.ReconciliationDeltaTime = 50;
+            };
+            var clientScene = new SimplePhysicsScene(clientSceneDesc);
+            var clientSceneContext = (ClientSceneContext)clientScene.Context;
+            var client = new ReliableUdpClient(clientScene, serverAddress);
             var clientNextTime = 60;
             var clientRunning = false;
 
@@ -80,23 +91,23 @@ namespace Nostradamus.Examples
                         goto End;
 
                     case ConsoleKey.LeftArrow:
-                        if (clientSimulator != null && clientScene.Ball != null)
-                            clientSimulator.ReceiveCommand(clientScene.Ball.Id, new MoveBallCommand() { InputX = -1 });
+                        if (clientSceneContext != null && clientScene.Ball != null)
+                            clientSceneContext.ReceiveCommand(clientScene.Ball.Id, new MoveBallCommand() { InputX = -1 });
                         break;
 
                     case ConsoleKey.UpArrow:
-                        if (clientSimulator != null && clientScene.Ball != null)
-                            clientSimulator.ReceiveCommand(clientScene.Ball.Id, new MoveBallCommand() { InputZ = 1 });
+                        if (clientSceneContext != null && clientScene.Ball != null)
+                            clientSceneContext.ReceiveCommand(clientScene.Ball.Id, new MoveBallCommand() { InputZ = 1 });
                         break;
 
                     case ConsoleKey.RightArrow:
-                        if (clientSimulator != null && clientScene.Ball != null)
-                            clientSimulator.ReceiveCommand(clientScene.Ball.Id, new MoveBallCommand() { InputX = 1 });
+                        if (clientSceneContext != null && clientScene.Ball != null)
+                            clientSceneContext.ReceiveCommand(clientScene.Ball.Id, new MoveBallCommand() { InputX = 1 });
                         break;
 
                     case ConsoleKey.DownArrow:
-                        if (clientSimulator != null && clientScene.Ball != null)
-                            clientSimulator.ReceiveCommand(clientScene.Ball.Id, new MoveBallCommand() { InputZ = -1 });
+                        if (clientSceneContext != null && clientScene.Ball != null)
+                            clientSceneContext.ReceiveCommand(clientScene.Ball.Id, new MoveBallCommand() { InputZ = -1 });
                         break;
 
                     default:

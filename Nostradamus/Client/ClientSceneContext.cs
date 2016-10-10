@@ -5,26 +5,17 @@ using System.Linq;
 
 namespace Nostradamus.Client
 {
-    public sealed class ClientSimulator : Simulator
+    public sealed class ClientSceneContext : SceneContext
     {
-        private readonly ClientId clientId;
-        private readonly int reconciliationDeltaTime;
-
         private FullSyncFrame fullSyncFrame;
         private Queue<DeltaSyncFrame> deltaSyncFrames = new Queue<DeltaSyncFrame>();
         private int maxCommandSeq;
         private CommandFrame commandFrame;
         private Queue<Command> unacknowledgedCommands = new Queue<Command>();
 
-        public ClientSimulator(ClientId clientId, int reconciliationDeltaTime)
+        internal ClientSceneContext(Scene scene, SceneDesc sceneDesc)
+            : base(scene, sceneDesc)
         {
-            this.clientId = clientId;
-            this.reconciliationDeltaTime = reconciliationDeltaTime;
-        }
-
-        internal override ActorContext CreateActorContext(Actor actor, ISnapshotArgs snapshot)
-        {
-            return new ClientActorContext(actor, snapshot);
         }
 
         public void ReceiveFullSyncFrame(FullSyncFrame frame)
@@ -44,12 +35,12 @@ namespace Nostradamus.Client
             var command = new Command(actorId, ++maxCommandSeq, Scene.Time, Scene.DeltaTime, commandArgs);
 
             if (commandFrame == null)
-                commandFrame = new CommandFrame(clientId);
+                commandFrame = new CommandFrame(SceneDesc.ClientId);
 
             commandFrame.Commands.Add(command);
         }
 
-        public void Simulate(int deltaTime)
+        public override void Simulate()
         {
             if (fullSyncFrame != null)
                 ApplyFullSync();
@@ -57,9 +48,9 @@ namespace Nostradamus.Client
             if (deltaSyncFrames.Count > 0)
                 ApplyDeltaSync();
 
-            UpdateScene(commandFrame != null ? commandFrame.Commands : null, Time, deltaTime, false);
+            UpdateScene(commandFrame != null ? commandFrame.Commands : null, Time, SceneDesc.SimulationDeltaTime, false);
 
-            Time += deltaTime;
+            base.Simulate();
         }
 
         private void ApplyFullSync()
@@ -90,7 +81,7 @@ namespace Nostradamus.Client
                 UpdateAuthoritativeTimeline(frame);
 
                 int commandSeq;
-                if (frame.LastCommandSeqs.TryGetValue(clientId, out commandSeq))
+                if (frame.LastCommandSeqs.TryGetValue(SceneDesc.ClientId, out commandSeq))
                     lastCommandSeq = commandSeq;
             }
 
@@ -167,7 +158,7 @@ namespace Nostradamus.Client
             else
                 commands = null;
 
-            var deltaTime = reconciliationDeltaTime;
+            var deltaTime = SceneDesc.ReconciliationDeltaTime;
             for (; lastCommandTime < Time; lastCommandTime += deltaTime)
             {
                 if (lastCommandTime + deltaTime > Time)
@@ -230,11 +221,6 @@ namespace Nostradamus.Client
             commandFrame = null;
 
             return frame;
-        }
-
-        public ClientId ClientId
-        {
-            get { return clientId; }
         }
 
         private IEnumerable<ClientActorContext> ActorContexts
