@@ -62,7 +62,7 @@ namespace Nostradamus.Client
 
             foreach (var snapshot in fullSyncFrame.Snapshots)
             {
-                Scene.CreateActorContext(snapshot.ActorId, snapshot.Args);
+                Scene.CreateActor(snapshot.ActorId, snapshot.Args);
             }
 
             fullSyncFrame = null;
@@ -79,7 +79,7 @@ namespace Nostradamus.Client
                 var frame = deltaSyncFrames.Dequeue();
                 lastFrameTime = frame.Time + frame.DeltaTime;
 
-                UpdateAuthoritativeTimeline(frame);
+                UpdateAuthoritativeTimelines(frame);
 
                 int commandSeq;
                 if (frame.LastCommandSeqs.TryGetValue(SceneDesc.ClientId, out commandSeq))
@@ -100,7 +100,7 @@ namespace Nostradamus.Client
             }
         }
 
-        private void UpdateAuthoritativeTimeline(DeltaSyncFrame frame)
+        private void UpdateAuthoritativeTimelines(DeltaSyncFrame frame)
         {
             Scene.Time = frame.Time;
             Scene.DeltaTime = frame.DeltaTime;
@@ -111,14 +111,15 @@ namespace Nostradamus.Client
 
             foreach (var events in eventsByActorId)
             {
-                var actorContext = Scene.GetActorContext(events.Key) as ClientActorContext;
-                if (actorContext == null)
+                var context = Scene.GetActorContext(events.Key);
+                if (context == null)
                 {
                     logger.Warn("Cannot find actor '{0}'", events.Key);
                     continue;
                 }
 
-                actorContext.CreateAuthoritativeTimepoint(events);
+                ((ClientActorContext)context).ApplyAuthoritativeEvents(from e in events
+                                                                       select e.Args);
             }
 
             logger.Debug("Update authoritative timeline to {0} / {1}", frame.Time, frame.DeltaTime);

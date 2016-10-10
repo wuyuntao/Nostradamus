@@ -54,13 +54,6 @@ namespace Nostradamus
             return context;
         }
 
-        internal ActorContext CreateActorContext(ActorId actorId, ISnapshotArgs snapshot)
-        {
-            var actor = CreateActor(actorId, snapshot);
-
-            return actor.Context;
-        }
-
         internal ActorContext GetActorContext(ActorId actorId)
         {
             ActorContext actor;
@@ -68,7 +61,7 @@ namespace Nostradamus
             return actor;
         }
 
-        protected abstract Actor CreateActor(ActorId actorId, ISnapshotArgs snapshot);
+        protected internal abstract Actor CreateActor(ActorId actorId, ISnapshotArgs snapshot);
 
         internal void Update(int time, int deltaTime)
         {

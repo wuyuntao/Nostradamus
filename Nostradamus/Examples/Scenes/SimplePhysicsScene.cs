@@ -41,7 +41,7 @@ namespace Nostradamus.Examples
             };
         }
 
-        protected override Actor CreateActor(ActorId actorId, ISnapshotArgs snapshot)
+        protected internal override Actor CreateActor(ActorId actorId, ISnapshotArgs snapshot)
         {
             switch (actorId.Value)
             {

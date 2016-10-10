@@ -12,7 +12,7 @@ namespace Nostradamus.Examples
             character = new SimpleCharacter(this, new ActorId(1), new ClientId(1), new CharacterSnapshot());
         }
 
-        protected override Actor CreateActor(ActorId actorId, ISnapshotArgs snapshot)
+        protected internal override Actor CreateActor(ActorId actorId, ISnapshotArgs snapshot)
         {
             if (actorId.Value == 1)
                 return new SimpleCharacter(this, new ActorId(1), new ClientId(1), new CharacterSnapshot());

@@ -11,12 +11,28 @@ namespace Nostradamus.Client
 
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
+        private Timeline authoritativeTimeline;
         private Timeline predictiveTimeline;
         private float predictivePriority;
 
         public ClientActorContext(Actor actor, ISnapshotArgs snapshot)
             : base(actor, snapshot)
-        { }
+        {
+            authoritativeTimeline = new Timeline();
+            authoritativeTimeline.AddPoint(actor.Scene.Time, snapshot);
+        }
+
+        internal void ApplyAuthoritativeEvents(IEnumerable<IEventArgs> events)
+        {
+            ActorSnapshot = authoritativeTimeline.InterpolatePoint(Actor.Scene.Time).Snapshot;
+
+            foreach (var e in events)
+            {
+                ApplyEvent(e);
+            }
+
+            authoritativeTimeline.AddPoint(Actor.Scene.Time + Actor.Scene.DeltaTime, Actor.Snapshot);
+        }
 
         public override ISnapshotArgs InterpolateSnapshot(int time)
         {
@@ -28,22 +44,6 @@ namespace Nostradamus.Client
             }
 
             return base.InterpolateSnapshot(time);
-        }
-
-        public void CreateAuthoritativeTimepoint(IEnumerable<Event> events)
-        {
-            var currentSnapshot = Actor.Snapshot;
-
-            ActorSnapshot = Timeline.Last.Snapshot.Clone();
-
-            foreach (var e in events)
-            {
-                Actor.ApplyEvent(e.Args);
-            }
-
-            Timeline.AddPoint(Actor.Scene.Time + Actor.Scene.DeltaTime, Actor.Snapshot);
-
-            ActorSnapshot = currentSnapshot;
         }
 
         public bool IsSynchronized(int authoritativeTimelienTime, int predictiveTimelineTime)
