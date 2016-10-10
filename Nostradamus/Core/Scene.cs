@@ -68,6 +68,8 @@ namespace Nostradamus
             return actor;
         }
 
+        protected abstract Actor CreateActor(ActorId actorId, ISnapshotArgs snapshot);
+
         internal void Update(int time, int deltaTime)
         {
             Time = time;
@@ -79,9 +81,7 @@ namespace Nostradamus
             OnUpdate();
         }
 
-        protected abstract Actor CreateActor(ActorId actorId, ISnapshotArgs snapshot);
-
-        protected internal virtual void OnUpdate()
+        protected virtual void OnUpdate()
         { }
 
         public SceneDesc Desc

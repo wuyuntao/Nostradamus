@@ -6,17 +6,18 @@ namespace Nostradamus.Physics
     public abstract class RigidBodyActor : Actor
     {
         private readonly PhysicsScene scene;
-        private RigidBody rigidBody;
+        private readonly RigidBody rigidBody;
 
-        protected RigidBodyActor(PhysicsScene scene, ActorId id, ClientId ownerId, RigidBodyDesc parameters, RigidBodySnapshot snapshot)
+        protected RigidBodyActor(PhysicsScene scene, ActorId id, ClientId ownerId, RigidBodyActorDesc parameters, RigidBodySnapshot snapshot)
             : base(scene, id, ownerId, snapshot)
         {
             this.scene = scene;
 
-            InitializeRigidBody(parameters);
+            rigidBody = CreateRigidBody(parameters);
+            scene.World.AddRigidBody(rigidBody);
         }
 
-        private void InitializeRigidBody(RigidBodyDesc desc)
+        private RigidBody CreateRigidBody(RigidBodyActorDesc desc)
         {
             var localInertia = Vector3.Zero;
             if (!desc.IsKinematic)
@@ -26,32 +27,31 @@ namespace Nostradamus.Physics
 
             using (var rbInfo = new RigidBodyConstructionInfo(desc.Mass, motionState, desc.Shape, localInertia))
             {
-                rigidBody = new RigidBody(rbInfo);
-                rigidBody.UserObject = this;
+                var rb = new RigidBody(rbInfo);
+                rb.UserObject = this;
 
                 if (desc.IsKinematic)
-                    rigidBody.CollisionFlags |= CollisionFlags.KinematicObject;
+                    rb.CollisionFlags |= CollisionFlags.KinematicObject;
 
-                scene.World.AddRigidBody(rigidBody);
+                return rb;
             }
         }
 
         protected override void DisposeManaged()
         {
             scene.World.RemoveRigidBody(rigidBody);
-
-            SafeDispose(ref rigidBody);
+            rigidBody.Dispose();
 
             base.DisposeManaged();
         }
 
-        protected override ISnapshotArgs OnEventApplied(IEventArgs @event)
+        protected internal override ISnapshotArgs OnEventApplied(ISnapshotArgs snapshot, IEventArgs @event)
         {
             if (@event is RigidBodyMovedEvent)
             {
                 var e = (RigidBodyMovedEvent)@event;
 
-                var s = (RigidBodySnapshot)Snapshot.Clone();
+                var s = (RigidBodySnapshot)snapshot.Clone();
 
                 s.Position = e.Position;
                 s.Rotation = e.Rotation;

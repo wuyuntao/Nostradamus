@@ -13,9 +13,9 @@ namespace Nostradamus.Examples
                     CreateRigidBodySnapshot(initialPosition))
         { }
 
-        private static RigidBodyDesc CreateRigidBodyDesc(Vector3 initialPosition)
+        private static RigidBodyActorDesc CreateRigidBodyDesc(Vector3 initialPosition)
         {
-            return new RigidBodyDesc()
+            return new RigidBodyActorDesc()
             {
                 Mass = 1,
                 Shape = new BoxShape(1),

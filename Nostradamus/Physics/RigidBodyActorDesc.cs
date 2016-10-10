@@ -3,7 +3,7 @@ using BulletSharp.Math;
 
 namespace Nostradamus.Physics
 {
-	public sealed class RigidBodyDesc
+	public sealed class RigidBodyActorDesc
 	{
 		public float Mass;
 

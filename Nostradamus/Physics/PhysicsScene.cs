@@ -53,7 +53,7 @@ namespace Nostradamus.Physics
             }
         }
 
-        protected internal override void OnUpdate()
+        protected override void OnUpdate()
         {
             base.OnUpdate();
 
