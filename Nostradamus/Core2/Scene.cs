@@ -1,49 +1,59 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Nostradamus.Core2
 {
     public abstract class Scene : Actor
     {
-        protected Scene(SceneDesc desc)
-            : base(desc)
-        { }
-
-        protected internal override void ApplyEvent(IEventArgs @event)
+        public Actor GetActor(ActorId id)
         {
-            if (@event is ActorAddedEvent)
-            {
-                var desc = ((ActorAddedEvent)@event).ActorDesc;
-                var actor = CreateActor(desc);
+            var snapshot = (SceneSnapshot)Snapshot;
+            if (!snapshot.Actors.Contains(id))
+                return null;
 
-                var s = (SceneSnapshot)Snapshot.Clone();
-                s.ActiveActors.Add(actor.Desc.Id);
-
-                Snapshot = s;
-            }
-            else if (@event is ActorRemovedEvent)
-            {
-                var id = ((ActorRemovedEvent)@event).ActorId;
-
-                var s = (SceneSnapshot)Snapshot.Clone();
-                s.ActiveActors.Remove(id);
-
-                Snapshot = s;
-            }
-            else
-                base.ApplyEvent(@event);
+            return Context.GetActor(id);
         }
 
-        public Actor GetActor(ActorId actorId)
+        public void AddActor(Actor actor)
         {
-            throw new NotImplementedException();
+            var snapshot = (SceneSnapshot)Snapshot;
+
+            if (!snapshot.Actors.Contains(actor.Desc.Id))
+                snapshot.Actors.Add(actor.Desc.Id);
         }
 
-        protected abstract Actor CreateActor(ActorDesc actorDesc);
+        public void RemoveActor(Actor actor)
+        {
+            var snapshot = (SceneSnapshot)Snapshot;
 
-        public IEnumerable<Actor> Actors { get; }
+            if (snapshot.Actors.Contains(actor.Desc.Id))
+                snapshot.Actors.Remove(actor.Desc.Id);
+        }
+
+        public IEnumerable<Actor> Actors
+        {
+            get
+            {
+                var snapshot = (SceneSnapshot)Snapshot;
+
+                foreach (var id in snapshot.Actors)
+                {
+                    var actor = Context.GetActor(id);
+                    if (actor == null)
+                        throw new InvalidOperationException();      // TODO: Message
+
+                    yield return actor;
+                }
+            }
+        }
+
+        public Simulator Simulator
+        {
+            get { return (Simulator)Context.ActorManager; }
+        }
+        public new SceneDesc Desc
+        {
+            get { return (SceneDesc)base.Desc; }
+        }
     }
 }

@@ -1,22 +1,24 @@
 ﻿using Nostradamus.Utils;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Nostradamus.Core2
 {
     public abstract class Actor : Disposable
     {
+        public ActorContext Context { get; private set; }
+
         public ActorDesc Desc { get; private set; }
 
         public ISnapshotArgs Snapshot { get; protected set; }
 
-        protected Actor(ActorDesc desc)
+        internal Actor()
+        { }
+
+        internal virtual void Initialize(ActorContext context, ActorDesc desc)
         {
-            this.Desc = desc;
-            this.Snapshot = desc.CreateInitialSnapshot();
+            Context = context;
+            Desc = desc;
+            Snapshot = desc.InitSnapshot();
         }
 
         protected internal virtual void RecoverSnapshot(ISnapshotArgs snapshot)

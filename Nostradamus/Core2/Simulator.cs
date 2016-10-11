@@ -1,34 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Nostradamus.Core2
 {
-    public abstract class Simulator
+    public abstract class Simulator : ActorManager
     {
-        public Scene Scene { get; private set; }
+        public PhysicsScene Scene { get; private set; }
 
-        protected Simulator(Scene scene)
+        protected Simulator(PhysicsSceneDesc desc)
         {
-            Scene = scene;
+            Scene = CreateActor<PhysicsScene>(desc);
         }
 
-        public void Update(IEnumerable<Command> commands)
+        protected void Simulate(IEnumerable<Command> commands)
         {
-            foreach (var c in commands)
+            foreach (var command in commands)
             {
-                var actor = Scene.GetActor(c.ActorId);
+                var actor = Scene.GetActor(command.ActorId);
 
-                actor.ReceiveCommand(c.Args);
+                actor.ReceiveCommand(command.Args);
             }
 
-            foreach (var a in Scene.Actors)
+            foreach (var actor in Scene.Actors)
             {
-                a.Update();
+                actor.Update();
             }
         }
 
-        public void Update(IEnumerable<Event> events)
+        protected void ApplyEvents(IEnumerable<Event> events)
         {
             foreach (var e in events)
             {
@@ -38,7 +37,7 @@ namespace Nostradamus.Core2
             }
         }
 
-        public SimulatorSnapshot CreateSnapshot()
+        protected SimulatorSnapshot CreateSnapshot()
         {
             return new SimulatorSnapshot()
             {
@@ -47,102 +46,20 @@ namespace Nostradamus.Core2
             };
         }
 
-        public void RecoverSnapshot(SimulatorSnapshot snapshot)
+        protected void RecoverSnapshot(SimulatorSnapshot snapshot)
         {
-            foreach (var s in snapshot.Actors)
+            Scene.RecoverSnapshot(new SceneSnapshot()
             {
-                //var actor = RecoverActorFromSnapshot(s);
-                throw new NotImplementedException();
-            }
-        }
-    }
+                Actors = new List<ActorId>(from actorSnapshot in snapshot.Actors
+                                           select actorSnapshot.ActorId)
+            });
 
-    public class ClientSimulator : Simulator
-    {
-        Timeline authoritativeTimeline = new Timeline();
-        Timeline predictiveTimeline;
-
-        public ClientSimulator(Scene scene)
-            : base(scene)
-        { }
-
-        public void Update()
-        {
-            var lastFrameTime = 10;
-            ReceiveDeltaSync(lastFrameTime, null);
-            var authoritativeTimepoint = authoritativeTimeline.InterpolatePoint(lastFrameTime);
-
-            var lastCommandTime = 0;
-
-            var predictiveTimepoint = predictiveTimeline.InterpolatePoint(lastCommandTime);
-            if (predictiveTimepoint == null)
-                return;
-
-            if (authoritativeTimepoint.Snapshot.IsApproximate(predictiveTimepoint.Snapshot))
-                return;
-
-            predictiveTimeline = new Timeline();
-            predictiveTimeline.AddPoint(lastCommandTime, authoritativeTimepoint.Snapshot);
-
-            RecoverSnapshot((SimulatorSnapshot)authoritativeTimepoint.Snapshot);
-
-            var clientTime = 1000;
-            var deltaTime = 50;
-            for (var time = lastCommandTime; time < clientTime; time += deltaTime)
+            foreach (var actorSnapshot in snapshot.Actors)
             {
-                var commands = new List<Command>();
+                var actor = GetActor(actorSnapshot.ActorId);
 
-                Update(commands);
-
-                predictiveTimeline.AddPoint(time, CreateSnapshot());
+                actor.RecoverSnapshot(actorSnapshot.Args);
             }
-
-            var newCommands = new List<Command>();
-            Update(newCommands);
-
-            var snapshot = CreateSnapshot();
-            predictiveTimeline.AddPoint(clientTime + deltaTime, snapshot);
-
-            // TODO 差值
-        }
-
-        public SimulatorSnapshot ReceiveFullSync(int time, SimulatorSnapshot snapshot)
-        {
-            authoritativeTimeline.AddPoint(time, snapshot);
-
-            return snapshot;
-        }
-
-        public SimulatorSnapshot ReceiveDeltaSync(int time, IEnumerable<Event> events)
-        {
-            var snapshot = (SimulatorSnapshot)authoritativeTimeline.Last.Snapshot;
-
-            RecoverSnapshot(snapshot);
-
-            Update(events);
-
-            snapshot = CreateSnapshot();
-
-            authoritativeTimeline.AddPoint(time, snapshot);
-
-            return snapshot;
-        }
-
-        public void ReceiveCommands(int time, IEnumerable<Command> commands)
-        {
-            if (predictiveTimeline == null)
-            {
-                predictiveTimeline = new Timeline();
-                predictiveTimeline.AddPoint(time, authoritativeTimeline.InterpolatePoint(time).Snapshot);
-            }
-
-            var snapshot = (SimulatorSnapshot)predictiveTimeline.Last.Snapshot;
-
-            RecoverSnapshot(snapshot);
-
-            Update(commands);
-
-            predictiveTimeline.AddPoint(time, CreateSnapshot());
         }
     }
 }
