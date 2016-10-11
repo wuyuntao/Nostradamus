@@ -105,6 +105,15 @@
     <Compile Include="Client\ClientActorContext.cs" />
     <Compile Include="Client\ClientSceneContext.cs" />
     <Compile Include="Client\CommandFrame.cs" />
+    <Compile Include="Core2\Actor.cs" />
+    <Compile Include="Core2\ActorAddedEvent.cs" />
+    <Compile Include="Core2\ActorDesc.cs" />
+    <Compile Include="Core2\ActorRemovedEvent.cs" />
+    <Compile Include="Core2\Scene.cs" />
+    <Compile Include="Core2\SceneDesc.cs" />
+    <Compile Include="Core2\SceneSnapshot.cs" />
+    <Compile Include="Core2\Simulator.cs" />
+    <Compile Include="Core2\SimulatorSnapshot.cs" />
     <Compile Include="Core\Actor.cs" />
     <Compile Include="Core\ActorContext.cs" />
     <Compile Include="Core\ClientId.cs" />
