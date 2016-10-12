@@ -37,7 +37,7 @@ namespace Nostradamus.Server
 
             var snapshot = CreateSnapshot();
 
-            fullSyncFrame.Snapshots = snapshot.Actors;
+            fullSyncFrame.Snapshot = snapshot;
 
             compensationTimeline.AddPoint(time, snapshot);
         }
@@ -50,6 +50,8 @@ namespace Nostradamus.Server
             {
                 if (command.Time <= time)
                 {
+                    deltaSyncFrame.LastCommandSeqs[command.ClientId] = command.Sequence;
+
                     dequeuedCommands.Add(command);
                     return true;
                 }
@@ -63,6 +65,11 @@ namespace Nostradamus.Server
         private void EnqueueEvent(Actor actor, IEventArgs @event)
         {
             deltaSyncFrame.Events.Add(new Event(actor.Desc.Id, @event));
+        }
+
+        public int Time
+        {
+            get { return time; }
         }
 
         public FullSyncFrame FullSyncFrame

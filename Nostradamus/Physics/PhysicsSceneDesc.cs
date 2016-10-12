@@ -11,8 +11,8 @@ namespace Nostradamus.Physics
 
         public readonly SceneColliderDesc[] Colliders;
 
-        public PhysicsSceneDesc(ActorId id, int simulationDeltaTime, int reconciliationDeltaTime, Vector3 gravity, SceneColliderDesc[] colliders)
-            : base(id, simulationDeltaTime, reconciliationDeltaTime)
+        public PhysicsSceneDesc(ActorId id, int simulationDeltaTime, int reconciliationDeltaTime, int convergenceTime, float convergenceRate, Vector3 gravity, SceneColliderDesc[] colliders)
+            : base(id, simulationDeltaTime, reconciliationDeltaTime, convergenceTime, convergenceRate)
         {
             Gravity = gravity;
             Colliders = colliders;

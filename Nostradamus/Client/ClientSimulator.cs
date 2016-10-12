@@ -1,4 +1,5 @@
-﻿using Nostradamus.Server;
+﻿using NLog;
+using Nostradamus.Server;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,11 +8,16 @@ namespace Nostradamus.Client
 {
     public sealed class ClientSimulator : Simulator
     {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         private ClientId clientId;
         private CommandFrame commandFrame;
+        private CommandFrame nextCommandFrame;
         private Timeline authoritativeTimeline = new Timeline();
+        private int lastCommandSeq;
         private int? lastAcknowledgedCommandSeq;
         private Timeline predictiveTimeline;
+        private int? nextConvergenceTime;
         private Queue<Command> unacknowledgedCommands = new Queue<Command>();
         private int time;
 
@@ -20,27 +26,32 @@ namespace Nostradamus.Client
             this.clientId = clientId;
         }
 
-        public void ReceiveCommand(Command command)
+        public void ReceiveCommand(Actor actor, ICommandArgs commandArgs)
         {
-            if (commandFrame == null)
-                commandFrame = new CommandFrame(clientId);
-            commandFrame.Commands.Add(command);
+            var command = new Command(clientId, actor.Desc.Id, ++lastCommandSeq, time, Scene.Desc.SimulationDeltaTime, commandArgs);
+
+            logger.Debug("ReceiveCommand: {0}", command);
+
+            if (nextCommandFrame == null)
+                nextCommandFrame = new CommandFrame(clientId);
+            nextCommandFrame.Commands.Add(command);
 
             unacknowledgedCommands.Enqueue(command);
-
-            if (predictiveTimeline != null)
-                predictiveTimeline = new Timeline();
         }
 
         public void ReceiveFullSyncFrame(FullSyncFrame frame)
         {
-            var snapshot = new SimulatorSnapshot() { Actors = frame.Snapshots };
+            logger.Debug("ReceiveFullSyncFrame: {0}", frame);
 
-            authoritativeTimeline.AddPoint(frame.Time + frame.DeltaTime, snapshot);
+            authoritativeTimeline.AddPoint(frame.Time + frame.DeltaTime, frame.Snapshot);
         }
 
         public void ReceiveDeltaSyncFrame(DeltaSyncFrame frame)
         {
+            logger.Debug("ReceiveDeltaSyncFrame: {0}", frame);
+
+            var currentSnapshot = CreateSnapshot();
+
             var lastTimepoint = authoritativeTimeline.Last;
 
             if (lastTimepoint.Time != frame.Time)
@@ -57,6 +68,8 @@ namespace Nostradamus.Client
             int lastCommandSeq;
             if (frame.LastCommandSeqs.TryGetValue(clientId, out lastCommandSeq))
                 lastAcknowledgedCommandSeq = lastCommandSeq;
+
+            RecoverSnapshot(currentSnapshot);
         }
 
         public void Simulate()
@@ -64,11 +77,14 @@ namespace Nostradamus.Client
             if (authoritativeTimeline.Last == null)     // Not initialized yet
                 return;
 
+            logger.Debug("Simulate: {0}: {1}, {2}: {3}"
+                    , nameof(time), time
+                    , nameof(nextCommandFrame), nextCommandFrame != null ? nextCommandFrame.Commands.Count : 0);
+
             int lastAcknowledgedCommandTime = -1;       // Dequeue acknowledge commands and get last time that command is predicted
             if (lastAcknowledgedCommandSeq != null)
             {
                 lastAcknowledgedCommandTime = DequeueAcknowledgedCommands();
-                return;
             }
 
             if (lastAcknowledgedCommandTime >= 0)
@@ -79,6 +95,8 @@ namespace Nostradamus.Client
                 if (predictiveTimepoint == null)
                     throw new InvalidOperationException();          // TODO: Message
 
+                var currentSnapshot = predictiveTimeline.Last.Snapshot;
+
                 if (!authoritativeSnapshot.IsApproximate(predictiveTimepoint.Snapshot))        // Rollback and replay
                 {
                     predictiveTimeline = new Timeline();
@@ -86,25 +104,91 @@ namespace Nostradamus.Client
 
                     RecoverSnapshot((SimulatorSnapshot)authoritativeSnapshot);
 
-                    var deltaTime = Scene.Desc.ReconciliationDeltaTime;
+                    // TODO: Use SceneDesc.ReconciliationDeltaTime to optimize replay performance
+                    var deltaTime = Scene.Desc.SimulationDeltaTime;
                     for (var replayTime = lastAcknowledgedCommandTime; replayTime < time; replayTime += deltaTime)
                     {
                         if (replayTime + deltaTime > time)
                             deltaTime = time - replayTime;
 
-                        Simulate(replayTime, deltaTime);
+                        Simulate(from command in unacknowledgedCommands
+                                 where command.Time >= replayTime && command.Time < replayTime + deltaTime
+                                 select command);
 
-                        predictiveTimeline.AddPoint(replayTime, CreateSnapshot());
+                        predictiveTimeline.AddPoint(replayTime + deltaTime, CreateSnapshot());
                     }
                 }
+
+                if (!currentSnapshot.IsApproximate(predictiveTimeline.Last.Snapshot))
+                    logger.Warn("Correction done with possible jitter");
             }
 
-            Simulate(time, Scene.Desc.SimulationDeltaTime);
+            if (nextCommandFrame != null || predictiveTimeline != null)
+            {
+                SimulatorSnapshot snapshot;
+                if (predictiveTimeline != null)
+                {
+                    snapshot = (SimulatorSnapshot)predictiveTimeline.InterpolatePoint(time).Snapshot;
 
-            var snapshot = CreateSnapshot();
-            predictiveTimeline.AddPoint(time + Scene.Desc.SimulationDeltaTime, snapshot);
+                    logger.Debug("RecoverSnapshot from predictive timeline");
+                }
+                else
+                {
+                    snapshot = (SimulatorSnapshot)authoritativeTimeline.InterpolatePoint(time).Snapshot;
+
+                    predictiveTimeline = new Timeline();
+                    predictiveTimeline.AddPoint(time, snapshot);
+
+                    logger.Debug("RecoverSnapshot from authoritative timeline");
+                }
+
+                RecoverSnapshot(snapshot);
+
+                Simulate(nextCommandFrame != null ? nextCommandFrame.Commands : null);
+
+                snapshot = CreateSnapshot();
+
+                if (unacknowledgedCommands.Count > 0)
+                {
+                    predictiveTimeline.AddPoint(time + Scene.Desc.SimulationDeltaTime, snapshot);
+                    nextConvergenceTime = time + Scene.Desc.ConvergenceTime;
+
+                    logger.Debug("Simulate and CreateSnapshot for predictive timeline");
+                }
+                else if (time < nextConvergenceTime)
+                {
+                    var authoritativeSnapshot = authoritativeTimeline.InterpolatePoint(time + Scene.Desc.SimulationDeltaTime).Snapshot;
+
+                    snapshot = (SimulatorSnapshot)((ISnapshotArgs)snapshot).Interpolate(authoritativeSnapshot, Scene.Desc.ConvergenceRate);
+
+                    predictiveTimeline.AddPoint(time + Scene.Desc.SimulationDeltaTime, snapshot);
+
+                    logger.Debug("All commands are acknowledged and convergence predictive timeline");
+                }
+                else
+                {
+                    predictiveTimeline = null;
+
+                    snapshot = (SimulatorSnapshot)authoritativeTimeline.InterpolatePoint(time + Scene.Desc.SimulationDeltaTime).Snapshot;
+
+                    logger.Debug("RecoverSnapshot from authoritative timeline and remove predictive timeline");
+                }
+
+                RecoverSnapshot(snapshot);
+            }
+            else
+            {
+                var snapshot = (SimulatorSnapshot)authoritativeTimeline.InterpolatePoint(time + Scene.Desc.SimulationDeltaTime).Snapshot;
+
+                logger.Debug("RecoverSnapshot from authoritative timeline");
+
+                RecoverSnapshot(snapshot);
+            }
 
             time += Scene.Desc.SimulationDeltaTime;
+
+            commandFrame = nextCommandFrame;
+            nextCommandFrame = null;
 
             lastAcknowledgedCommandSeq = null;
         }
@@ -116,49 +200,13 @@ namespace Nostradamus.Client
                 var command = unacknowledgedCommands.Dequeue();
 
                 if (command.Sequence == lastAcknowledgedCommandSeq)
+                {
+                    logger.Debug("DequeueAcknowledgedCommands: {0}", command);
                     return command.Time + command.DeltaTime;
+                }
             }
 
             throw new InvalidOperationException(string.Format("Cannot find acknowledged command #{0}", lastAcknowledgedCommandSeq));
-        }
-
-        private void Simulate(int time, int deltaTime)
-        {
-            Simulate(from command in unacknowledgedCommands
-                     where command.Time > time && command.Time <= time + deltaTime
-                     select command);
-        }
-
-        public SimulatorSnapshot ReceiveDeltaSync(int time, IEnumerable<Event> events)
-        {
-            var snapshot = (SimulatorSnapshot)authoritativeTimeline.Last.Snapshot;
-
-            RecoverSnapshot(snapshot);
-
-            ApplyEvents(events);
-
-            snapshot = CreateSnapshot();
-
-            authoritativeTimeline.AddPoint(time, snapshot);
-
-            return snapshot;
-        }
-
-        public void ReceiveCommands(int time, IEnumerable<Command> commands)
-        {
-            if (predictiveTimeline == null)
-            {
-                predictiveTimeline = new Timeline();
-                predictiveTimeline.AddPoint(time, authoritativeTimeline.InterpolatePoint(time).Snapshot);
-            }
-
-            var snapshot = (SimulatorSnapshot)predictiveTimeline.Last.Snapshot;
-
-            RecoverSnapshot(snapshot);
-
-            Simulate(commands);
-
-            predictiveTimeline.AddPoint(time, CreateSnapshot());
         }
 
         public ClientId ClientId
@@ -169,6 +217,11 @@ namespace Nostradamus.Client
         public CommandFrame CommandFrame
         {
             get { return commandFrame; }
+        }
+
+        public int Time
+        {
+            get { return time; }
         }
     }
 }

@@ -8,48 +8,64 @@ namespace Nostradamus
 
     public abstract class ActorManager : Disposable
     {
+        private delegate Actor ActorFactoryMethod(ActorDesc desc);
+
         public event EventAppliedEventHandler EventApplied;
 
-        protected Dictionary<ActorId, ActorContext> Actors { get; private set; }
+        private Dictionary<Type, ActorFactoryMethod> actorFactories = new Dictionary<Type, ActorFactoryMethod>();
+        private Dictionary<ActorId, ActorContext> actors = new Dictionary<ActorId, ActorContext>();
 
         protected ActorManager()
-        {
-            Actors = new Dictionary<ActorId, ActorContext>();
-        }
+        { }
 
         protected override void DisposeManaged()
         {
-            foreach (var context in Actors.Values)
+            foreach (var context in actors.Values)
                 context.Actor.Dispose();
 
-            Actors.Clear();
+            actors.Clear();
 
             base.DisposeManaged();
+        }
+
+        public void RegisterActorFactory<TActorDesc, TActor>(Func<TActorDesc, TActor> factory)
+            where TActorDesc : ActorDesc
+            where TActor : Actor
+        {
+            if (factory == null)
+                throw new ArgumentNullException(nameof(factory));
+
+            var type = typeof(TActorDesc);
+            var factoryMethod = new ActorFactoryMethod(desc => factory((TActorDesc)desc));
+
+            actorFactories.Add(type, factoryMethod);
+        }
+
+        public Actor CreateActor(ActorDesc desc)
+        {
+            ActorFactoryMethod factory;
+            if (!actorFactories.TryGetValue(desc.GetType(), out factory))
+                throw new InvalidOperationException();      // TODO: Message
+
+            var actor = factory(desc);
+            var context = new ActorContext(this, actor);
+            actor.Initialize(context, desc);
+
+            actors.Add(desc.Id, context);
+
+            return actor;
         }
 
         public TActor CreateActor<TActor>(ActorDesc desc)
             where TActor : Actor, new()
         {
-            var actor = new TActor();
-            var context = new ActorContext(this, actor);
-            actor.Initialize(context, desc);
-
-            Actors.Add(desc.Id, context);
-
-            return actor;
-        }
-
-        public ActorContext GetActorContext(ActorId id)
-        {
-            ActorContext context;
-            Actors.TryGetValue(id, out context);
-            return context;
+            return (TActor)CreateActor(desc);
         }
 
         public Actor GetActor(ActorId id)
         {
             ActorContext context;
-            if (Actors.TryGetValue(id, out context))
+            if (actors.TryGetValue(id, out context))
                 return context.Actor;
             else
                 return null;

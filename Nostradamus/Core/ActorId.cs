@@ -49,7 +49,7 @@ namespace Nostradamus
 
         #region IComparable
 
-        int IComparable<ActorId>.CompareTo(ActorId other)
+        public int CompareTo(ActorId other)
         {
             return Value.CompareTo(other.Value);
         }

@@ -8,13 +8,12 @@ namespace Nostradamus.Server
 
 		public int DeltaTime { get; set; }
 
-		public List<Snapshot> Snapshots { get; set; }
+		public SimulatorSnapshot Snapshot { get; set; }
 
 		public FullSyncFrame(int time, int deltaTime)
 		{
 			Time = time;
 			DeltaTime = deltaTime;
-            Snapshots = new List<Snapshot>();
 		}
 	}
 }

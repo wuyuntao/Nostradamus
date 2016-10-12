@@ -12,7 +12,7 @@ namespace Nostradamus
         private ActorDesc desc;
         private ISnapshotArgs snapshot;
 
-        internal Actor()
+        public Actor()
         { }
 
         internal virtual void Initialize(ActorContext context, ActorDesc desc)

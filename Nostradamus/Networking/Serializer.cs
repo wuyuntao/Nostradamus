@@ -24,14 +24,14 @@ namespace Nostradamus.Networking
 
         public static void Initialize()
         {
-            AddSerializer<MessageEnvelope>(Serialize_MessageEnvelope, Deserialize_MessageEnvelope);
-            AddSerializer<CommandFrame>(Serialize_CommandFrame, Deserialize_CommandFrame);
-            AddSerializer<FullSyncFrame>(Serialize_FullSyncFrame, Deserialize_FullSyncFrame);
-            AddSerializer<DeltaSyncFrame>(Serialize_DeltaSyncFrame, Deserialize_DeltaSyncFrame);
-            AddSerializer<RigidBodyMovedEvent>(Serialize_RigidBodyMovedEvent, Deserialize_RigidBodyMovedEvent);
-            AddSerializer<RigidBodySnapshot>(Serialize_RigidBodySnapshot, Deserialize_RigidBodySnapshot);
+            //AddSerializer<MessageEnvelope>(Serialize_MessageEnvelope, Deserialize_MessageEnvelope);
+            //AddSerializer<CommandFrame>(Serialize_CommandFrame, Deserialize_CommandFrame);
+            //AddSerializer<FullSyncFrame>(Serialize_FullSyncFrame, Deserialize_FullSyncFrame);
+            //AddSerializer<DeltaSyncFrame>(Serialize_DeltaSyncFrame, Deserialize_DeltaSyncFrame);
+            //AddSerializer<RigidBodyMovedEvent>(Serialize_RigidBodyMovedEvent, Deserialize_RigidBodyMovedEvent);
+            //AddSerializer<RigidBodySnapshot>(Serialize_RigidBodySnapshot, Deserialize_RigidBodySnapshot);
 
-            AddSerializer<Login>(Serialize_Login, Deserialize_Login);
+            //AddSerializer<Login>(Serialize_Login, Deserialize_Login);
 
             //AddSerializer<MoveBallCommand>(Serialize_MoveBallCommand, Deserialize_MoveBallCommand);
             //AddSerializer<MoveCharacterCommand>(Serialize_MoveCharacterCommand, Deserialize_MoveCharacterCommand);
@@ -81,6 +81,7 @@ namespace Nostradamus.Networking
 
         #endregion
 
+        /*
         #region MessageEnvelope
 
         private static byte[] Serialize_MessageEnvelope(MessageEnvelope envelope)
@@ -390,7 +391,6 @@ namespace Nostradamus.Networking
 
         #endregion
 
-        /*
         #region MoveBallCommand
 
         private static byte[] Serialize_MoveBallCommand(MoveBallCommand command)

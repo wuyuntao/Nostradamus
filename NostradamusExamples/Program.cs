@@ -13,9 +13,8 @@ namespace Nostradamus.Examples
             var t1 = new ServerSimulatorTest();
             t1.TestExampleScene();
 
-            //var t2 = new ClientSimulatorTest();
-            //t2.TestSimpleScene();
-            //t2.TestSimpleSceneWithServer();
+            var t2 = new ClientSimulatorTest();
+            t2.TestExampleScene();
 
             //var t3 = new PhysicsSceneTest();
             //t3.TestSimplePhysicsScene();
@@ -33,7 +32,7 @@ namespace Nostradamus.Examples
 
             //StepByStepExample.Run();
 
-            Console.WriteLine("Press any key to stop...");
+            Console.WriteLine("Press ENTER to exit...");
             Console.ReadLine();
         }
     }

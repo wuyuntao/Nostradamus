@@ -12,15 +12,15 @@ namespace Nostradamus
         bool IsApproximate(ISnapshotArgs snapshot);
     }
 
-    public sealed class Snapshot
+    public sealed class ActorSnapshot
     {
-        public readonly ActorId ActorId;
+        public readonly ActorDesc Desc;
 
         public readonly ISnapshotArgs Args;
 
-        public Snapshot(ActorId actorId, ISnapshotArgs args)
+        public ActorSnapshot(ActorDesc actorDesc, ISnapshotArgs args)
         {
-            ActorId = actorId;
+            Desc = actorDesc;
             Args = args;
         }
     }

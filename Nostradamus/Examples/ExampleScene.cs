@@ -8,7 +8,7 @@ namespace Nostradamus.Examples
     public class ExampleSceneDesc : PhysicsSceneDesc
     {
         public ExampleSceneDesc(int simulationDeltaTime, int reconciliationDeltaTime)
-            : base(new ActorId(1), simulationDeltaTime, reconciliationDeltaTime, DefaultGravity, CreateColliders())
+            : base(new ActorId(1), simulationDeltaTime, reconciliationDeltaTime, 3000, 0.1f, DefaultGravity, CreateColliders())
         { }
 
         private static SceneColliderDesc[] CreateColliders()
@@ -25,8 +25,8 @@ namespace Nostradamus.Examples
 
     public class ExampleScene : PhysicsScene
     {
-        private Ball ball;
         private Cube cube;
+        private Ball ball;
 
         protected internal override void OnUpdate()
         {
@@ -45,13 +45,13 @@ namespace Nostradamus.Examples
                 var s = (SceneSnapshot)Snapshot.Clone();
 
                 var cubeId = new ActorId(2);
-                var cubeDesc = new CubeDesc(cubeId, new Vector3(3.1f, 1.1f, 3.1f));
-                cube = Context.CreateActor<Cube>(cubeDesc);
+                var cubeDesc = new CubeDesc(cubeId, new Vector3(1.1f, 1.1f, 1.1f));
+                var cube = Context.CreateActor<Cube>(cubeDesc);
                 AddActor(s, cube);
 
                 var ballId = new ActorId(3);
-                var ballDesc = new BallDesc(ballId, new Vector3(-3.1f, 2.6f, -3.1f));
-                ball = Context.CreateActor<Ball>(ballDesc);
+                var ballDesc = new BallDesc(ballId, new Vector3(-2.6f, 2.6f, -2.6f));
+                var ball = Context.CreateActor<Ball>(ballDesc);
                 AddActor(s, ball);
 
                 Snapshot = s;
@@ -60,14 +60,26 @@ namespace Nostradamus.Examples
                 base.OnEventApplied(@event);
         }
 
-        public Ball Ball
-        {
-            get { return ball; }
-        }
-
         public Cube Cube
         {
-            get { return cube; }
+            get
+            {
+                if (cube == null)
+                    cube = Simulator.GetActor(new ActorId(2)) as Cube;
+
+                return cube;
+            }
+        }
+
+        public Ball Ball
+        {
+            get
+            {
+                if (ball == null)
+                    ball = Simulator.GetActor(new ActorId(3)) as Ball;
+
+                return ball;
+            }
         }
     }
 }

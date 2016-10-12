@@ -1,297 +1,398 @@
 ﻿using Nostradamus.Client;
 using Nostradamus.Examples;
+using Nostradamus.Physics;
 using Nostradamus.Server;
 using NUnit.Framework;
 
 namespace Nostradamus.Tests
 {
-    /*
     public class ClientSimulatorTest
     {
-        const float FloatAppromiateThreshold = 0.0001f;
-
         [Test]
-        public void TestSimpleScene()
+        public void TestExampleScene()
         {
+            // Server tick freq: 20Hz. Client tick freq: 50Hz. Client latency: 40ms
+
+            var serverSimulator = new ServerSimulator();
+            RegisterActorFactories(serverSimulator);
+            var serverSceneDesc = new ExampleSceneDesc(50, 50);
+            var serverScene = serverSimulator.CreateScene<ExampleScene>(serverSceneDesc);
+
             var clientId = new ClientId(1);
-            var sceneDesc = new SceneDesc()
-            {
-                Mode = SceneMode.Client,
-                ClientId = clientId,
-                SimulationDeltaTime = 20,
-                ReconciliationDeltaTime = 50
-            };
-            var scene = new SimpleScene(sceneDesc);
-            var sceneContext = (ClientSceneContext)scene.Context;
+            var clientSimulator = new ClientSimulator(clientId);
+            RegisterActorFactories(clientSimulator);
+            var clientSceneDesc = new ExampleSceneDesc(20, 50);
+            var clientScene = clientSimulator.CreateScene<ExampleScene>(clientSceneDesc);
 
-            // Time: 0 - 20
-            var serverFrame0 = new DeltaSyncFrame(0, 50);
-            sceneContext.ReceiveDeltaSyncFrame(serverFrame0);
+            // +++ Server: 0. Update #1 sent
+            Server_Update0(serverSimulator, serverScene);
+            var fullSyncFrame0 = serverSimulator.FullSyncFrame;
 
-            sceneContext.Simulate();
-            Assert.AreEqual(0, scene.Time);
-            Assert.AreEqual(20, scene.DeltaTime);
+            // --- Client: 40 / 0. Update #1 received
+            clientSimulator.ReceiveFullSyncFrame(fullSyncFrame0);
+            Client_Update0(clientSimulator, clientScene);
 
-            var frame0 = sceneContext.FetchCommandFrame();
-            Assert.AreEqual(null, frame0);
+            // +++ Server: 50 / 10. Update #2 sent
+            Server_Update50(serverSimulator, serverScene);
+            var deltaSyncFrame50 = serverSimulator.DeltaSyncFrame;
 
-            var snapshot20 = (CharacterSnapshot)scene.Character.Snapshot;
-            Assert.AreEqual(0f, snapshot20.PositionX);
-            Assert.AreEqual(0f, snapshot20.PositionY);
+            // --- Client: 60 / 20. Update #2
+            Client_Update20(clientSimulator, clientScene);
 
-            // Time : 20 - 40
-            var command1 = new MoveCharacterCommand() { DeltaX = 1, DeltaY = 1 };
-            sceneContext.ReceiveCommand(scene.Character.Id, command1);
+            // --- Client: 80 / 40. Updated #3. Move command #1 sent
+            Client_Update40_Command1(clientSimulator, clientScene);
+            var commandFrame40 = clientSimulator.CommandFrame;
 
-            sceneContext.Simulate();
-            Assert.AreEqual(20, scene.Time);
-            Assert.AreEqual(20, scene.DeltaTime);
+            // --- Client: 90 / 50. Update #2 received
+            clientSimulator.ReceiveDeltaSyncFrame(deltaSyncFrame50);
 
-            var frame20 = sceneContext.FetchCommandFrame();
-            Assert.AreEqual(1, frame20.Commands.Count);
+            // +++ Server: 100 / 60. Update #3 sent
+            Server_Update100(serverSimulator, serverScene);
+            var deltaSyncFrame100 = serverSimulator.DeltaSyncFrame;
 
-            var snapshot40 = (CharacterSnapshot)scene.Character.Snapshot;
-            Assert.That(snapshot40.PositionX, Is.EqualTo(0.02f).Within(FloatAppromiateThreshold));
-            Assert.That(snapshot40.PositionY, Is.EqualTo(0.02f).Within(FloatAppromiateThreshold));
+            // --- Client: 100 / 60. Updated #3. Move command #2 sent.
+            Client_Update60_Command2(clientSimulator, clientScene);
+            var commandFrame60 = clientSimulator.CommandFrame;
 
-            // Time: 40 - 60
-            var serverFrame50 = new DeltaSyncFrame(50, 50);
-            var eventArgs = new CharacterMovedEvent() { PositionX = 0.05f, PositionY = 0.05f };
-            var @event = new Event(scene.Character.Id, eventArgs);
-            serverFrame50.Events.Add(@event);
-            serverFrame50.LastCommandSeqs.Add(clientId, 1);
-            sceneContext.ReceiveDeltaSyncFrame(serverFrame50);
+            // +++ Server: 120 / 80. Move command #1 received
+            serverSimulator.ReceiveCommandFrame(commandFrame40);
 
-            var command2 = new MoveCharacterCommand() { DeltaX = 1, DeltaY = 1 };
-            sceneContext.ReceiveCommand(scene.Character.Id, command2);
+            // --- Client: 120 / 80. Updated #4. Move command #3 sent.
+            Client_Update80_Command3(clientSimulator, clientScene);
+            var commandFrame80 = clientSimulator.CommandFrame;
 
-            sceneContext.Simulate();
-            Assert.AreEqual(40, scene.Time);
-            Assert.AreEqual(20, scene.DeltaTime);
+            // +++ Server: 140 / 100. Move command #2 received
+            serverSimulator.ReceiveCommandFrame(commandFrame60);
 
-            var frame40 = sceneContext.FetchCommandFrame();
-            Assert.AreEqual(1, frame40.Commands.Count);
+            // --- Client: 140 / 100. Update #3 received. Updated #5. Move command #4 sent.
+            clientSimulator.ReceiveDeltaSyncFrame(deltaSyncFrame100);
 
-            var snapshot60 = (CharacterSnapshot)scene.Character.Snapshot;
-            Assert.That(snapshot60.PositionX, Is.EqualTo(0.07f).Within(FloatAppromiateThreshold));
-            Assert.That(snapshot60.PositionY, Is.EqualTo(0.07f).Within(FloatAppromiateThreshold));
+            Client_Update100_Command4(clientSimulator, clientScene);
+            var commandFrame100 = clientSimulator.CommandFrame;
+
+            // +++ Server: 150 / 110. Update #4 sent
+            Server_Update150(serverSimulator, serverScene, clientId);
+            var deltaSyncFrame150 = serverSimulator.DeltaSyncFrame;
+
+            // +++ Server: 160 / 120. Move command #3 received
+            serverSimulator.ReceiveCommandFrame(commandFrame80);
+
+            // --- Client: 160 / 120. Updated #4. Move command #5 sent.
+            clientSimulator.ReceiveCommand(clientScene.Ball, new KickBallCommand(0.5f, 0, 1f));
+            clientSimulator.Simulate();
+            var commandFrame120 = clientSimulator.CommandFrame;
+
+            // +++ Server: 180 / 140. Move command #3 received
+            serverSimulator.ReceiveCommandFrame(commandFrame100);
+
+            // --- Client: 180 / 140. Updated #4. Move command #6 sent.
+            Client_Update140_Command6(clientSimulator, clientScene);
+            var commandFrame140 = clientSimulator.CommandFrame;
+
+            // --- Client: 190 / 150. Update #4 received
+            clientSimulator.ReceiveDeltaSyncFrame(deltaSyncFrame150);
+
+            // +++ Server: 200 / 160. Move command #4 received. Update
+            serverSimulator.ReceiveCommandFrame(commandFrame120);
+            Server_Update200(serverSimulator, serverScene, clientId);
+            var deltaSyncFrame200 = serverSimulator.DeltaSyncFrame;
+
+            // --- Client: 200 / 160. Update #8
+            Client_Update160_Command7(clientSimulator, clientScene);
+            var commandFrame160 = clientSimulator.CommandFrame;
+
+            // +++ Server: 220 / 180. Move command #5 received
+            serverSimulator.ReceiveCommandFrame(commandFrame140);
+
+            // +++ Server: 240 / 200. Move command #6 received
+            serverSimulator.ReceiveCommandFrame(commandFrame160);
+
+            // --- Client: 240 / 200. Update #4 received
+            clientSimulator.ReceiveDeltaSyncFrame(deltaSyncFrame200);
         }
 
-        [Test]
-        public void TestSimpleSceneWithServer()
+        private static void RegisterActorFactories(Simulator simulator)
         {
-            // Server tick freq: 20Hz. Client tick freq: 50Hz. Client latency: 20ms
+            simulator.RegisterActorFactory<ExampleSceneDesc, ExampleScene>(desc => new ExampleScene());
+            simulator.RegisterActorFactory<BallDesc, Ball>(desc => new Ball());
+            simulator.RegisterActorFactory<CubeDesc, Cube>(desc => new Cube());
+        }
 
-            var serverSceneDesc = new SceneDesc()
-            {
-                Mode = SceneMode.Server,
-                SimulationDeltaTime = 50,
-            };
-            var serverScene = new SimpleScene(serverSceneDesc);
-            var serverSceneContext = (ServerSceneContext)serverScene.Context;
+        private static void Server_Update0(ServerSimulator simulator, ExampleScene scene)
+        {
+            simulator.Simulate();
+            Assert.AreEqual(50, simulator.Time);
 
-            var clientId = new ClientId(1);
-            var clientSceneDesc = new SceneDesc()
-            {
-                Mode = SceneMode.Client,
-                SimulationDeltaTime = 20,
-                ReconciliationDeltaTime = 50
-            };
-            var clientScene = new SimpleScene(clientSceneDesc);
-            var clientSceneContext = (ClientSceneContext)clientScene.Context;
+            var frame = simulator.DeltaSyncFrame;
+            Assert.AreEqual(0, frame.Time);
+            Assert.AreEqual(50, frame.DeltaTime);
+            Assert.AreEqual(3, frame.Events.Count);
 
-            // +++ Server: 0. Updated #1
-            serverSceneContext.Simulate();
-            var serverFrame0 = serverSceneContext.FetchDeltaSyncFrame();
-            Assert.AreEqual(0, serverScene.Time);
-            Assert.AreEqual(50, serverScene.DeltaTime);
-            Assert.AreEqual(0, serverFrame0.Time);
-            Assert.AreEqual(50, serverFrame0.DeltaTime);
-            Assert.AreEqual(0, serverFrame0.Events.Count);
+            var ball = (RigidBodySnapshot)scene.Ball.Snapshot;
+            AssertHelper.AreApproximate(-2.6f, ball.Position.X);
+            AssertHelper.AreApproximate(2.597275f, ball.Position.Y);
+            AssertHelper.AreApproximate(-2.6f, ball.Position.Z);
 
-            var serverSnapshot0 = (CharacterSnapshot)serverScene.Character.Snapshot;
-            Assert.AreEqual(0, serverSnapshot0.PositionX);
-            Assert.AreEqual(0, serverSnapshot0.PositionY);
+            var cube = (RigidBodySnapshot)scene.Cube.Snapshot;
+            AssertHelper.AreApproximate(1.1f, cube.Position.X);
+            AssertHelper.AreApproximate(1.09727502f, cube.Position.Y);
+            AssertHelper.AreApproximate(1.1f, cube.Position.Z);
+        }
 
-            // --- Client: 20 / 0. Update #1 received.
-            clientSceneContext.ReceiveDeltaSyncFrame(serverFrame0);
+        private static void Server_Update50(ServerSimulator simulator, ExampleScene scene)
+        {
+            simulator.Simulate();
+            Assert.AreEqual(100, simulator.Time);
 
-            clientSceneContext.Simulate();
-            Assert.AreEqual(0, clientScene.Time);
-            Assert.AreEqual(20, clientScene.DeltaTime);
+            var frame = simulator.DeltaSyncFrame;
+            Assert.AreEqual(50, frame.Time);
+            Assert.AreEqual(50, frame.DeltaTime);
+            Assert.AreEqual(2, frame.Events.Count);
 
-            var clientFrame0 = clientSceneContext.FetchCommandFrame();
-            Assert.AreEqual(null, clientFrame0);
+            var ball = (RigidBodySnapshot)scene.Ball.Snapshot;
+            AssertHelper.AreApproximate(-2.6f, ball.Position.X);
+            AssertHelper.AreApproximate(2.59182501f, ball.Position.Y);
+            AssertHelper.AreApproximate(-2.6f, ball.Position.Z);
 
-            var clientSnapshot0 = (CharacterSnapshot)clientScene.Character.Snapshot;
-            Assert.AreEqual(0, clientSnapshot0.PositionX);
-            Assert.AreEqual(0, clientSnapshot0.PositionY);
+            var cube = (RigidBodySnapshot)scene.Cube.Snapshot;
+            AssertHelper.AreApproximate(1.1f, cube.Position.X);
+            AssertHelper.AreApproximate(1.09182501f, cube.Position.Y);
+            AssertHelper.AreApproximate(1.1f, cube.Position.Z);
+        }
 
-            // --- Client: 40 / 20. Updated #2. Move command #1 sent
-            var clientCommand1 = new MoveCharacterCommand() { DeltaX = 1, DeltaY = 1 };
-            clientSceneContext.ReceiveCommand(clientScene.Character.Id, clientCommand1);
+        private static void Server_Update100(ServerSimulator simulator, ExampleScene scene)
+        {
+            simulator.Simulate();
+            Assert.AreEqual(150, simulator.Time);
 
-            clientSceneContext.Simulate();
-            var clientFrame20 = clientSceneContext.FetchCommandFrame();
-            Assert.AreEqual(20, clientScene.Time);
-            Assert.AreEqual(20, clientScene.DeltaTime);
-            Assert.AreEqual(1, clientFrame20.Commands.Count);
+            var frame = simulator.DeltaSyncFrame;
+            Assert.AreEqual(100, frame.Time);
+            Assert.AreEqual(50, frame.DeltaTime);
+            Assert.AreEqual(2, frame.Events.Count);
 
-            var clientSnapshot20 = (CharacterSnapshot)clientScene.Character.Snapshot;
-            Assert.That(clientSnapshot20.PositionX, Is.EqualTo(0.02f).Within(FloatAppromiateThreshold));
-            Assert.That(clientSnapshot20.PositionY, Is.EqualTo(0.02f).Within(FloatAppromiateThreshold));
+            var ball = (RigidBodySnapshot)scene.Ball.Snapshot;
+            AssertHelper.AreApproximate(-2.6f, ball.Position.X);
+            AssertHelper.AreApproximate(2.58365011f, ball.Position.Y);
+            AssertHelper.AreApproximate(-2.6f, ball.Position.Z);
 
-            // +++ Server: 50 / 30. Updated #2.
-            serverSceneContext.Simulate();
-            var serverFrame50 = serverSceneContext.FetchDeltaSyncFrame();
-            Assert.AreEqual(50, serverScene.Time);
-            Assert.AreEqual(50, serverScene.DeltaTime);
-            Assert.AreEqual(50, serverFrame50.Time);
-            Assert.AreEqual(50, serverFrame50.DeltaTime);
-            Assert.AreEqual(0, serverFrame50.Events.Count);
+            var cube = (RigidBodySnapshot)scene.Cube.Snapshot;
+            AssertHelper.AreApproximate(1.1f, cube.Position.X);
+            AssertHelper.AreApproximate(1.08364999f, cube.Position.Y);
+            AssertHelper.AreApproximate(1.1f, cube.Position.Z);
+        }
 
-            var serverSnapshot50 = (CharacterSnapshot)serverScene.Character.Snapshot;
-            Assert.AreEqual(0, serverSnapshot50.PositionX);
-            Assert.AreEqual(0, serverSnapshot50.PositionY);
+        private static void Server_Update150(ServerSimulator simulator, ExampleScene scene, ClientId clientId)
+        {
+            simulator.Simulate();
+            Assert.AreEqual(200, simulator.Time);
 
-            // +++ Server: 60 / 40. Move command #1 received
-            serverSceneContext.ReceiveCommandFrame(clientFrame20);
+            var frame = simulator.DeltaSyncFrame;
+            Assert.AreEqual(150, frame.Time);
+            Assert.AreEqual(50, frame.DeltaTime);
+            Assert.AreEqual(2, frame.Events.Count);
+            Assert.AreEqual(1, frame.LastCommandSeqs.Count);
+            Assert.AreEqual(2, frame.LastCommandSeqs[clientId]);
 
-            // --- Client: 60 / 40. Updated #3. Move command #2 sent.
-            var clientCommand2 = new MoveCharacterCommand() { DeltaX = 1, DeltaY = 1 };
-            clientSceneContext.ReceiveCommand(clientScene.Character.Id, clientCommand2);
+            var ball = (RigidBodySnapshot)scene.Ball.Snapshot;
+            AssertHelper.AreApproximate(-2.57222223f, ball.Position.X);
+            AssertHelper.AreApproximate(2.57275009f, ball.Position.Y);
+            AssertHelper.AreApproximate(-2.57222223f, ball.Position.Z);
 
-            clientSceneContext.Simulate();
-            var clientFrame40 = clientSceneContext.FetchCommandFrame();
-            Assert.AreEqual(40, clientScene.Time);
-            Assert.AreEqual(20, clientScene.DeltaTime);
-            Assert.AreEqual(1, clientFrame40.Commands.Count);
+            var cube = (RigidBodySnapshot)scene.Cube.Snapshot;
+            AssertHelper.AreApproximate(1.1f, cube.Position.X);
+            AssertHelper.AreApproximate(1.07274997f, cube.Position.Y);
+            AssertHelper.AreApproximate(1.1f, cube.Position.Z);
+        }
 
-            var clientSnapshot40 = (CharacterSnapshot)clientScene.Character.Snapshot;
-            Assert.That(clientSnapshot40.PositionX, Is.EqualTo(0.04f).Within(FloatAppromiateThreshold));
-            Assert.That(clientSnapshot40.PositionY, Is.EqualTo(0.04f).Within(FloatAppromiateThreshold));
+        private static void Server_Update200(ServerSimulator simulator, ExampleScene scene, ClientId clientId)
+        {
+            simulator.Simulate();
+            Assert.AreEqual(250, simulator.Time);
 
-            // --- Client: 70 / 50. Update #2 received.
-            clientSceneContext.ReceiveDeltaSyncFrame(serverFrame50);
+            var frame = simulator.DeltaSyncFrame;
+            Assert.AreEqual(200, frame.Time);
+            Assert.AreEqual(50, frame.DeltaTime);
+            Assert.AreEqual(2, frame.Events.Count);
+            Assert.AreEqual(1, frame.LastCommandSeqs.Count);
+            Assert.AreEqual(5, frame.LastCommandSeqs[clientId]);
 
-            // +++ Server: 80 / 60. Move command #2 received.
-            serverSceneContext.ReceiveCommandFrame(clientFrame40);
+            var ball = (RigidBodySnapshot)scene.Ball.Snapshot;
+            AssertHelper.AreApproximate(-2.53055549f, ball.Position.X);
+            AssertHelper.AreApproximate(2.55912519f, ball.Position.Y);
+            AssertHelper.AreApproximate(-2.51666665f, ball.Position.Z);
 
-            // --- Client: 80 / 60. Updated #4. Move command #3 sent.
-            var clientCommand3 = new MoveCharacterCommand() { DeltaX = 1, DeltaY = 1 };
-            clientSceneContext.ReceiveCommand(clientScene.Character.Id, clientCommand3);
+            var cube = (RigidBodySnapshot)scene.Cube.Snapshot;
+            AssertHelper.AreApproximate(1.1f, cube.Position.X);
+            AssertHelper.AreApproximate(1.05912495f, cube.Position.Y);
+            AssertHelper.AreApproximate(1.1f, cube.Position.Z);
+        }
 
-            clientSceneContext.Simulate();
-            var clientFrame60 = clientSceneContext.FetchCommandFrame();
-            Assert.AreEqual(60, clientScene.Time);
-            Assert.AreEqual(20, clientScene.DeltaTime);
-            Assert.AreEqual(1, clientFrame60.Commands.Count);
+        private static void Client_Update0(ClientSimulator simulator, ExampleScene scene)
+        {
+            simulator.Simulate();
+            Assert.AreEqual(20, simulator.Time);
 
-            var clientSnapshot60 = (CharacterSnapshot)clientScene.Character.Snapshot;
-            Assert.That(clientSnapshot60.PositionX, Is.EqualTo(0.06f).Within(FloatAppromiateThreshold));
-            Assert.That(clientSnapshot60.PositionY, Is.EqualTo(0.06f).Within(FloatAppromiateThreshold));
+            Assert.IsNull(simulator.CommandFrame);
 
-            // +++ Server: 100 / 80. Move command #3 received. Updated #3
-            serverSceneContext.ReceiveCommandFrame(clientFrame60);
+            var ball = (RigidBodySnapshot)scene.Ball.Snapshot;
+            AssertHelper.AreApproximate(-2.6f, ball.Position.X);
+            AssertHelper.AreApproximate(2.60218f, ball.Position.Y);
+            AssertHelper.AreApproximate(-2.6f, ball.Position.Z);
 
-            serverSceneContext.Simulate();
-            var serverFrame100 = serverSceneContext.FetchDeltaSyncFrame();
-            Assert.AreEqual(100, serverScene.Time);
-            Assert.AreEqual(50, serverScene.DeltaTime);
-            Assert.AreEqual(100, serverFrame100.Time);
-            Assert.AreEqual(50, serverFrame100.DeltaTime);
-            Assert.AreEqual(1, serverFrame100.Events.Count);
+            var cube = (RigidBodySnapshot)scene.Cube.Snapshot;
+            AssertHelper.AreApproximate(1.1f, cube.Position.X);
+            AssertHelper.AreApproximate(1.10218f, cube.Position.Y);
+            AssertHelper.AreApproximate(1.1f, cube.Position.Z);
+        }
 
-            var serverSnapshot100 = (CharacterSnapshot)serverScene.Character.Snapshot;
-            Assert.That(serverSnapshot100.PositionX, Is.EqualTo(0.05f).Within(FloatAppromiateThreshold));
-            Assert.That(serverSnapshot100.PositionY, Is.EqualTo(0.05f).Within(FloatAppromiateThreshold));
+        private static void Client_Update20(ClientSimulator simulator, ExampleScene scene)
+        {
+            simulator.Simulate();
+            Assert.AreEqual(40, simulator.Time);
 
-            // --- Client: 100 / 80. Updated #5. Move command #4 sent
-            var clientCommand4 = new MoveCharacterCommand() { DeltaX = 1, DeltaY = 1 };
-            clientSceneContext.ReceiveCommand(clientScene.Character.Id, clientCommand4);
+            Assert.IsNull(simulator.CommandFrame);
 
-            clientSceneContext.Simulate();
-            var clientFrame80 = clientSceneContext.FetchCommandFrame();
-            Assert.AreEqual(80, clientScene.Time);
-            Assert.AreEqual(20, clientScene.DeltaTime);
-            Assert.AreEqual(1, clientFrame80.Commands.Count);
+            var ball = (RigidBodySnapshot)scene.Ball.Snapshot;
+            AssertHelper.AreApproximate(-2.6f, ball.Position.X);
+            AssertHelper.AreApproximate(2.59891009f, ball.Position.Y);
+            AssertHelper.AreApproximate(-2.6f, ball.Position.Z);
 
-            var clientSnapshot80 = (CharacterSnapshot)clientScene.Character.Snapshot;
-            Assert.AreEqual(0.08f, clientSnapshot80.PositionX);
-            Assert.AreEqual(0.08f, clientSnapshot80.PositionY);
+            var cube = (RigidBodySnapshot)scene.Cube.Snapshot;
+            AssertHelper.AreApproximate(1.1f, cube.Position.X);
+            AssertHelper.AreApproximate(1.09890997f, cube.Position.Y);
+            AssertHelper.AreApproximate(1.1f, cube.Position.Z);
+        }
 
-            // +++ Server: 120 / 100. Move command #4 received.
-            serverSceneContext.ReceiveCommandFrame(clientFrame80);
+        private static void Client_Update40_Command1(ClientSimulator simulator, ExampleScene scene)
+        {
+            var command = new KickBallCommand(1, 0, 1);
+            simulator.ReceiveCommand(scene.Ball, command);
 
-            // --- Client: 120 / 100. Update #3 received. Move command #3 confirmed. Move command #5 sent
-            clientSceneContext.ReceiveDeltaSyncFrame(serverFrame100);
+            simulator.Simulate();
+            Assert.AreEqual(60, simulator.Time);
 
-            var clientCommand5 = new MoveCharacterCommand() { DeltaX = 1, DeltaY = 1 };
-            clientSceneContext.ReceiveCommand(clientScene.Character.Id, clientCommand5);
+            var frame = simulator.CommandFrame;
+            Assert.AreEqual(1, frame.Commands.Count);
 
-            clientSceneContext.Simulate();
-            var clientFrame100 = clientSceneContext.FetchCommandFrame();
-            Assert.AreEqual(100, clientScene.Time);
-            Assert.AreEqual(20, clientScene.DeltaTime);
-            Assert.AreEqual(1, clientFrame100.Commands.Count);
+            var ball = (RigidBodySnapshot)scene.Ball.Snapshot;
+            AssertHelper.AreApproximate(-2.57222223f, ball.Position.X);
+            AssertHelper.AreApproximate(2.59346008f, ball.Position.Y);
+            AssertHelper.AreApproximate(-2.57222223f, ball.Position.Z);
 
-            var clientSnapshot100 = (CharacterSnapshot)clientScene.Character.Snapshot;
-            Assert.That(clientSnapshot100.PositionX, Is.EqualTo(0.09f).Within(FloatAppromiateThreshold));
-            Assert.That(clientSnapshot100.PositionY, Is.EqualTo(0.09f).Within(FloatAppromiateThreshold));
+            var cube = (RigidBodySnapshot)scene.Cube.Snapshot;
+            AssertHelper.AreApproximate(1.1f, cube.Position.X);
+            AssertHelper.AreApproximate(1.09345996f, cube.Position.Y);
+            AssertHelper.AreApproximate(1.1f, cube.Position.Z);
+        }
 
-            // +++ Server: 140 / 120. Move command #5 received
-            serverSceneContext.ReceiveCommandFrame(clientFrame100);
+        private static void Client_Update60_Command2(ClientSimulator simulator, ExampleScene scene)
+        {
+            var command = new KickBallCommand(1, 0, 0.5f);
+            simulator.ReceiveCommand(scene.Ball, command);
 
-            // --- Client: 140 / 120. 
-            clientSceneContext.Simulate();
-            Assert.AreEqual(120, clientScene.Time);
-            Assert.AreEqual(20, clientScene.DeltaTime);
+            simulator.Simulate();
+            Assert.AreEqual(80, simulator.Time);
 
-            var clientFrame120 = clientSceneContext.FetchCommandFrame();
-            Assert.AreEqual(null, clientFrame120);
+            var frame = simulator.CommandFrame;
+            Assert.AreEqual(1, frame.Commands.Count);
 
-            var clientSnapshot120 = (CharacterSnapshot)clientScene.Character.Snapshot;
-            Assert.That(clientSnapshot120.PositionX, Is.EqualTo(0.09f).Within(FloatAppromiateThreshold));
-            Assert.That(clientSnapshot120.PositionY, Is.EqualTo(0.09f).Within(FloatAppromiateThreshold));
+            var ball = (RigidBodySnapshot)scene.Ball.Snapshot;
+            AssertHelper.AreApproximate(-2.51666665f, ball.Position.X);
+            AssertHelper.AreApproximate(2.58528519f, ball.Position.Y);
+            AssertHelper.AreApproximate(-2.53055549f, ball.Position.Z);
 
-            // +++ Server: 150 / 130. Updated #3
-            serverSceneContext.Simulate();
-            var serverFrame150 = serverSceneContext.FetchDeltaSyncFrame();
-            Assert.AreEqual(150, serverScene.Time);
-            Assert.AreEqual(50, serverScene.DeltaTime);
-            Assert.AreEqual(150, serverFrame150.Time);
-            Assert.AreEqual(50, serverFrame150.DeltaTime);
-            Assert.AreEqual(1, serverFrame150.Events.Count);
+            var cube = (RigidBodySnapshot)scene.Cube.Snapshot;
+            AssertHelper.AreApproximate(1.1f, cube.Position.X);
+            AssertHelper.AreApproximate(1.08528495f, cube.Position.Y);
+            AssertHelper.AreApproximate(1.1f, cube.Position.Z);
+        }
 
-            var serverSnapshot150 = (CharacterSnapshot)serverScene.Character.Snapshot;
-            Assert.That(serverSnapshot150.PositionX, Is.EqualTo(0.1f).Within(FloatAppromiateThreshold));
-            Assert.That(serverSnapshot150.PositionY, Is.EqualTo(0.1f).Within(FloatAppromiateThreshold));
+        private static void Client_Update80_Command3(ClientSimulator simulator, ExampleScene scene)
+        {
+            var command = new KickBallCommand(0.5f, 0, 1f);
+            simulator.ReceiveCommand(scene.Ball, command);
 
-            // --- Client: 160 / 140.
-            clientSceneContext.Simulate();
-            Assert.AreEqual(140, clientScene.Time);
-            Assert.AreEqual(20, clientScene.DeltaTime);
-            var clientFrame140 = clientSceneContext.FetchCommandFrame();
-            Assert.AreEqual(null, clientFrame140);
+            simulator.Simulate();
+            Assert.AreEqual(100, simulator.Time);
 
-            var clientSnapshot140 = (CharacterSnapshot)clientScene.Character.Snapshot;
-            Assert.That(clientSnapshot140.PositionX, Is.EqualTo(0.09f).Within(FloatAppromiateThreshold));
-            Assert.That(clientSnapshot140.PositionY, Is.EqualTo(0.09f).Within(FloatAppromiateThreshold));
+            var frame = simulator.CommandFrame;
+            Assert.AreEqual(1, frame.Commands.Count);
 
-            // --- Client: 170 / 150. Update #3 received
-            clientSceneContext.ReceiveDeltaSyncFrame(serverFrame150);
+            var ball = (RigidBodySnapshot)scene.Ball.Snapshot;
+            AssertHelper.AreApproximate(-2.44722223f, ball.Position.X);
+            AssertHelper.AreApproximate(2.57438517f, ball.Position.Y);
+            AssertHelper.AreApproximate(-2.46111107f, ball.Position.Z);
 
-            // --- Client: 180 / 160. 
-            clientSceneContext.Simulate();
-            Assert.AreEqual(160, clientScene.Time);
-            Assert.AreEqual(20, clientScene.DeltaTime);
-            var clientFrame160 = clientSceneContext.FetchCommandFrame();
-            Assert.AreEqual(null, clientFrame160);
+            var cube = (RigidBodySnapshot)scene.Cube.Snapshot;
+            AssertHelper.AreApproximate(1.1f, cube.Position.X);
+            AssertHelper.AreApproximate(1.07438493f, cube.Position.Y);
+            AssertHelper.AreApproximate(1.1f, cube.Position.Z);
+        }
 
-            var clientSnapshot160 = (CharacterSnapshot)clientScene.Character.Snapshot;
-            Assert.That(clientSnapshot160.PositionX, Is.EqualTo(0.1f).Within(FloatAppromiateThreshold));
-            Assert.That(clientSnapshot160.PositionY, Is.EqualTo(0.1f).Within(FloatAppromiateThreshold));
+        private static void Client_Update100_Command4(ClientSimulator simulator, ExampleScene scene)
+        {
+            var command = new KickBallCommand(1f, 0, 1f);
+            simulator.ReceiveCommand(scene.Ball, command);
+
+            simulator.Simulate();
+            Assert.AreEqual(120, simulator.Time);
+
+            var frame = simulator.CommandFrame;
+            Assert.AreEqual(1, frame.Commands.Count);
+
+            var ball = (RigidBodySnapshot)scene.Ball.Snapshot;
+            AssertHelper.AreApproximate(-2.3499999f, ball.Position.X);
+            AssertHelper.AreApproximate(2.56076026f, ball.Position.Y);
+            AssertHelper.AreApproximate(-2.36388874f, ball.Position.Z);
+
+            var cube = (RigidBodySnapshot)scene.Cube.Snapshot;
+            AssertHelper.AreApproximate(1.1f, cube.Position.X);
+            AssertHelper.AreApproximate(1.0607599f, cube.Position.Y);
+            AssertHelper.AreApproximate(1.1f, cube.Position.Z);
+        }
+
+        private static void Client_Update140_Command6(ClientSimulator simulator, ExampleScene scene)
+        {
+            var command = new KickBallCommand(1f, 0, 0.5f);
+            simulator.ReceiveCommand(scene.Ball, command);
+
+            simulator.Simulate();
+            Assert.AreEqual(160, simulator.Time);
+
+            var frame = simulator.CommandFrame;
+            Assert.AreEqual(1, frame.Commands.Count);
+
+            var ball = (RigidBodySnapshot)scene.Ball.Snapshot;
+            AssertHelper.AreApproximate(-2.0999999f, ball.Position.X);
+            AssertHelper.AreApproximate(2.52533531f, ball.Position.Y);
+            AssertHelper.AreApproximate(-2.0999999f, ball.Position.Z);
+
+            var cube = (RigidBodySnapshot)scene.Cube.Snapshot;
+            AssertHelper.AreApproximate(1.1f, cube.Position.X);
+            AssertHelper.AreApproximate(1.02533484f, cube.Position.Y);
+            AssertHelper.AreApproximate(1.1f, cube.Position.Z);
+        }
+
+        private static void Client_Update160_Command7(ClientSimulator simulator, ExampleScene scene)
+        {
+            var command = new KickBallCommand(1f, 0, 1f);
+            simulator.ReceiveCommand(scene.Ball, command);
+
+            simulator.Simulate();
+            Assert.AreEqual(180, simulator.Time);
+
+            var frame = simulator.CommandFrame;
+            Assert.AreEqual(1, frame.Commands.Count);
+
+            var ball = (RigidBodySnapshot)scene.Ball.Snapshot;
+            AssertHelper.AreApproximate(-2.13158202f, ball.Position.X);
+            AssertHelper.AreApproximate(2.49999809f, ball.Position.Y);
+            AssertHelper.AreApproximate(-2.04862928f, ball.Position.Z);
+
+            var cube = (RigidBodySnapshot)scene.Cube.Snapshot;
+            AssertHelper.AreApproximate(1.1f, cube.Position.X);
+            AssertHelper.AreApproximate(0.977374852f, cube.Position.Y);
+            AssertHelper.AreApproximate(1.1f, cube.Position.Z);
         }
     }
-    */
 }

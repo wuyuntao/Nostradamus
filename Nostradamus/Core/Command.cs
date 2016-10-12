@@ -7,6 +7,8 @@ namespace Nostradamus
 
     public sealed class Command
     {
+        public readonly ClientId ClientId;
+
         public readonly ActorId ActorId;
 
         public readonly int Sequence;
@@ -17,8 +19,9 @@ namespace Nostradamus
 
         public int DeltaTime;
 
-        public Command(ActorId actorId, int sequence, int time, int deltaTime, ICommandArgs args)
+        public Command(ClientId clientId, ActorId actorId, int sequence, int time, int deltaTime, ICommandArgs args)
         {
+            ClientId = clientId;
             ActorId = actorId;
             Time = time;
             DeltaTime = deltaTime;

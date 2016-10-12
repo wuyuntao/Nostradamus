@@ -8,6 +8,8 @@ namespace Nostradamus
     {
         private Scene scene;
 
+        // TODO: Must provide scene factory in constructor
+
         public TScene CreateScene<TScene>(SceneDesc desc)
             where TScene : Scene, new()
         {
@@ -22,11 +24,14 @@ namespace Nostradamus
 
         protected void Simulate(IEnumerable<Command> commands)
         {
-            foreach (var command in commands)
+            if (commands != null)
             {
-                var actor = Scene.GetActor(command.ActorId);
+                foreach (var command in commands)
+                {
+                    var actor = Scene.GetActor(command.ActorId);
 
-                actor.OnCommandReceived(command.Args);
+                    actor.OnCommandReceived(command.Args);
+                }
             }
 
             foreach (var actor in Scene.Actors)
@@ -51,8 +56,8 @@ namespace Nostradamus
         {
             return new SimulatorSnapshot()
             {
-                Actors = new List<Snapshot>(from a in Scene.Actors
-                                            select new Snapshot(a.Desc.Id, a.Snapshot))
+                Actors = new List<ActorSnapshot>(from a in Scene.Actors
+                                                 select new ActorSnapshot(a.Desc, a.Snapshot))
             };
         }
 
@@ -61,12 +66,14 @@ namespace Nostradamus
             Scene.OnSnapshotRecovered(new SceneSnapshot()
             {
                 Actors = new List<ActorId>(from actorSnapshot in snapshot.Actors
-                                           select actorSnapshot.ActorId)
+                                           select actorSnapshot.Desc.Id)
             });
 
             foreach (var actorSnapshot in snapshot.Actors)
             {
-                var actor = GetActor(actorSnapshot.ActorId);
+                var actor = GetActor(actorSnapshot.Desc.Id);
+                if (actor == null)
+                    actor = CreateActor(actorSnapshot.Desc);
 
                 actor.OnSnapshotRecovered(actorSnapshot.Args);
             }
