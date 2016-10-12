@@ -1,15 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace Nostradamus.Core2
+namespace Nostradamus
 {
     public abstract class Simulator : ActorManager
     {
-        public PhysicsScene Scene { get; private set; }
+        private Scene scene;
 
-        protected Simulator(PhysicsSceneDesc desc)
+        public void CreateScene<TScene>(SceneDesc desc)
+            where TScene : Scene, new()
         {
-            Scene = CreateActor<PhysicsScene>(desc);
+            if (scene != null)
+                throw new InvalidOperationException();  // TODO: Message
+
+            scene = CreateActor<TScene>(desc);
         }
 
         protected void Simulate(IEnumerable<Command> commands)
@@ -25,6 +30,8 @@ namespace Nostradamus.Core2
             {
                 actor.Update();
             }
+
+            Scene.Update();
         }
 
         protected void ApplyEvents(IEnumerable<Event> events)
@@ -59,6 +66,17 @@ namespace Nostradamus.Core2
                 var actor = GetActor(actorSnapshot.ActorId);
 
                 actor.RecoverSnapshot(actorSnapshot.Args);
+            }
+        }
+
+        public Scene Scene
+        {
+            get
+            {
+                if (scene == null)
+                    throw new InvalidOperationException();          // TODO: Message
+
+                return scene;
             }
         }
     }

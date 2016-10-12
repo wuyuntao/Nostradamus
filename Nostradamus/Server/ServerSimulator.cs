@@ -1,8 +1,7 @@
 ﻿using Nostradamus.Client;
-using Nostradamus.Server;
 using System.Collections.Generic;
 
-namespace Nostradamus.Core2
+namespace Nostradamus.Server
 {
     public sealed class ServerSimulator : Simulator
     {
@@ -12,8 +11,7 @@ namespace Nostradamus.Core2
         private DeltaSyncFrame deltaSyncFrame;
         private Timeline compensationTimeline = new Timeline();
 
-        public ServerSimulator(PhysicsSceneDesc desc)
-            : base(desc)
+        public ServerSimulator()
         { }
 
         public void ReceiveCommandFrame(CommandFrame frame)

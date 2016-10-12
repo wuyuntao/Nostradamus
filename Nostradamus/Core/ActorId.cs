@@ -2,61 +2,69 @@
 
 namespace Nostradamus
 {
-	public sealed class ActorId : IEquatable<ActorId>, IComparable<ActorId>
-	{
-		public int Value { get; set; }
+    public sealed class ActorId : IEquatable<ActorId>, IComparable<ActorId>
+    {
+        public readonly int Value;
 
-		public string Description { get; set; }
+        public readonly string Description;
 
-		public ActorId(int value, string description = null)
-		{
-			Value = value;
-			Description = description;
-		}
+        public ActorId(int value, string description = null)
+        {
+            Value = value;
+            Description = description;
+        }
 
-		public override bool Equals(object obj)
-		{
-			if (!(obj is ActorId))
-				return false;
+        #region IEquatable
 
-			return Equals((ActorId)obj);
-		}
+        public override bool Equals(object obj)
+        {
+            if (!(obj is ActorId))
+                return false;
 
-		public bool Equals(ActorId other)
-		{
-			return Value.Equals(other.Value);
-		}
+            return Equals((ActorId)obj);
+        }
 
-		public override int GetHashCode()
-		{
-			return Value.GetHashCode();
-		}
+        public bool Equals(ActorId other)
+        {
+            return Value.Equals(other.Value);
+        }
 
-		public override string ToString()
-		{
-			if (string.IsNullOrEmpty(Description))
-				return string.Format("{0} #{1}", GetType().Name, Value);
-			else
-				return string.Format("{0} #{1} ({2})", GetType().Name, Value, Description);
-		}
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
+        }
 
-		#region IComparable
+        public override string ToString()
+        {
+            if (string.IsNullOrEmpty(Description))
+                return string.Format("{0} #{1}", GetType().Name, Value);
+            else
+                return string.Format("{0} #{1} ({2})", GetType().Name, Value, Description);
+        }
 
-		int IComparable<ActorId>.CompareTo(ActorId other)
-		{
-			return Value.CompareTo(other.Value);
-		}
+        #endregion
 
-		#endregion
+        #region IComparable
 
-		public static bool operator ==(ActorId a, ActorId b)
-		{
-			return a.Equals(b);
-		}
+        int IComparable<ActorId>.CompareTo(ActorId other)
+        {
+            return Value.CompareTo(other.Value);
+        }
 
-		public static bool operator !=(ActorId a, ActorId b)
-		{
-			return !a.Equals(b);
-		}
-	}
+        #endregion
+
+        #region Operator Overrie
+
+        public static bool operator ==(ActorId a, ActorId b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(ActorId a, ActorId b)
+        {
+            return !a.Equals(b);
+        }
+
+        #endregion
+    }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Nostradamus.Core2
+namespace Nostradamus
 {
     public class SceneSnapshot : ISnapshotArgs
     {

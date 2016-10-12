@@ -1,9 +1,9 @@
 ﻿namespace Nostradamus
 {
-    public sealed class Timepoint
+    sealed class Timepoint
     {
-        private readonly Timeline timeline;
-        private readonly int time;
+        private Timeline timeline;
+        private int time;
         private ISnapshotArgs snapshot;
 
         public Timepoint(Timeline timeline, int time, ISnapshotArgs snapshot)

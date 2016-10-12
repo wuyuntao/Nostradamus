@@ -1,6 +1,5 @@
 ﻿using BulletSharp;
-using System.Collections.Generic;
-using System.Linq;
+using Nostradamus.Physics;
 
 namespace Nostradamus.Physics
 {
@@ -11,9 +10,12 @@ namespace Nostradamus.Physics
         private DbvtBroadphase broadphase;
         private DiscreteDynamicsWorld world;
 
-        public PhysicsScene(PhysicsSceneDesc desc)
-            : base(desc)
+        internal override void Initialize(ActorContext context, ActorDesc actorDesc)
         {
+            base.Initialize(context, actorDesc);
+
+            var desc = (PhysicsSceneDesc)actorDesc;
+
             // TODO: Enable custom initialization of physics world
             collisionConf = new DefaultCollisionConfiguration();
             dispatcher = new CollisionDispatcher(collisionConf);
@@ -53,30 +55,24 @@ namespace Nostradamus.Physics
             }
         }
 
-        protected override void OnUpdate()
+        protected internal override void Update()
         {
-            base.OnUpdate();
+            base.Update();
 
-            // TODO: Is maxSubSteps and fixedTimestep necessary?
-            world.StepSimulation(DeltaTime / 1000f);
+            world.StepSimulation(Desc.SimulationDeltaTime);
 
-            foreach (var actor in RigidBodies)
-                actor.OnPhysicsUpdate();
+            foreach (var actor in Actors)
+            {
+                if (actor is RigidBodyActor)
+                {
+                    ((RigidBodyActor)actor).PhysicsUpdate();
+                }
+            }
         }
 
         internal DiscreteDynamicsWorld World
         {
             get { return world; }
-        }
-
-        internal IEnumerable<RigidBodyActor> RigidBodies
-        {
-            get
-            {
-                return from actor in Actors
-                       where actor is RigidBodyActor
-                       select (RigidBodyActor)actor;
-            }
         }
     }
 }

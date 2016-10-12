@@ -4,24 +4,19 @@ using NLog;
 
 namespace Nostradamus.Physics
 {
-    public abstract class RigidBodyActor : Actor
+    public abstract class RigidBodyActor : SceneActor
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private readonly PhysicsScene scene;
-        private readonly RigidBody rigidBody;
+        private RigidBody rigidBody;
 
-        protected RigidBodyActor(PhysicsScene scene, ActorId id, ClientId ownerId, RigidBodyActorDesc parameters, RigidBodySnapshot snapshot)
-            : base(scene, id, ownerId, snapshot)
+        internal override void Initialize(ActorContext context, ActorDesc actorDesc)
         {
-            this.scene = scene;
+            base.Initialize(context, actorDesc);
 
-            rigidBody = CreateRigidBody(parameters);
-            scene.World.AddRigidBody(rigidBody);
-        }
+            var desc = (RigidBodyActorDesc)actorDesc;
+            var snapshot = (RigidBodySnapshot)Snapshot;
 
-        private RigidBody CreateRigidBody(RigidBodyActorDesc desc)
-        {
             var localInertia = Vector3.Zero;
             if (!desc.IsKinematic)
                 desc.Shape.CalculateLocalInertia(desc.Mass, out localInertia);
@@ -30,25 +25,50 @@ namespace Nostradamus.Physics
 
             using (var rbInfo = new RigidBodyConstructionInfo(desc.Mass, motionState, desc.Shape, localInertia))
             {
-                var rb = new RigidBody(rbInfo);
-                rb.UserObject = this;
+                rigidBody = new RigidBody(rbInfo);
+                rigidBody.UserObject = this;
 
                 if (desc.IsKinematic)
-                    rb.CollisionFlags |= CollisionFlags.KinematicObject;
+                    rigidBody.CollisionFlags |= CollisionFlags.KinematicObject;
 
-                return rb;
+                Scene.World.AddRigidBody(rigidBody);
             }
         }
 
         protected override void DisposeManaged()
         {
-            scene.World.RemoveRigidBody(rigidBody);
-            rigidBody.Dispose();
+            Scene.World.RemoveRigidBody(rigidBody);
+            SafeDispose(ref rigidBody);
 
             base.DisposeManaged();
         }
 
-        protected internal override ISnapshotArgs OnEventApplied(IEventArgs @event)
+        protected internal override void RecoverSnapshot(ISnapshotArgs snapshot)
+        {
+            base.RecoverSnapshot(snapshot);
+
+            var s = (RigidBodySnapshot)snapshot;
+            rigidBody.CenterOfMassTransform = Matrix.RotationQuaternion(s.Rotation) * Matrix.Translation(s.Position);
+            rigidBody.LinearVelocity = s.LinearVelocity;
+            rigidBody.AngularVelocity = s.AngularVelocity;
+        }
+
+        protected internal virtual void PhysicsUpdate()
+        {
+            // TODO: Check threshold with dead reckoning algorithm to reduce the frequency of triggering event
+
+            var @event = new RigidBodyMovedEvent()
+            {
+                Position = rigidBody.CenterOfMassPosition,
+                Rotation = Quaternion.RotationMatrix(rigidBody.CenterOfMassTransform),
+                LinearVelocity = rigidBody.LinearVelocity,
+                AngularVelocity = rigidBody.AngularVelocity,
+            };
+
+            ApplyEvent(@event);
+        }
+
+        protected internal override void ApplyEvent(IEventArgs @event)
         {
             if (@event is RigidBodyMovedEvent)
             {
@@ -64,10 +84,15 @@ namespace Nostradamus.Physics
                 logger.Debug("{0} applied {1}: Position: {2}, Rotation: {3}, LinearVelocity: {4}, AngularVelocity: {5}"
                         , this, @event.GetType().Name, e.Position, e.Rotation, e.LinearVelocity, e.AngularVelocity);
 
-                return s;
+                Snapshot = s;
             }
             else
-                return base.OnEventApplied(@event);
+                base.ApplyEvent(@event);
+        }
+
+        protected internal override void Update()
+        {
+            base.Update();
         }
 
         protected void ApplyCentralForce(Vector3 force)
@@ -78,33 +103,9 @@ namespace Nostradamus.Physics
             logger.Debug("{0} applied central force {1}", this, force);
         }
 
-        //internal void OnPrePhysicsUpdate()
-        //{
-        //    var snapshot = (RigidBodySnapshot)Snapshot;
-
-        //    rigidBody.CenterOfMassTransform = Matrix.RotationQuaternion(snapshot.Rotation) * Matrix.Translation(snapshot.Position);
-        //    rigidBody.LinearVelocity = snapshot.LinearVelocity;
-        //    rigidBody.AngularVelocity = snapshot.AngularVelocity;
-        //}
-
-        internal void OnPhysicsUpdate()
-        {
-            // TODO: Check threshold with dead reckoning algorithm to reduce the frequency of triggering event
-
-            var eventArgs = new RigidBodyMovedEvent()
-            {
-                Position = rigidBody.CenterOfMassPosition,
-                Rotation = Quaternion.RotationMatrix(rigidBody.CenterOfMassTransform),
-                LinearVelocity = rigidBody.LinearVelocity,
-                AngularVelocity = rigidBody.AngularVelocity,
-            };
-
-            ApplyEvent(eventArgs);
-        }
-
         public new PhysicsScene Scene
         {
-            get { return scene; }
+            get { return (PhysicsScene)base.Scene; }
         }
 
         internal RigidBody RigidBody

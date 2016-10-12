@@ -4,9 +4,9 @@ namespace Nostradamus.Client
 {
 	public sealed class CommandFrame
 	{
-		public ClientId ClientId { get; set; }
+        public readonly ClientId ClientId;
 
-		public List<Command> Commands { get; set; }
+        public readonly List<Command> Commands;
 
 		public CommandFrame(ClientId clientId)
 		{

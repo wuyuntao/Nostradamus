@@ -2,22 +2,22 @@
 
 namespace Nostradamus.Server
 {
-	public sealed class DeltaSyncFrame
-	{
-		public int Time { get; set; }
+    public sealed class DeltaSyncFrame
+    {
+        public readonly int Time;
 
-		public int DeltaTime { get; set; }
+        public readonly int DeltaTime;
 
-		public List<Event> Events { get; set; }
+        public readonly List<Event> Events;
 
-		public SortedList<ClientId, int> LastCommandSeqs { get; set; }
+        public readonly SortedList<ClientId, int> LastCommandSeqs;
 
-		public DeltaSyncFrame(int time, int deltaTime)
-		{
-			Time = time;
-			DeltaTime = deltaTime;
-			Events = new List<Event>();
-			LastCommandSeqs = new SortedList<ClientId, int>();
-		}
-	}
+        public DeltaSyncFrame(int time, int deltaTime)
+        {
+            Time = time;
+            DeltaTime = deltaTime;
+            Events = new List<Event>();
+            LastCommandSeqs = new SortedList<ClientId, int>();
+        }
+    }
 }

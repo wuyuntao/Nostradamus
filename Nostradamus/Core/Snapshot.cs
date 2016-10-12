@@ -1,27 +1,27 @@
 ﻿
 namespace Nostradamus
 {
-	public interface ISnapshotArgs
-	{
-		ISnapshotArgs Clone();
+    public interface ISnapshotArgs
+    {
+        ISnapshotArgs Clone();
 
-		ISnapshotArgs Interpolate(ISnapshotArgs snapshot, float factor);
+        ISnapshotArgs Interpolate(ISnapshotArgs snapshot, float factor);
 
-		ISnapshotArgs Extrapolate(int deltaTime);
+        ISnapshotArgs Extrapolate(int deltaTime);
 
-		bool IsApproximate(ISnapshotArgs snapshot);
-	}
+        bool IsApproximate(ISnapshotArgs snapshot);
+    }
 
-	public sealed class Snapshot
-	{
-		public ActorId ActorId { get; set; }
+    public sealed class Snapshot
+    {
+        public readonly ActorId ActorId;
 
-		public ISnapshotArgs Args { get; set; }
+        public readonly ISnapshotArgs Args;
 
-		public Snapshot(ActorId actorId, ISnapshotArgs args)
-		{
-			ActorId = actorId;
-			Args = args;
-		}
-	}
+        public Snapshot(ActorId actorId, ISnapshotArgs args)
+        {
+            ActorId = actorId;
+            Args = args;
+        }
+    }
 }

@@ -33,10 +33,10 @@ namespace Nostradamus.Networking
 
             AddSerializer<Login>(Serialize_Login, Deserialize_Login);
 
-            AddSerializer<MoveBallCommand>(Serialize_MoveBallCommand, Deserialize_MoveBallCommand);
-            AddSerializer<MoveCharacterCommand>(Serialize_MoveCharacterCommand, Deserialize_MoveCharacterCommand);
-            AddSerializer<CharacterMovedEvent>(Serialize_CharacterMovedEvent, Deserialize_CharacterMovedEvent);
-            AddSerializer<CharacterSnapshot>(Serialize_CharacterSnapshot, Deserialize_CharacterSnapshot);
+            //AddSerializer<MoveBallCommand>(Serialize_MoveBallCommand, Deserialize_MoveBallCommand);
+            //AddSerializer<MoveCharacterCommand>(Serialize_MoveCharacterCommand, Deserialize_MoveCharacterCommand);
+            //AddSerializer<CharacterMovedEvent>(Serialize_CharacterMovedEvent, Deserialize_CharacterMovedEvent);
+            //AddSerializer<CharacterSnapshot>(Serialize_CharacterSnapshot, Deserialize_CharacterSnapshot);
         }
 
         #region Serialization
@@ -390,6 +390,7 @@ namespace Nostradamus.Networking
 
         #endregion
 
+        /*
         #region MoveBallCommand
 
         private static byte[] Serialize_MoveBallCommand(MoveBallCommand command)
@@ -494,5 +495,6 @@ namespace Nostradamus.Networking
         }
 
         #endregion
+        */
     }
 }

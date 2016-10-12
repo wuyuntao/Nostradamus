@@ -2,13 +2,36 @@
 
 namespace Nostradamus.Examples
 {
-    public class SimpleCharacter : Actor
+    public class SimpleCharacter : SceneActor
     {
         private bool hasMoved;
 
         public SimpleCharacter(Scene scene, ActorId id, ClientId ownerId, ISnapshotArgs snapshot)
             : base(scene, id, ownerId, snapshot)
         { }
+
+        protected internal override void ReceiveCommand(ICommandArgs command)
+        {
+            if (command is MoveCharacterCommand)
+            {
+                if (hasMoved)
+                    return;
+
+                var s = (CharacterSnapshot)Snapshot;
+                var c = (MoveCharacterCommand)command;
+
+                var e = new CharacterMovedEvent()
+                {
+                    PositionX = s.PositionX + c.DeltaX * Scene.DeltaTime / 1000f,
+                    PositionY = s.PositionY + c.DeltaY * Scene.DeltaTime / 1000f,
+                };
+
+                ApplyEvent(e);
+
+                hasMoved = true;
+            }
+            base.ReceiveCommand(command);
+        }
 
         protected internal override void OnCommandReceived(ICommandArgs command)
         {

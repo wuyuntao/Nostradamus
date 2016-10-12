@@ -16,6 +16,8 @@ namespace Nostradamus.Physics
 
         public Vector3 AngularVelocity { get; set; }
 
+        #region ISnapshotArgs
+
         ISnapshotArgs ISnapshotArgs.Clone()
         {
             return new RigidBodySnapshot()
@@ -81,5 +83,7 @@ namespace Nostradamus.Physics
 
             return true;
         }
+
+        #endregion
     }
 }

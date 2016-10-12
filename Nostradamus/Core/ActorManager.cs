@@ -1,15 +1,26 @@
-﻿using System;
+﻿using Nostradamus.Utils;
+using System;
 using System.Collections.Generic;
 
-namespace Nostradamus.Core2
+namespace Nostradamus
 {
-    public abstract class ActorManager
+    public abstract class ActorManager : Disposable
     {
         protected Dictionary<ActorId, ActorContext> Actors { get; private set; }
 
         protected ActorManager()
         {
             Actors = new Dictionary<ActorId, ActorContext>();
+        }
+
+        protected override void DisposeManaged()
+        {
+            foreach (var context in Actors.Values)
+                context.Actor.Dispose();
+
+            Actors.Clear();
+
+            base.DisposeManaged();
         }
 
         public TActor CreateActor<TActor>(ActorDesc desc)

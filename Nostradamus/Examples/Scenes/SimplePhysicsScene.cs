@@ -27,6 +27,16 @@ namespace Nostradamus.Examples
             }
         }
 
+        protected internal override void Update()
+        {
+            if (cube == null && ball == null && Simulator is ServerSimulator)
+            {
+
+            }
+
+            base.Update();
+        }
+
         public static PhysicsSceneDesc CreateSceneDesc()
         {
             var ground = new SceneColliderDesc()

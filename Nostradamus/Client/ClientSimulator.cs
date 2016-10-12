@@ -1,10 +1,9 @@
-﻿using Nostradamus.Client;
-using Nostradamus.Server;
+﻿using Nostradamus.Server;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Nostradamus.Core2
+namespace Nostradamus.Client
 {
     public sealed class ClientSimulator : Simulator
     {
@@ -16,8 +15,7 @@ namespace Nostradamus.Core2
         private Queue<Command> unacknowledgedCommands = new Queue<Command>();
         private int time;
 
-        public ClientSimulator(PhysicsSceneDesc desc, ClientId clientId)
-            : base(desc)
+        public ClientSimulator(ClientId clientId)
         {
             this.clientId = clientId;
         }
@@ -41,7 +39,7 @@ namespace Nostradamus.Core2
             authoritativeTimeline.AddPoint(frame.Time + frame.DeltaTime, snapshot);
         }
 
-        public void ReceiveDeltaFullFrame(DeltaSyncFrame frame)
+        public void ReceiveDeltaSyncFrame(DeltaSyncFrame frame)
         {
             var lastTimepoint = authoritativeTimeline.Last;
 
@@ -56,7 +54,6 @@ namespace Nostradamus.Core2
 
             authoritativeTimeline.AddPoint(frame.Time + frame.DeltaTime, snapshot);
 
-            lastAcknowledgedCommandSeq = null;
             int lastCommandSeq;
             if (frame.LastCommandSeqs.TryGetValue(clientId, out lastCommandSeq))
                 lastAcknowledgedCommandSeq = lastCommandSeq;
@@ -67,18 +64,11 @@ namespace Nostradamus.Core2
             if (authoritativeTimeline.Last == null)     // Not initialized yet
                 return;
 
-            int lastAcknowledgedCommandTime = -1;       // Dequeue acknowledge commaands and get last time that command is predicted
+            int lastAcknowledgedCommandTime = -1;       // Dequeue acknowledge commands and get last time that command is predicted
             if (lastAcknowledgedCommandSeq != null)
             {
-                while (unacknowledgedCommands.Count > 0 && unacknowledgedCommands.Peek().Sequence <= lastAcknowledgedCommandSeq)
-                {
-                    var command = unacknowledgedCommands.Dequeue();
-
-                    if (command.Sequence == lastAcknowledgedCommandSeq)
-                        lastAcknowledgedCommandTime = command.Time + command.DeltaTime;
-                }
-
-                throw new InvalidOperationException(string.Format("Cannot find acknowledged command #{0}", lastAcknowledgedCommandSeq));
+                lastAcknowledgedCommandTime = DequeueAcknowledgedCommands();
+                return;
             }
 
             if (lastAcknowledgedCommandTime >= 0)
@@ -89,24 +79,23 @@ namespace Nostradamus.Core2
                 if (predictiveTimepoint == null)
                     throw new InvalidOperationException();          // TODO: Message
 
-                var predictiveSnapshot = predictiveTimepoint.Snapshot;
-                if (authoritativeSnapshot.IsApproximate(predictiveSnapshot))        // Prediction is almost correct
-                    return;
-
-                predictiveTimeline = new Timeline();
-                predictiveTimeline.AddPoint(lastAcknowledgedCommandTime, authoritativeSnapshot);
-
-                RecoverSnapshot((SimulatorSnapshot)authoritativeSnapshot);
-
-                var deltaTime = Scene.Desc.ReconciliationDeltaTime;
-                for (var replayTime = lastAcknowledgedCommandTime; replayTime < time; replayTime += deltaTime)
+                if (!authoritativeSnapshot.IsApproximate(predictiveTimepoint.Snapshot))        // Rollback and replay
                 {
-                    if (replayTime + deltaTime > time)
-                        deltaTime = time - replayTime;
+                    predictiveTimeline = new Timeline();
+                    predictiveTimeline.AddPoint(lastAcknowledgedCommandTime, authoritativeSnapshot);
 
-                    Simulate(replayTime, deltaTime);
+                    RecoverSnapshot((SimulatorSnapshot)authoritativeSnapshot);
 
-                    predictiveTimeline.AddPoint(replayTime, CreateSnapshot());
+                    var deltaTime = Scene.Desc.ReconciliationDeltaTime;
+                    for (var replayTime = lastAcknowledgedCommandTime; replayTime < time; replayTime += deltaTime)
+                    {
+                        if (replayTime + deltaTime > time)
+                            deltaTime = time - replayTime;
+
+                        Simulate(replayTime, deltaTime);
+
+                        predictiveTimeline.AddPoint(replayTime, CreateSnapshot());
+                    }
                 }
             }
 
@@ -116,6 +105,21 @@ namespace Nostradamus.Core2
             predictiveTimeline.AddPoint(time + Scene.Desc.SimulationDeltaTime, snapshot);
 
             time += Scene.Desc.SimulationDeltaTime;
+
+            lastAcknowledgedCommandSeq = null;
+        }
+
+        private int DequeueAcknowledgedCommands()
+        {
+            while (unacknowledgedCommands.Count > 0 && unacknowledgedCommands.Peek().Sequence <= lastAcknowledgedCommandSeq)
+            {
+                var command = unacknowledgedCommands.Dequeue();
+
+                if (command.Sequence == lastAcknowledgedCommandSeq)
+                    return command.Time + command.DeltaTime;
+            }
+
+            throw new InvalidOperationException(string.Format("Cannot find acknowledged command #{0}", lastAcknowledgedCommandSeq));
         }
 
         private void Simulate(int time, int deltaTime)
@@ -155,6 +159,11 @@ namespace Nostradamus.Core2
             Simulate(commands);
 
             predictiveTimeline.AddPoint(time, CreateSnapshot());
+        }
+
+        public ClientId ClientId
+        {
+            get { return clientId; }
         }
 
         public CommandFrame CommandFrame

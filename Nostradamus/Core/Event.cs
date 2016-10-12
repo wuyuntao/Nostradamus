@@ -1,25 +1,25 @@
 ﻿
 namespace Nostradamus
 {
-	public interface IEventArgs
-	{
-	}
+    public interface IEventArgs
+    {
+    }
 
-	public sealed class Event
-	{
-		public ActorId ActorId { get; set; }
+    public sealed class Event
+    {
+        public readonly ActorId ActorId;
 
-		public IEventArgs Args { get; set; }
+        public readonly IEventArgs Args;
 
-		public Event(ActorId actorId, IEventArgs args)
-		{
-			ActorId = actorId;
-			Args = args;
-		}
+        public Event(ActorId actorId, IEventArgs args)
+        {
+            ActorId = actorId;
+            Args = args;
+        }
 
-		public override string ToString()
-		{
-			return string.Format("{0} ({1})", GetType().Name, ActorId);
-		}
-	}
+        public override string ToString()
+        {
+            return string.Format("{0} ({1})", GetType().Name, ActorId);
+        }
+    }
 }

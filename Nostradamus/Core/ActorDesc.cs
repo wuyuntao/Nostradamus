@@ -1,4 +1,4 @@
-﻿namespace Nostradamus.Core2
+﻿namespace Nostradamus
 {
     public abstract class ActorDesc
     {

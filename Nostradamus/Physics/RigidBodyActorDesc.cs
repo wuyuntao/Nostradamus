@@ -3,16 +3,16 @@ using BulletSharp.Math;
 
 namespace Nostradamus.Physics
 {
-	public sealed class RigidBodyActorDesc
-	{
-		public float Mass;
+    public abstract class RigidBodyActorDesc : ActorDesc
+    {
+        public float Mass;
 
-		public CollisionShape Shape;
+        public CollisionShape Shape;
 
-		public Matrix CenterOfMassOffset;
+        public Matrix CenterOfMassOffset;
 
-		public Matrix StartTransform;
+        public Matrix StartTransform;
 
-		public bool IsKinematic;
-	}
+        public bool IsKinematic;
+    }
 }

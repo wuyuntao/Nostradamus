@@ -1,108 +1,63 @@
 ﻿using NLog;
-using Nostradamus.Client;
-using Nostradamus.Server;
-using Nostradamus.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Nostradamus
 {
-    public abstract class Scene : Disposable
+    public abstract class Scene : Actor
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private readonly SceneDesc desc;
-        private readonly SceneContext context;
-        private readonly Dictionary<ActorId, ActorContext> actors = new Dictionary<ActorId, ActorContext>();
-
-        public Scene(SceneDesc desc)
+        public SceneActor GetActor(ActorId id)
         {
-            this.desc = desc;
+            var snapshot = (SceneSnapshot)Snapshot;
+            if (!snapshot.Actors.Contains(id))
+                return null;
 
-            switch (desc.Mode)
-            {
-                case SceneMode.Client:
-                    context = new ClientSceneContext(this, desc);
-                    break;
-
-                case SceneMode.Server:
-                    context = new ServerSceneContext(this, desc);
-                    break;
-
-                default:
-                    throw new NotSupportedException(desc.Mode.ToString());
-            }
+            return Context.GetActor(id) as SceneActor;
         }
 
-        protected override void DisposeManaged()
+        public void AddActor(SceneActor actor)
         {
-            foreach (var context in actors.Values)
-                context.Actor.Dispose();
+            var snapshot = (SceneSnapshot)Snapshot;
 
-            actors.Clear();
-
-            base.DisposeManaged();
+            if (!snapshot.Actors.Contains(actor.Desc.Id))
+                snapshot.Actors.Add(actor.Desc.Id);
         }
 
-        internal ActorContext CreateActorContext(Actor actor, ISnapshotArgs snapshot)
+        public void RemoveActor(SceneActor actor)
         {
-            var context = this.context.CreateActorContext(actor, snapshot);
+            var snapshot = (SceneSnapshot)Snapshot;
 
-            actors.Add(actor.Id, context);
-
-            return context;
+            if (snapshot.Actors.Contains(actor.Desc.Id))
+                snapshot.Actors.Remove(actor.Desc.Id);
         }
 
-        internal ActorContext GetActorContext(ActorId actorId)
-        {
-            ActorContext actor;
-            actors.TryGetValue(actorId, out actor);
-            return actor;
-        }
-
-        protected internal abstract Actor CreateActor(ActorId actorId, ISnapshotArgs snapshot);
-
-        internal void Update(int time, int deltaTime)
-        {
-            Time = time;
-            DeltaTime = deltaTime;
-
-            foreach (var context in actors.Values)
-                context.Update();
-
-            OnUpdate();
-        }
-
-        protected virtual void OnUpdate()
-        { }
-
-        public SceneDesc Desc
-        {
-            get { return desc; }
-        }
-
-        public SceneContext Context
-        {
-            get { return context; }
-        }
-
-        public IEnumerable<Actor> Actors
+        public IEnumerable<SceneActor> Actors
         {
             get
             {
-                return from context in actors.Values
-                       select context.Actor;
+                var snapshot = (SceneSnapshot)Snapshot;
+
+                foreach (var id in snapshot.Actors)
+                {
+                    var actor = Context.GetActor(id) as SceneActor;
+                    if (actor == null)
+                        throw new InvalidOperationException();      // TODO: Message
+
+                    yield return actor;
+                }
             }
         }
 
-        internal IEnumerable<ActorContext> ActorContexts
+        public Simulator Simulator
         {
-            get { return actors.Values; }
+            get { return (Simulator)Context.ActorManager; }
         }
 
-        public int Time { get; internal set; }
-
-        public int DeltaTime { get; internal set; }
+        public new SceneDesc Desc
+        {
+            get { return (SceneDesc)base.Desc; }
+        }
     }
 }

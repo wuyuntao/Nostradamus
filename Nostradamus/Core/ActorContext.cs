@@ -1,102 +1,35 @@
-﻿using NLog;
-using System;
-using System.Collections.Generic;
-
-namespace Nostradamus
+﻿namespace Nostradamus
 {
-    public abstract class ActorContext
+    public sealed class ActorContext
     {
-        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-
+        private ActorManager actorManager;
         private Actor actor;
-        private ISnapshotArgs actorSnapshot;
-        private Timeline timeline;
 
-        private int? lastCommandSeq;
-        private Queue<Command> queuedCommands = new Queue<Command>();
-
-        protected ActorContext(Actor actor, ISnapshotArgs snapshot)
+        internal ActorContext(ActorManager actorManager, Actor actor)
         {
-            if (actor == null)
-                throw new ArgumentNullException("actor");
-
-            this.actor = actor;
-            this.actorSnapshot = snapshot;
-
-            timeline = new Timeline();
-            timeline.AddPoint(actor.Scene.Time, snapshot);
+            this.actorManager = actorManager;
+            this.actor = Actor;
         }
 
-        internal virtual void ApplyEvent(IEventArgs @event)
+        public TActor CreateActor<TActor>(ActorDesc desc)
+            where TActor : Actor, new()
         {
-            var newSnapshot = actor.OnEventApplied(@event);
-            if (newSnapshot == null)
-                throw new InvalidOperationException("Snapshot cannot be null");
-
-            actorSnapshot = newSnapshot;
+            return ActorManager.CreateActor<TActor>(desc);
         }
 
-        public virtual ISnapshotArgs InterpolateSnapshot(int time)
+        public Actor GetActor(ActorId id)
         {
-            var timepoint = timeline.InterpolatePoint(time);
-
-            return timepoint != null ? timepoint.Snapshot : null;
+            return ActorManager.GetActor(id);
         }
 
-        public void EnqueueCommand(Command command)
+        internal ActorManager ActorManager
         {
-            queuedCommands.Enqueue(command);
+            get { return actorManager; }
         }
 
-        public void Update()
-        {
-            lastCommandSeq = null;
-            while (queuedCommands.Count > 0)
-            {
-                var command = queuedCommands.Dequeue();
-
-                actor.OnCommandReceived(command.Args);
-
-                lastCommandSeq = command.Sequence;
-
-                logger.Debug("{0} received command {1}", actor, command);
-            }
-
-            actor.OnUpdate();
-        }
-
-        public Actor Actor
+        internal Actor Actor
         {
             get { return actor; }
-        }
-
-        internal ISnapshotArgs ActorSnapshot
-        {
-            get
-            {
-                actor.Scene.Context.ThrowUnlessSimulating();
-
-                return actorSnapshot;
-            }
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException("snapshot");
-
-                actor.Scene.Context.ThrowUnlessSimulating();
-
-                actorSnapshot = value;
-            }
-        }
-
-        protected Timeline Timeline
-        {
-            get { return timeline; }
-        }
-
-        public int? LastCommandSeq
-        {
-            get { return lastCommandSeq; }
         }
     }
 }

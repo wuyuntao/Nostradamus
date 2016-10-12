@@ -1,29 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Nostradamus
+﻿namespace Nostradamus
 {
-    public enum SceneMode : byte
+    public abstract class SceneDesc : ActorDesc
     {
-        Client,
-        Server,
-    }
-
-    public class SceneDesc
-    {
-        public SceneMode Mode;
-
-        public ClientId ClientId;
 
         public int SimulationDeltaTime;
 
         public int ReconciliationDeltaTime;
 
-        public virtual void Validate()
+        protected internal override ISnapshotArgs InitSnapshot()
         {
+            return new SceneSnapshot();
         }
     }
 }

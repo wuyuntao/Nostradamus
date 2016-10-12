@@ -8,72 +8,53 @@ namespace Nostradamus
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private readonly Scene scene;
-        private readonly ActorId id;
-        private readonly ClientId ownerId;
         private ActorContext context;
+        private ActorDesc desc;
+        private ISnapshotArgs snapshot;
 
-        protected Actor(Scene scene, ActorId id, ClientId ownerId, ISnapshotArgs snapshot)
+        internal Actor()
+        { }
+
+        internal virtual void Initialize(ActorContext context, ActorDesc desc)
         {
-            this.scene = scene;
-            this.id = id;
-            this.ownerId = ownerId;
-            this.context = scene.CreateActorContext(this, snapshot);
+            this.context = context;
+            this.desc = desc;
+            this.snapshot = desc.InitSnapshot();
         }
 
-        public ISnapshotArgs InterpolateSnapshot(int time)
+        protected internal virtual void RecoverSnapshot(ISnapshotArgs snapshot)
         {
-            return context.InterpolateSnapshot(time);
+            Snapshot = snapshot;
         }
 
-        protected internal void ApplyEvent(IEventArgs @event)
+        protected internal virtual void Update()
         {
-            context.ApplyEvent(@event);
         }
 
-        protected internal virtual void OnCommandReceived(ICommandArgs command)
+        protected internal virtual void ReceiveCommand(ICommandArgs command)
         {
-            throw new NotSupportedException(command.GetType().FullName);
+            throw new NotSupportedException(command.ToString());
         }
 
-        protected internal virtual ISnapshotArgs OnEventApplied(IEventArgs @event)
+        protected internal virtual void ApplyEvent(IEventArgs @event)
         {
-            throw new NotSupportedException(@event.GetType().FullName);
-        }
-
-        protected internal abstract void OnUpdate();
-
-        public override string ToString()
-        {
-            if (string.IsNullOrEmpty(id.Description))
-                return string.Format("{0} #{1}", GetType().Name, id.Value);
-            else
-                return string.Format("{0} #{1} ({2})", GetType().Name, id.Value, id.Description);
-        }
-
-        public Scene Scene
-        {
-            get { return scene; }
-        }
-
-        public ActorId Id
-        {
-            get { return id; }
-        }
-
-        public ClientId OwnerId
-        {
-            get { return ownerId; }
-        }
-
-        public ISnapshotArgs Snapshot
-        {
-            get { return context.ActorSnapshot; }
+            throw new NotSupportedException(@event.ToString());
         }
 
         public ActorContext Context
         {
             get { return context; }
+        }
+
+        public ActorDesc Desc
+        {
+            get { return desc; }
+        }
+
+        public ISnapshotArgs Snapshot
+        {
+            get { return snapshot; }
+            protected set { snapshot = value; }
         }
     }
 }

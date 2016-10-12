@@ -4,15 +4,17 @@ namespace Nostradamus
 {
     public sealed class ClientId : IEquatable<ClientId>, IComparable<ClientId>
     {
-        public int Value { get; set; }
+        public readonly int Value;
 
-        public string Description { get; set; }
+        public readonly string Description;
 
         public ClientId(int value, string description = null)
         {
             Value = value;
             Description = description;
         }
+
+        #region IEquatable
 
         public override bool Equals(object obj)
         {
@@ -43,6 +45,8 @@ namespace Nostradamus
                 return string.Format("{0} #{1} ({2})", GetType().Name, Value, Description);
         }
 
+        #endregion
+
         #region IComparable
 
         int IComparable<ClientId>.CompareTo(ClientId other)
@@ -51,6 +55,8 @@ namespace Nostradamus
         }
 
         #endregion
+
+        #region Operator Override
 
         public static bool operator ==(ClientId a, ClientId b)
         {
@@ -64,5 +70,7 @@ namespace Nostradamus
         {
             return !(a == b);
         }
+
+        #endregion
     }
 }

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Nostradamus
 {
-    public sealed class Timeline
+    sealed class Timeline
     {
-        private readonly LinkedList<Timepoint> points = new LinkedList<Timepoint>();
+        private LinkedList<Timepoint> points = new LinkedList<Timepoint>();
 
         public Timepoint AddPoint(int time, ISnapshotArgs snapshot)
         {
