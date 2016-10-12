@@ -63,7 +63,8 @@ namespace Nostradamus.Physics
 
         protected void PhysicsUpdate()
         {
-            world.StepSimulation(Desc.SimulationDeltaTime);
+            var timeStep = Desc.SimulationDeltaTime / 1000f;
+            world.StepSimulation(timeStep, 1, timeStep);
 
             foreach (var actor in Actors)
             {
