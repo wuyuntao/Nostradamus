@@ -1,7 +1,7 @@
 ﻿
 namespace Nostradamus.Examples
 {
-	public class MoveBallCommand : ICommandArgs
+	public class KickBallCommand : ICommandArgs
 	{
 		public float InputX { get; set; }
 

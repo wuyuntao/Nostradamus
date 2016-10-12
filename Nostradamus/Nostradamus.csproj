@@ -108,6 +108,10 @@
     <Compile Include="Core\ActorDesc.cs" />
     <Compile Include="Core\ActorManager.cs" />
     <Compile Include="Client\ClientSimulator.cs" />
+    <Compile Include="Examples\Ball.cs" />
+    <Compile Include="Examples\Cube.cs" />
+    <Compile Include="Examples\KickBallCommand.cs" />
+    <Compile Include="Examples\ExampleScene.cs" />
     <Compile Include="Physics\PhysicsScene.cs" />
     <Compile Include="Physics\PhysicsSceneDesc.cs" />
     <Compile Include="Core\Scene.cs" />

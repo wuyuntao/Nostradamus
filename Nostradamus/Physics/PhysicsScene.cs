@@ -1,5 +1,4 @@
 ﻿using BulletSharp;
-using Nostradamus.Physics;
 
 namespace Nostradamus.Physics
 {
@@ -59,6 +58,11 @@ namespace Nostradamus.Physics
         {
             base.Update();
 
+            PhysicsUpdate();
+        }
+
+        protected void PhysicsUpdate()
+        {
             world.StepSimulation(Desc.SimulationDeltaTime);
 
             foreach (var actor in Actors)
