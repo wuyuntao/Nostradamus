@@ -10,6 +10,7 @@ namespace Nostradamus.Examples
     {
         public static void Run()
         {
+            /*
             var clientId = new ClientId(1);
             var sceneDesc = SimplePhysicsScene.CreateSceneDesc();
             {
@@ -37,6 +38,7 @@ namespace Nostradamus.Examples
 
                 client.Stop();
             }
+            */
         }
     }
 }

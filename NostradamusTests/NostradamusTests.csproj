@@ -100,15 +100,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Client\ClientSimulatorTest.cs" />
-    <Compile Include="Physics\PhysicsSceneTest.cs" />
+    <Compile Include="AssertHelper.cs" />
+    <Compile Include="ClientSimulatorTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Core\TimelineTest.cs" />
-    <Compile Include="Server\ServerSimulatorTest.cs" />
+    <Compile Include="TimelineTest.cs" />
+    <Compile Include="ServerSimulatorTest.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Networking\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config">
       <SubType>Designer</SubType>

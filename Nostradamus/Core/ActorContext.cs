@@ -8,7 +8,7 @@
         internal ActorContext(ActorManager actorManager, Actor actor)
         {
             this.actorManager = actorManager;
-            this.actor = Actor;
+            this.actor = actor;
         }
 
         public TActor CreateActor<TActor>(ActorDesc desc)

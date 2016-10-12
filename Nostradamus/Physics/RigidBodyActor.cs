@@ -14,7 +14,7 @@ namespace Nostradamus.Physics
         {
             base.Initialize(context, actorDesc);
 
-            var desc = (RigidBodyActorDesc)actorDesc;
+            var desc = (RigidBodyDesc)actorDesc;
             var snapshot = (RigidBodySnapshot)Snapshot;
 
             var localInertia = Vector3.Zero;
@@ -43,9 +43,9 @@ namespace Nostradamus.Physics
             base.DisposeManaged();
         }
 
-        protected internal override void RecoverSnapshot(ISnapshotArgs snapshot)
+        protected internal override void OnSnapshotRecovered(ISnapshotArgs snapshot)
         {
-            base.RecoverSnapshot(snapshot);
+            base.OnSnapshotRecovered(snapshot);
 
             var s = (RigidBodySnapshot)snapshot;
             rigidBody.CenterOfMassTransform = Matrix.RotationQuaternion(s.Rotation) * Matrix.Translation(s.Position);
@@ -53,7 +53,7 @@ namespace Nostradamus.Physics
             rigidBody.AngularVelocity = s.AngularVelocity;
         }
 
-        protected internal virtual void PhysicsUpdate()
+        protected internal virtual void OnPhysicsUpdate()
         {
             // TODO: Check threshold with dead reckoning algorithm to reduce the frequency of triggering event
 
@@ -68,7 +68,7 @@ namespace Nostradamus.Physics
             ApplyEvent(@event);
         }
 
-        protected internal override void ApplyEvent(IEventArgs @event)
+        protected override void OnEventApplied(IEventArgs @event)
         {
             if (@event is RigidBodyMovedEvent)
             {
@@ -81,18 +81,10 @@ namespace Nostradamus.Physics
                 s.LinearVelocity = e.LinearVelocity;
                 s.AngularVelocity = e.AngularVelocity;
 
-                logger.Debug("{0} applied {1}: Position: {2}, Rotation: {3}, LinearVelocity: {4}, AngularVelocity: {5}"
-                        , this, @event.GetType().Name, e.Position, e.Rotation, e.LinearVelocity, e.AngularVelocity);
-
                 Snapshot = s;
             }
             else
-                base.ApplyEvent(@event);
-        }
-
-        protected internal override void Update()
-        {
-            base.Update();
+                base.OnEventApplied(@event);
         }
 
         protected void ApplyCentralForce(Vector3 force)

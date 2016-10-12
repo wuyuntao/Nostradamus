@@ -1,9 +1,6 @@
 ﻿using Nostradamus.Networking;
-using Nostradamus.Tests.Client;
-using Nostradamus.Tests.Physics;
-using Nostradamus.Tests.Server;
+using Nostradamus.Tests;
 using System;
-using System.Threading;
 
 namespace Nostradamus.Examples
 {
@@ -13,8 +10,8 @@ namespace Nostradamus.Examples
         {
             Serializer.Initialize();
 
-            //var t1 = new ServerSimulatorTest();
-            //t1.TestSimpleScene();
+            var t1 = new ServerSimulatorTest();
+            t1.TestExampleScene();
 
             //var t2 = new ClientSimulatorTest();
             //t2.TestSimpleScene();
@@ -34,7 +31,7 @@ namespace Nostradamus.Examples
             //    SimpleClientExample.Run();
             //});
 
-            StepByStepExample.Run();
+            //StepByStepExample.Run();
 
             Console.WriteLine("Press any key to stop...");
             Console.ReadLine();

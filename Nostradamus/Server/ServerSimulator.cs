@@ -27,7 +27,11 @@ namespace Nostradamus.Server
             fullSyncFrame = new FullSyncFrame(time, deltaTime);
             deltaSyncFrame = new DeltaSyncFrame(time, deltaTime);
 
+            EventApplied += EnqueueEvent;
+
             Simulate(DequeueCommandsBefore(time + deltaTime));
+
+            EventApplied -= EnqueueEvent;
 
             time += deltaTime;
 
@@ -54,6 +58,11 @@ namespace Nostradamus.Server
             });
 
             return dequeuedCommands;
+        }
+
+        private void EnqueueEvent(Actor actor, IEventArgs @event)
+        {
+            deltaSyncFrame.Events.Add(new Event(actor.Desc.Id, @event));
         }
 
         public FullSyncFrame FullSyncFrame

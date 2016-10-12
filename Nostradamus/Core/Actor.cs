@@ -22,21 +22,28 @@ namespace Nostradamus
             this.snapshot = desc.InitSnapshot();
         }
 
-        protected internal virtual void RecoverSnapshot(ISnapshotArgs snapshot)
+        protected internal virtual void OnSnapshotRecovered(ISnapshotArgs snapshot)
         {
             Snapshot = snapshot;
         }
 
-        protected internal virtual void Update()
+        protected internal virtual void OnUpdate()
         {
         }
 
-        protected internal virtual void ReceiveCommand(ICommandArgs command)
+        protected internal virtual void OnCommandReceived(ICommandArgs command)
         {
             throw new NotSupportedException(command.ToString());
         }
 
-        protected internal virtual void ApplyEvent(IEventArgs @event)
+        internal void ApplyEvent(IEventArgs @event)
+        {
+            context.ActorManager.OnEventApplied(this, @event);
+
+            OnEventApplied(@event);
+        }
+
+        protected virtual void OnEventApplied(IEventArgs @event)
         {
             throw new NotSupportedException(@event.ToString());
         }

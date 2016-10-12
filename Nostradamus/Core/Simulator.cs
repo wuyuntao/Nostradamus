@@ -8,13 +8,16 @@ namespace Nostradamus
     {
         private Scene scene;
 
-        public void CreateScene<TScene>(SceneDesc desc)
+        public TScene CreateScene<TScene>(SceneDesc desc)
             where TScene : Scene, new()
         {
-            if (scene != null)
+            if (this.scene != null)
                 throw new InvalidOperationException();  // TODO: Message
 
-            scene = CreateActor<TScene>(desc);
+            var scene = CreateActor<TScene>(desc);
+            this.scene = scene;
+
+            return scene;
         }
 
         protected void Simulate(IEnumerable<Command> commands)
@@ -23,15 +26,15 @@ namespace Nostradamus
             {
                 var actor = Scene.GetActor(command.ActorId);
 
-                actor.ReceiveCommand(command.Args);
+                actor.OnCommandReceived(command.Args);
             }
 
             foreach (var actor in Scene.Actors)
             {
-                actor.Update();
+                actor.OnUpdate();
             }
 
-            Scene.Update();
+            Scene.OnUpdate();
         }
 
         protected void ApplyEvents(IEnumerable<Event> events)
@@ -55,7 +58,7 @@ namespace Nostradamus
 
         protected void RecoverSnapshot(SimulatorSnapshot snapshot)
         {
-            Scene.RecoverSnapshot(new SceneSnapshot()
+            Scene.OnSnapshotRecovered(new SceneSnapshot()
             {
                 Actors = new List<ActorId>(from actorSnapshot in snapshot.Actors
                                            select actorSnapshot.ActorId)
@@ -65,7 +68,7 @@ namespace Nostradamus
             {
                 var actor = GetActor(actorSnapshot.ActorId);
 
-                actor.RecoverSnapshot(actorSnapshot.Args);
+                actor.OnSnapshotRecovered(actorSnapshot.Args);
             }
         }
 

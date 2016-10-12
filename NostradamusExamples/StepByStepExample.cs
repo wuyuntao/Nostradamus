@@ -14,6 +14,7 @@ namespace Nostradamus.Examples
 
         public static void Run()
         {
+            /*
             var elapsedTime = 0;
             var serverSceneDesc = SimplePhysicsScene.CreateSceneDesc();
             {
@@ -122,8 +123,10 @@ namespace Nostradamus.Examples
 
             client.Stop();
             client.Dispose();
+            */
         }
 
+        /*
         private static void PrintActorSnapshots(SimplePhysicsScene scene, int time)
         {
             logger.Info("~~~~ Begin actor snapshots at {0}. Scene: {1} + {2}", time, scene.Time, scene.DeltaTime);
@@ -137,5 +140,6 @@ namespace Nostradamus.Examples
 
             logger.Info("~~~~ End actor snapshots at {0}. Scene: {1} + {2}", time, scene.Time, scene.DeltaTime);
         }
+        */
     }
 }

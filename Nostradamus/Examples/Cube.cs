@@ -4,16 +4,11 @@ using Nostradamus.Physics;
 
 namespace Nostradamus.Examples
 {
-    public class CubeDesc : RigidBodyActorDesc
+    public class CubeDesc : RigidBodyDesc
     {
-        public CubeDesc(Vector3 initialPosition)
-        {
-            Mass = 1;
-            Shape = new BoxShape(1);
-            CenterOfMassOffset = Matrix.Identity;
-            IsKinematic = false;
-            StartTransform = Matrix.Translation(initialPosition);
-        }
+        public CubeDesc(ActorId id, Vector3 initialPosition)
+            : base(id, 1, new BoxShape(1), Matrix.Identity, Matrix.Translation(initialPosition), false)
+        { }
 
         protected internal override ISnapshotArgs InitSnapshot()
         {

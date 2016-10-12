@@ -54,9 +54,9 @@ namespace Nostradamus.Physics
             }
         }
 
-        protected internal override void Update()
+        protected internal override void OnUpdate()
         {
-            base.Update();
+            base.OnUpdate();
 
             PhysicsUpdate();
         }
@@ -69,7 +69,7 @@ namespace Nostradamus.Physics
             {
                 if (actor is RigidBodyActor)
                 {
-                    ((RigidBodyActor)actor).PhysicsUpdate();
+                    ((RigidBodyActor)actor).OnPhysicsUpdate();
                 }
             }
         }

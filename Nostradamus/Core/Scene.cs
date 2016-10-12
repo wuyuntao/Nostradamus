@@ -17,18 +17,14 @@ namespace Nostradamus
             return Context.GetActor(id) as SceneActor;
         }
 
-        public void AddActor(SceneActor actor)
+        public void AddActor(SceneSnapshot snapshot, SceneActor actor)
         {
-            var snapshot = (SceneSnapshot)Snapshot;
-
             if (!snapshot.Actors.Contains(actor.Desc.Id))
                 snapshot.Actors.Add(actor.Desc.Id);
         }
 
-        public void RemoveActor(SceneActor actor)
+        public void RemoveActor(SceneSnapshot snapshot, SceneActor actor)
         {
-            var snapshot = (SceneSnapshot)Snapshot;
-
             if (snapshot.Actors.Contains(actor.Desc.Id))
                 snapshot.Actors.Remove(actor.Desc.Id);
         }

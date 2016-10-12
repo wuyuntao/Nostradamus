@@ -2,7 +2,7 @@
 
 namespace Nostradamus
 {
-    public sealed class ActorId : IEquatable<ActorId>, IComparable<ActorId>
+    public struct ActorId : IEquatable<ActorId>, IComparable<ActorId>
     {
         public readonly int Value;
 
@@ -26,7 +26,10 @@ namespace Nostradamus
 
         public bool Equals(ActorId other)
         {
-            return Value.Equals(other.Value);
+            if (ReferenceEquals(other, null))
+                return false;
+            else
+                return Value.Equals(other.Value);
         }
 
         public override int GetHashCode()
@@ -57,7 +60,10 @@ namespace Nostradamus
 
         public static bool operator ==(ActorId a, ActorId b)
         {
-            return a.Equals(b);
+            if (ReferenceEquals(a, null))
+                return ReferenceEquals(b, null);
+            else
+                return a.Equals(b);
         }
 
         public static bool operator !=(ActorId a, ActorId b)

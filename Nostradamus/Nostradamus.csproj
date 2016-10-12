@@ -112,6 +112,7 @@
     <Compile Include="Examples\Cube.cs" />
     <Compile Include="Examples\KickBallCommand.cs" />
     <Compile Include="Examples\ExampleScene.cs" />
+    <Compile Include="Examples\SceneInitializedEvent.cs" />
     <Compile Include="Physics\PhysicsScene.cs" />
     <Compile Include="Physics\PhysicsSceneDesc.cs" />
     <Compile Include="Core\Scene.cs" />
@@ -150,7 +151,7 @@
     <Compile Include="Networking\ReliableUdpServer.cs" />
     <Compile Include="Networking\Serializer.cs" />
     <Compile Include="Physics\RigidBodyActor.cs" />
-    <Compile Include="Physics\RigidBodyActorDesc.cs" />
+    <Compile Include="Physics\RigidBodyDesc.cs" />
     <Compile Include="Physics\RigidBodyMovedEvent.cs" />
     <Compile Include="Physics\RigidBodySnapshot.cs" />
     <Compile Include="Physics\SceneColliderDesc.cs" />

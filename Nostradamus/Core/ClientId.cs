@@ -2,7 +2,7 @@
 
 namespace Nostradamus
 {
-    public sealed class ClientId : IEquatable<ClientId>, IComparable<ClientId>
+    public struct ClientId : IEquatable<ClientId>, IComparable<ClientId>
     {
         public readonly int Value;
 
@@ -28,8 +28,8 @@ namespace Nostradamus
         {
             if (ReferenceEquals(other, null))
                 return false;
-
-            return Value.Equals(other.Value);
+            else
+                return Value.Equals(other.Value);
         }
 
         public override int GetHashCode()

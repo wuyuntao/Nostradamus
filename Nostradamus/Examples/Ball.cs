@@ -4,15 +4,11 @@ using Nostradamus.Physics;
 
 namespace Nostradamus.Examples
 {
-    public class BallDesc : RigidBodyActorDesc
+    public class BallDesc : RigidBodyDesc
     {
-        public BallDesc(Vector3 initialPosition)
-        {
-            Mass = 10;
-            Shape = new SphereShape(2.5f);
-            CenterOfMassOffset = Matrix.Identity;
-            StartTransform = Matrix.Translation(initialPosition);
-        }
+        public BallDesc(ActorId id, Vector3 initialPosition)
+            : base(id, 10, new SphereShape(2.5f), Matrix.Identity, Matrix.Translation(initialPosition), false)
+        { }
 
         protected internal override ISnapshotArgs InitSnapshot()
         {
@@ -28,7 +24,7 @@ namespace Nostradamus.Examples
     {
         bool hasMoved;
 
-        protected internal override void ReceiveCommand(ICommandArgs command)
+        protected internal override void OnCommandReceived(ICommandArgs command)
         {
             if (command is KickBallCommand)
             {
@@ -51,12 +47,12 @@ namespace Nostradamus.Examples
                 hasMoved = true;
             }
             else
-                base.ReceiveCommand(command);
+                base.OnCommandReceived(command);
         }
 
-        protected internal override void Update()
+        protected internal override void OnUpdate()
         {
-            base.Update();
+            base.OnUpdate();
 
             hasMoved = false;
         }

@@ -4,8 +4,12 @@ using System.Collections.Generic;
 
 namespace Nostradamus
 {
+    public delegate void EventAppliedEventHandler(Actor actor, IEventArgs @event);
+
     public abstract class ActorManager : Disposable
     {
+        public event EventAppliedEventHandler EventApplied;
+
         protected Dictionary<ActorId, ActorContext> Actors { get; private set; }
 
         protected ActorManager()
@@ -49,6 +53,11 @@ namespace Nostradamus
                 return context.Actor;
             else
                 return null;
+        }
+
+        internal void OnEventApplied(Actor actor, IEventArgs @event)
+        {
+            EventApplied?.Invoke(actor, @event);
         }
     }
 }
