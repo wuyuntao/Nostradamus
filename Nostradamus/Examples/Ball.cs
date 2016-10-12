@@ -6,6 +6,10 @@ namespace Nostradamus.Examples
 {
     public class BallDesc : RigidBodyDesc
     {
+        public readonly float HorizontalForceFactor = 1000;
+
+        public readonly float VerticalForceFactor = 1000;
+
         public BallDesc(ActorId id, Vector3 initialPosition)
             : base(id, 10, new SphereShape(2.5f), Matrix.Identity, Matrix.Translation(initialPosition), false)
         { }
@@ -22,29 +26,17 @@ namespace Nostradamus.Examples
 
     public class Ball : RigidBodyActor
     {
-        bool hasMoved;
+        private Vector3 inputVector;
+        private int inputCount;
 
         protected internal override void OnCommandReceived(ICommandArgs command)
         {
             if (command is KickBallCommand)
             {
-                if (hasMoved)
-                    return;
-
                 var c = (KickBallCommand)command;
-                var horizontal = new Vector3(c.InputX, 0, c.InputZ) * 1000;
-                if (horizontal.LengthSquared > 0)
-                {
-                    ApplyCentralForce(horizontal);
-                }
 
-                var vertical = new Vector3(0, c.InputY, 0) * 2000;
-                if (vertical.LengthSquared > 0)
-                {
-                    ApplyCentralForce(vertical);
-                }
-
-                hasMoved = true;
+                inputVector += new Vector3(c.InputX, c.InputY, c.InputZ);
+                inputCount++;
             }
             else
                 base.OnCommandReceived(command);
@@ -54,7 +46,17 @@ namespace Nostradamus.Examples
         {
             base.OnUpdate();
 
-            hasMoved = false;
+            if (inputCount > 0)
+            {
+                var desc = (BallDesc)Desc;
+                var force = new Vector3(inputVector.X * desc.HorizontalForceFactor, inputVector.Y * desc.VerticalForceFactor, inputVector.Z * desc.HorizontalForceFactor) / inputCount;
+
+                if (force.LengthSquared > 0)
+                    ApplyCentralForce(force);
+
+                inputVector = Vector3.Zero;
+                inputCount = 0;
+            }
         }
     }
 }

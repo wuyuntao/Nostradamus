@@ -119,6 +119,7 @@ namespace Nostradamus.Client
                     }
                 }
 
+                // TODO: Get jitter detail for analysis
                 if (!currentSnapshot.IsApproximate(predictiveTimeline.Last.Snapshot))
                     logger.Warn("Correction done with possible jitter");
             }

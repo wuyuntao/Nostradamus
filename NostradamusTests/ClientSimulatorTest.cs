@@ -196,7 +196,7 @@ namespace Nostradamus.Tests
             var ball = (RigidBodySnapshot)scene.Ball.Snapshot;
             AssertHelper.AreApproximate(-2.57222223f, ball.Position.X);
             AssertHelper.AreApproximate(2.57275009f, ball.Position.Y);
-            AssertHelper.AreApproximate(-2.57222223f, ball.Position.Z);
+            AssertHelper.AreApproximate(-2.57916665f, ball.Position.Z);
 
             var cube = (RigidBodySnapshot)scene.Cube.Snapshot;
             AssertHelper.AreApproximate(1.1f, cube.Position.X);
@@ -217,9 +217,9 @@ namespace Nostradamus.Tests
             Assert.AreEqual(5, frame.LastCommandSeqs[clientId]);
 
             var ball = (RigidBodySnapshot)scene.Ball.Snapshot;
-            AssertHelper.AreApproximate(-2.53055549f, ball.Position.X);
+            AssertHelper.AreApproximate(-2.52592587f, ball.Position.X);
             AssertHelper.AreApproximate(2.55912519f, ball.Position.Y);
-            AssertHelper.AreApproximate(-2.51666665f, ball.Position.Z);
+            AssertHelper.AreApproximate(-2.53055549f, ball.Position.Z);
 
             var cube = (RigidBodySnapshot)scene.Cube.Snapshot;
             AssertHelper.AreApproximate(1.1f, cube.Position.X);
@@ -387,7 +387,7 @@ namespace Nostradamus.Tests
             var ball = (RigidBodySnapshot)scene.Ball.Snapshot;
             AssertHelper.AreApproximate(-2.13158202f, ball.Position.X);
             AssertHelper.AreApproximate(2.49999809f, ball.Position.Y);
-            AssertHelper.AreApproximate(-2.04862928f, ball.Position.Z);
+            AssertHelper.AreApproximate(-2.09020805f, ball.Position.Z);
 
             var cube = (RigidBodySnapshot)scene.Cube.Snapshot;
             AssertHelper.AreApproximate(1.1f, cube.Position.X);
