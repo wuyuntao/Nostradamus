@@ -32,11 +32,11 @@ namespace Nostradamus.Server
 
             EventApplied -= EnqueueEvent;
 
-            time += deltaTime;
-
             var snapshot = CreateSnapshot();
 
             fullSyncFrame = new FullSyncFrame(time, deltaTime, snapshot);
+
+            time += deltaTime;
 
             compensationTimeline.AddPoint(time, snapshot);
         }

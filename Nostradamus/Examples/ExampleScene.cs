@@ -46,12 +46,12 @@ namespace Nostradamus.Examples
 
                 var cubeId = new ActorId(2);
                 var cubeDesc = new CubeDesc(cubeId, new Vector3(1.1f, 1.1f, 1.1f));
-                var cube = Context.CreateActor<Cube>(cubeDesc);
+                cube = Context.CreateActor<Cube>(cubeDesc);
                 AddActor(s, cube);
 
                 var ballId = new ActorId(3);
                 var ballDesc = new BallDesc(ballId, new Vector3(-2.6f, 2.6f, -2.6f));
-                var ball = Context.CreateActor<Ball>(ballDesc);
+                ball = Context.CreateActor<Ball>(ballDesc);
                 AddActor(s, ball);
 
                 Snapshot = s;

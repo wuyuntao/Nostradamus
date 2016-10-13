@@ -23,6 +23,11 @@ namespace Nostradamus.Server
             Events = new List<Event>();
             LastCommandSeqs = new SortedList<ClientId, int>();
         }
+
+        public override string ToString()
+        {
+            return string.Format("{0} (Time: {1}, DeltaTime: {2}, Events: {3})", GetType().Name, Time, DeltaTime, Events.Count);
+        }
     }
 
     class CommandSeqSerializer : Serializer<KeyValuePair<ClientId, int>, Schema.CommandSeq>

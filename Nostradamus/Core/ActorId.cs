@@ -82,7 +82,9 @@ namespace Nostradamus
 
         public override Offset<Schema.ActorId> Serialize(FlatBufferBuilder fbb, ActorId id)
         {
-            return Schema.ActorId.CreateActorId(fbb, id.Value, fbb.CreateString(id.Description));
+            var desc = string.IsNullOrEmpty(id.Description) ? default(StringOffset) : fbb.CreateString(id.Description);
+
+            return Schema.ActorId.CreateActorId(fbb, id.Value, desc);
         }
 
         public override ActorId Deserialize(Schema.ActorId id)

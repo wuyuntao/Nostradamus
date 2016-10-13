@@ -82,7 +82,9 @@ namespace Nostradamus
 
         public override Offset<Schema.ClientId> Serialize(FlatBufferBuilder fbb, ClientId id)
         {
-            return Schema.ClientId.CreateClientId(fbb, id.Value, fbb.CreateString(id.Description));
+            var desc = string.IsNullOrEmpty(id.Description) ? default(StringOffset) : fbb.CreateString(id.Description);
+
+            return Schema.ClientId.CreateClientId(fbb, id.Value, desc);
         }
 
         public override ClientId Deserialize(Schema.ClientId id)

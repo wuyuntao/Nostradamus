@@ -15,6 +15,11 @@ namespace Nostradamus.Client
             ClientId = clientId;
             Commands = new List<Command>();
         }
+
+        public override string ToString()
+        {
+            return string.Format("{0} (Commands: {1})", GetType().Name, Commands.Count);
+        }
     }
 
     class CommandFrameSerializer : Serializer<CommandFrame, Schema.CommandFrame>

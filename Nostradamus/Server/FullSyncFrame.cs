@@ -21,6 +21,11 @@ namespace Nostradamus.Server
             DeltaTime = deltaTime;
             Snapshot = snapshot;
         }
+
+        public override string ToString()
+        {
+            return string.Format("{0} (Time: {1}, DeltaTime: {2}, Actors: {3})", GetType().Name, Time, DeltaTime, Snapshot.Actors.Count);
+        }
     }
 
     class FullSyncFrameSerializer : Serializer<FullSyncFrame, Schema.FullSyncFrame>

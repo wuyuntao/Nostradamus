@@ -10,14 +10,11 @@ namespace Nostradamus.Examples
         {
             Serializer.Initialize();
 
-            var t1 = new ServerSimulatorTest();
-            t1.TestExampleScene();
+            //var t1 = new ServerSimulatorTest();
+            //t1.TestExampleScene();
 
-            var t2 = new ClientSimulatorTest();
-            t2.TestExampleScene();
-
-            //var t3 = new PhysicsSceneTest();
-            //t3.TestSimplePhysicsScene();
+            //var t2 = new ClientSimulatorTest();
+            //t2.TestExampleScene();
 
             //ThreadPool.QueueUserWorkItem(s =>
             //{
@@ -30,7 +27,7 @@ namespace Nostradamus.Examples
             //    SimpleClientExample.Run();
             //});
 
-            //StepByStepExample.Run();
+            StepByStepExample.Run();
 
             Console.WriteLine("Press ENTER to exit...");
             Console.ReadLine();
