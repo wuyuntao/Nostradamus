@@ -1,7 +1,6 @@
 ﻿using NLog;
 using Nostradamus.Client;
 using Nostradamus.Networking;
-using Nostradamus.Physics;
 using Nostradamus.Server;
 using System;
 using System.Net;
@@ -14,30 +13,27 @@ namespace Nostradamus.Examples
 
         public static void Run()
         {
-            /*
             var elapsedTime = 0;
-            var serverSceneDesc = SimplePhysicsScene.CreateSceneDesc();
-            {
-                serverSceneDesc.Mode = SceneMode.Server;
-                serverSceneDesc.SimulationDeltaTime = 50;
-            };
-            var serverScene = new SimplePhysicsScene(serverSceneDesc);
-            var serverSceneContext = (ServerSceneContext)serverScene.Context;
-            var server = new ReliableUdpServer(serverScene, 9000);
+
+            var serverSimulator = new ServerSimulator();
+            RegisterActorFactories(serverSimulator);
+
+            var serverSceneDesc = new ExampleSceneDesc(50, 50);
+            var serverScene = serverSimulator.CreateScene<ExampleScene>(serverSceneDesc);
+
+            var server = new ReliableUdpServer(serverSimulator, 9000);
             server.Start();
             var serverNextTime = 0;
             var serverAddress = new IPEndPoint(IPAddress.Loopback, 9000);
 
             var clientId = new ClientId(1);
-            var clientSceneDesc = SimplePhysicsScene.CreateSceneDesc();
-            {
-                clientSceneDesc.Mode = SceneMode.Client;
-                clientSceneDesc.SimulationDeltaTime = 20;
-                clientSceneDesc.ReconciliationDeltaTime = 50;
-            };
-            var clientScene = new SimplePhysicsScene(clientSceneDesc);
-            var clientSceneContext = (ClientSceneContext)clientScene.Context;
-            var client = new ReliableUdpClient(clientScene, serverAddress);
+            var clientSimulator = new ClientSimulator(clientId);
+            RegisterActorFactories(clientSimulator);
+
+            var clientSceneDesc = new ExampleSceneDesc(20, 50);
+            var clientScene = clientSimulator.CreateScene<ExampleScene>(clientSceneDesc);
+
+            var client = new ReliableUdpClient(clientSimulator, serverAddress);
             var clientNextTime = 60;
             var clientRunning = false;
 
@@ -55,7 +51,7 @@ namespace Nostradamus.Examples
                         {
                             logger.Info("++++ Begin server update at {0}ms", serverNextTime);
                             server.Update();
-                            PrintActorSnapshots(serverScene, serverScene.Time + serverScene.DeltaTime);
+                            //PrintActorSnapshots(serverScene, serverScene.Time + serverScene.DeltaTime);
                             logger.Info("++++ End server update at {0}ms", serverNextTime);
 
                             serverNextTime += 50;
@@ -77,13 +73,13 @@ namespace Nostradamus.Examples
                                 clientRunning = true;
                                 logger.Info("---- End Client update at {0}ms", clientNextTime);
 
-                                PrintActorSnapshots(clientScene, elapsedTime - 60);
+                                //PrintActorSnapshots(clientScene, elapsedTime - 60);
                                 clientNextTime += 20;
                             }
                         }
                         else if (clientRunning)
                         {
-                            PrintActorSnapshots(clientScene, elapsedTime - 60);
+                            //PrintActorSnapshots(clientScene, elapsedTime - 60);
                         }
 
                         break;
@@ -92,23 +88,23 @@ namespace Nostradamus.Examples
                         goto End;
 
                     case ConsoleKey.LeftArrow:
-                        if (clientSceneContext != null && clientScene.Ball != null)
-                            clientSceneContext.ReceiveCommand(clientScene.Ball.Id, new MoveBallCommand() { InputX = -1 });
+                        if (clientSimulator != null && clientScene.Ball != null)
+                            clientSimulator.ReceiveCommand(clientScene.Ball, new KickBallCommand(x: -1));
                         break;
 
                     case ConsoleKey.UpArrow:
-                        if (clientSceneContext != null && clientScene.Ball != null)
-                            clientSceneContext.ReceiveCommand(clientScene.Ball.Id, new MoveBallCommand() { InputZ = 1 });
+                        if (clientSimulator != null && clientScene.Ball != null)
+                            clientSimulator.ReceiveCommand(clientScene.Ball, new KickBallCommand(z: 1));
                         break;
 
                     case ConsoleKey.RightArrow:
-                        if (clientSceneContext != null && clientScene.Ball != null)
-                            clientSceneContext.ReceiveCommand(clientScene.Ball.Id, new MoveBallCommand() { InputX = 1 });
+                        if (clientSimulator != null && clientScene.Ball != null)
+                            clientSimulator.ReceiveCommand(clientScene.Ball, new KickBallCommand(x: 1));
                         break;
 
                     case ConsoleKey.DownArrow:
-                        if (clientSceneContext != null && clientScene.Ball != null)
-                            clientSceneContext.ReceiveCommand(clientScene.Ball.Id, new MoveBallCommand() { InputZ = -1 });
+                        if (clientSimulator != null && clientScene.Ball != null)
+                            clientSimulator.ReceiveCommand(clientScene.Ball, new KickBallCommand(z: -1));
                         break;
 
                     default:
@@ -123,23 +119,13 @@ namespace Nostradamus.Examples
 
             client.Stop();
             client.Dispose();
-            */
         }
 
-        /*
-        private static void PrintActorSnapshots(SimplePhysicsScene scene, int time)
+        private static void RegisterActorFactories(Simulator simulator)
         {
-            logger.Info("~~~~ Begin actor snapshots at {0}. Scene: {1} + {2}", time, scene.Time, scene.DeltaTime);
-
-            foreach (var actor in scene.Actors)
-            {
-                var snapshot = (RigidBodySnapshot)actor.InterpolateSnapshot(time);
-
-                logger.Debug("{0}: Position: {1}, Rotation: {2}", actor, snapshot.Position, snapshot.Rotation);
-            }
-
-            logger.Info("~~~~ End actor snapshots at {0}. Scene: {1} + {2}", time, scene.Time, scene.DeltaTime);
+            simulator.RegisterActorFactory<ExampleSceneDesc, ExampleScene>(desc => new ExampleScene());
+            simulator.RegisterActorFactory<BallDesc, Ball>(desc => new Ball());
+            simulator.RegisterActorFactory<CubeDesc, Cube>(desc => new Cube());
         }
-        */
     }
 }
