@@ -54,12 +54,12 @@ namespace Nostradamus.Tests
 
             var ball100 = (RigidBodySnapshot)scene.Ball.Snapshot;
             AssertHelper.AreApproximate(-2.3499999f, ball100.Position.X);
-            AssertHelper.AreApproximate(2.52642488f, ball100.Position.Y);
+            AssertHelper.AreApproximate(2.52669716f, ball100.Position.Y);
             AssertHelper.AreApproximate(-2.3499999f, ball100.Position.Z);
 
             var cube100 = (RigidBodySnapshot)scene.Cube.Snapshot;
             AssertHelper.AreApproximate(1.1f, cube100.Position.X);
-            AssertHelper.AreApproximate(1.026425f, cube100.Position.Y);
+            AssertHelper.AreApproximate(1.02669704f, cube100.Position.Y);
             AssertHelper.AreApproximate(1.1f, cube100.Position.Z);
         }
     }

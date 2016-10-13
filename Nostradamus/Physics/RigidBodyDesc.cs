@@ -16,7 +16,19 @@ namespace Nostradamus.Physics
 
         public readonly bool IsKinematic;
 
-        protected RigidBodyDesc(ActorId id, float mass, CollisionShape shape, Matrix centerOfMassOffset, Matrix startTransform, bool isKinematic)
+        public readonly float LinearDamping;
+
+        public readonly float AngularDamping;
+
+        public readonly float Friction;
+
+        public readonly float RollingFriction;
+
+        public readonly float Restitution;
+
+        protected RigidBodyDesc(ActorId id, float mass, CollisionShape shape, Matrix centerOfMassOffset, Matrix startTransform, bool isKinematic = false
+                              , float friction = 0, float rollingFriction = 0, float restitution = 0
+                              , float linearDamping = 0, float angularDamping = 0)
             : base(id)
         {
             if (mass <= 0)
@@ -30,6 +42,11 @@ namespace Nostradamus.Physics
             CenterOfMassOffset = centerOfMassOffset;
             StartTransform = startTransform;
             IsKinematic = isKinematic;
+            LinearDamping = linearDamping;
+            AngularDamping = angularDamping;
+            Friction = friction;
+            RollingFriction = rollingFriction;
+            Restitution = restitution;
         }
     }
 }

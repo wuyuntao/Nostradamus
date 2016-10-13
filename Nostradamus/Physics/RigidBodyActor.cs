@@ -25,6 +25,12 @@ namespace Nostradamus.Physics
 
             using (var rbInfo = new RigidBodyConstructionInfo(desc.Mass, motionState, desc.Shape, localInertia))
             {
+                rbInfo.Friction = desc.Friction;
+                rbInfo.RollingFriction = desc.RollingFriction;
+                rbInfo.Restitution = desc.Restitution;
+                rbInfo.LinearDamping = desc.LinearDamping;
+                rbInfo.AngularDamping = desc.AngularDamping;
+
                 rigidBody = new RigidBody(rbInfo);
                 rigidBody.UserObject = this;
 
@@ -32,6 +38,9 @@ namespace Nostradamus.Physics
                     rigidBody.CollisionFlags |= CollisionFlags.KinematicObject;
 
                 Scene.World.AddRigidBody(rigidBody);
+
+                logger.Debug("Create RigidBody for {0}: Mass: {1}, Shape: {2}, Friction: {3}, RollingFriction: {4}, Restitution: {5}, LinearDamping: {6}, AngularDamping: {7}"
+                        , this, 1 / rigidBody.InvMass, rigidBody.CollisionShape, rigidBody.Friction, rigidBody.RollingFriction, rigidBody.Restitution, rigidBody.LinearDamping, rigidBody.AngularDamping);
             }
         }
 

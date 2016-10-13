@@ -11,7 +11,7 @@ namespace Nostradamus.Examples
         public readonly float VerticalForceFactor = 1000;
 
         public BallDesc(ActorId id, Vector3 initialPosition)
-            : base(id, 10, new SphereShape(2.5f), Matrix.Identity, Matrix.Translation(initialPosition), false)
+            : base(id, 10, new SphereShape(2.5f), Matrix.Identity, Matrix.Translation(initialPosition), false, 1, 1, 0.8f, 0.2f, 0.2f)
         { }
 
         protected internal override ISnapshotArgs InitSnapshot()
