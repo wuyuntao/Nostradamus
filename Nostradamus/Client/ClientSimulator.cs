@@ -162,13 +162,26 @@ namespace Nostradamus.Client
 
                     snapshot = (SimulatorSnapshot)((ISnapshotArgs)snapshot).Interpolate(authoritativeSnapshot, Scene.Desc.ConvergenceRate);
 
-                    predictiveTimeline.AddPoint(time + Scene.Desc.SimulationDeltaTime, snapshot);
+                    if (authoritativeSnapshot.IsApproximate(snapshot))
+                    {
+                        logger.Debug("All commands are acknowledged and convergence is done in advance: {0} < {1}", time, nextConvergenceTime);
 
-                    logger.Debug("All commands are acknowledged and convergence predictive timeline");
+                        snapshot = (SimulatorSnapshot)authoritativeSnapshot;
+
+                        predictiveTimeline = null;
+                        nextConvergenceTime = null;
+                    }
+                    else
+                    {
+                        predictiveTimeline.AddPoint(time + Scene.Desc.SimulationDeltaTime, snapshot);
+
+                        logger.Debug("All commands are acknowledged and convergence predictive timeline");
+                    }
                 }
                 else
                 {
                     predictiveTimeline = null;
+                    nextConvergenceTime = null;
 
                     snapshot = (SimulatorSnapshot)authoritativeTimeline.InterpolatePoint(time + Scene.Desc.SimulationDeltaTime).Snapshot;
 

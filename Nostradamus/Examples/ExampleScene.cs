@@ -8,7 +8,7 @@ namespace Nostradamus.Examples
     public class ExampleSceneDesc : PhysicsSceneDesc
     {
         public ExampleSceneDesc(int simulationDeltaTime, int reconciliationDeltaTime)
-            : base(new ActorId(1), simulationDeltaTime, reconciliationDeltaTime, 3000, 0.1f, DefaultGravity, CreateColliders())
+            : base(new ActorId(1), simulationDeltaTime, reconciliationDeltaTime, 500, 0.3f, DefaultGravity, CreateColliders())
         { }
 
         private static SceneColliderDesc[] CreateColliders()
