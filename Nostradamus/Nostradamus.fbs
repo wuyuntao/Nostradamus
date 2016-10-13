@@ -1,5 +1,11 @@
 namespace Nostradamus.Schema;
 
+// Common
+table MessageEnvelope {
+	id: string;
+	data: [ubyte];
+}
+
 table ActorId {
 	value: int;
 	description: string;
@@ -10,12 +16,8 @@ table ClientId {
 	description: string;
 }
 
-table MessageEnvelope {
-	id: string;
-	data: [ubyte];
-}
-
 table Command {
+	clientId: ClientId (required);
 	actorId: ActorId (required);
 	sequence: int;
 	time: int;
@@ -23,21 +25,50 @@ table Command {
 	args: MessageEnvelope (required);
 }
 
-table CommandFrame {
-	clientId: ClientId (required);
-	commands: [Command];
-}
-
 table Event {
 	actorId: ActorId (required);
 	args: MessageEnvelope (required);
 }
 
-table Snapshot {
-	actorId: ActorId (required);
-	args: MessageEnvelope (required);
+table ActorSnapshot {
+    desc: MessageEnvelope (required);
+    args: MessageEnvelope (required);
 }
 
+table SimulatorSnapshot {
+    actors: [ActorSnapshot];
+}
+
+// Client
+table CommandFrame {
+	clientId: ClientId (required);
+	commands: [Command];
+}
+
+// Server
+table FullSyncFrame {
+	time: int;
+	deltaTime: int;
+	snapshot: SimulatorSnapshot;
+}
+
+table CommandSeq {
+	clientId: ClientId (required);
+	sequence: int;
+}
+
+table DeltaSyncFrame {
+	time: int;
+	deltaTime: int;
+	events: [Event];
+	lastCommandSeqs: [CommandSeq];
+}
+
+table Login {
+    clientId: ClientId (required);
+}
+
+// Physics
 table Vector3 {
 	x: float;
 	y: float;
@@ -65,24 +96,22 @@ table RigidBodySnapshot {
 	angularVelocity: Vector3;
 }
 
-table FullSyncFrame {
-	time: int;
-	deltaTime: int;
-	snapshots: [Snapshot];
+// Examples
+table BallDesc {
+    id: ActorId (required);
+    initialPosition: Vector3 (required);
 }
 
-table CommandSeq {
-	clientId: ClientId (required);
-	sequence: int;
+table CubeDesc {
+    id: ActorId (required);
+    initialPosition: Vector3 (required);
 }
 
-table DeltaSyncFrame {
-	time: int;
-	deltaTime: int;
-	events: [Event];
-	lastCommandSeqs: [CommandSeq];
+table KickBallCommand {
+    inputX: float;
+    inputY: float;
+    inputZ: float;
 }
 
-table Login {
-    clientId: ClientId (required);
+table SceneInitializedEvent {
 }

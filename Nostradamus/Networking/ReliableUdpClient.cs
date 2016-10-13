@@ -148,7 +148,7 @@ namespace Nostradamus.Networking
             switch (status)
             {
                 case NetConnectionStatus.Connected:
-                    SendMessage(new Login() { ClientId = simulator.ClientId });
+                    SendMessage(new Login(simulator.ClientId));
                     break;
 
                 case NetConnectionStatus.Disconnected:
@@ -159,7 +159,7 @@ namespace Nostradamus.Networking
 
         private void SendMessage(object message)
         {
-            var bytes = Serializer.Serialize(new MessageEnvelope() { Message = message });
+            var bytes = Serializer.Serialize(new MessageEnvelope(message));
 
             var msg = client.CreateMessage();
             msg.Write(bytes);

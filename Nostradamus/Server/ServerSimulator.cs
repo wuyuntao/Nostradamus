@@ -24,7 +24,6 @@ namespace Nostradamus.Server
         {
             var deltaTime = Scene.Desc.SimulationDeltaTime;
 
-            fullSyncFrame = new FullSyncFrame(time, deltaTime);
             deltaSyncFrame = new DeltaSyncFrame(time, deltaTime);
 
             EventApplied += EnqueueEvent;
@@ -37,7 +36,7 @@ namespace Nostradamus.Server
 
             var snapshot = CreateSnapshot();
 
-            fullSyncFrame.Snapshot = snapshot;
+            fullSyncFrame = new FullSyncFrame(time, deltaTime, snapshot);
 
             compensationTimeline.AddPoint(time, snapshot);
         }

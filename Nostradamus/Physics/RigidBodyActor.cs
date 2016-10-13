@@ -1,6 +1,7 @@
 ﻿using BulletSharp;
 using BulletSharp.Math;
 using NLog;
+using Nostradamus.Server;
 
 namespace Nostradamus.Physics
 {
@@ -60,6 +61,8 @@ namespace Nostradamus.Physics
             rigidBody.CenterOfMassTransform = Matrix.RotationQuaternion(s.Rotation) * Matrix.Translation(s.Position);
             rigidBody.LinearVelocity = s.LinearVelocity;
             rigidBody.AngularVelocity = s.AngularVelocity;
+
+            logger.Debug("Rigidbody recovered for {0}. {1}", this, s);
         }
 
         protected internal virtual void OnPhysicsUpdate()

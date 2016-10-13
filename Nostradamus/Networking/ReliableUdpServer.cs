@@ -138,7 +138,7 @@ namespace Nostradamus.Networking
 
         private void SendMessage(Client client, object message)
         {
-            var bytes = Serializer.Serialize(new MessageEnvelope() { Message = message });
+            var bytes = Serializer.Serialize(new MessageEnvelope(message));
 
             var msg = server.CreateMessage();
             msg.Write(bytes);
@@ -148,7 +148,7 @@ namespace Nostradamus.Networking
 
         private void SendMessageToAll(object message)
         {
-            var bytes = Serializer.Serialize(new MessageEnvelope() { Message = message });
+            var bytes = Serializer.Serialize(new MessageEnvelope(message));
 
             var msg = server.CreateMessage();
             msg.Write(bytes);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FlatBuffers;
+using Nostradamus.Networking;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -81,5 +82,43 @@ namespace Nostradamus
         }
 
         #endregion
+    }
+
+    class SimulatorSnapshotSerializer : Serializer<SimulatorSnapshot, Schema.SimulatorSnapshot>
+    {
+        public static readonly SimulatorSnapshotSerializer Instance = new SimulatorSnapshotSerializer();
+
+        public override Offset<Schema.SimulatorSnapshot> Serialize(FlatBufferBuilder fbb, SimulatorSnapshot snapshot)
+        {
+            var oActors = new Offset<Schema.ActorSnapshot>[snapshot.Actors.Count];
+            for (int i = 0; i < snapshot.Actors.Count; i++)
+            {
+                var oActor = ActorSnapshotSerializer.Instance.Serialize(fbb, snapshot.Actors[i]);
+
+                oActors[i] = oActor;
+            }
+            var voActors = Schema.SimulatorSnapshot.CreateActorsVector(fbb, oActors);
+
+            return Schema.SimulatorSnapshot.CreateSimulatorSnapshot(fbb, voActors);
+        }
+
+        public override SimulatorSnapshot Deserialize(Schema.SimulatorSnapshot snapshot)
+        {
+            var actors = new List<ActorSnapshot>();
+
+            for (int i = 0; i < snapshot.ActorsLength; i++)
+            {
+                var actor = snapshot.Actors(i).Value;
+
+                actors.Add(ActorSnapshotSerializer.Instance.Deserialize(actor));
+            }
+
+            return new SimulatorSnapshot() { Actors = actors };
+        }
+
+        public override Schema.SimulatorSnapshot ToFlatBufferObject(ByteBuffer buffer)
+        {
+            return Schema.SimulatorSnapshot.GetRootAsSimulatorSnapshot(buffer);
+        }
     }
 }

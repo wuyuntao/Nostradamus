@@ -1,29 +1,8 @@
-﻿using BulletSharp;
-using BulletSharp.Math;
+﻿using BulletSharp.Math;
 using Nostradamus.Physics;
 
 namespace Nostradamus.Examples
 {
-    public class BallDesc : RigidBodyDesc
-    {
-        public readonly float HorizontalForceFactor = 1000;
-
-        public readonly float VerticalForceFactor = 1000;
-
-        public BallDesc(ActorId id, Vector3 initialPosition)
-            : base(id, 10, new SphereShape(2.5f), Matrix.Identity, Matrix.Translation(initialPosition), false, 1, 1, 0.8f, 0.2f, 0.2f)
-        { }
-
-        protected internal override ISnapshotArgs InitSnapshot()
-        {
-            return new RigidBodySnapshot()
-            {
-                Position = StartTransform.Origin,
-                Rotation = Quaternion.Identity,
-            };
-        }
-    }
-
     public class Ball : RigidBodyActor
     {
         private Vector3 inputVector;

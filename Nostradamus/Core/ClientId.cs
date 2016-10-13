@@ -1,4 +1,6 @@
-﻿using System;
+﻿using FlatBuffers;
+using Nostradamus.Networking;
+using System;
 
 namespace Nostradamus
 {
@@ -72,5 +74,25 @@ namespace Nostradamus
         }
 
         #endregion
+    }
+
+    class ClientIdSerializer : Serializer<ClientId, Schema.ClientId>
+    {
+        public static readonly ClientIdSerializer Instance = new ClientIdSerializer();
+
+        public override Offset<Schema.ClientId> Serialize(FlatBufferBuilder fbb, ClientId id)
+        {
+            return Schema.ClientId.CreateClientId(fbb, id.Value, fbb.CreateString(id.Description));
+        }
+
+        public override ClientId Deserialize(Schema.ClientId id)
+        {
+            return new ClientId(id.Value, id.Description);
+        }
+
+        public override Schema.ClientId ToFlatBufferObject(ByteBuffer buffer)
+        {
+            return Schema.ClientId.GetRootAsClientId(buffer);
+        }
     }
 }
