@@ -1,12 +1,14 @@
 ﻿using BulletUnity;
+using NLog;
 using Nostradamus.Physics;
-using System;
 using UnityEngine;
 
 namespace Nostradamus.Examples
 {
     public class RigidBodyInterpolate : MonoBehaviour
     {
+        private static readonly NLog.Logger logger = LogManager.GetCurrentClassLogger();
+
         RigidBodyActor actor;
         RigidBodySnapshot snapshot;
         Vector3 smoothVelocity;
@@ -23,7 +25,7 @@ namespace Nostradamus.Examples
 
         void Start()
         {
-            snapshot = (RigidBodySnapshot)actor.InterpolateSnapshot(actor.Scene.Time);
+            snapshot = (RigidBodySnapshot)actor.Snapshot;
 
             transform.position = snapshot.Position.ToUnity();
             transform.rotation = snapshot.Rotation.ToUnity();
@@ -31,7 +33,7 @@ namespace Nostradamus.Examples
 
         void FixedUpdate()
         {
-            snapshot = (RigidBodySnapshot)actor.InterpolateSnapshot(actor.Scene.Time + actor.Scene.DeltaTime);
+            snapshot = (RigidBodySnapshot)actor.Snapshot;
         }
 
         void Update()

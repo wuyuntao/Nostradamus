@@ -1,4 +1,5 @@
 ﻿using Nostradamus.Networking;
+using Nostradamus.Server;
 using System.Diagnostics;
 using System.Threading;
 
@@ -8,15 +9,14 @@ namespace Nostradamus.Examples
     {
         public static void Run()
         {
-            /*
-            var sceneDesc = SimplePhysicsScene.CreateSceneDesc();
-            {
-                sceneDesc.Mode = SceneMode.Server;
-                sceneDesc.SimulationDeltaTime = 50;
-            };
-            var scene = new SimplePhysicsScene(sceneDesc);
 
-            using (var server = new ReliableUdpServer(scene, 9000))
+            var serverSimulator = new ServerSimulator();
+            RegisterActorFactories(serverSimulator);
+
+            var serverSceneDesc = new ExampleSceneDesc(50, 50);
+            var serverScene = serverSimulator.CreateScene<ExampleScene>(serverSceneDesc);
+
+            using (var server = new ReliableUdpServer(serverSimulator, 9000))
             {
                 server.Start();
 
@@ -34,7 +34,13 @@ namespace Nostradamus.Examples
 
                 server.Stop();
             }
-            */
+        }
+
+        private static void RegisterActorFactories(Simulator simulator)
+        {
+            simulator.RegisterActorFactory<ExampleSceneDesc, ExampleScene>(desc => new ExampleScene());
+            simulator.RegisterActorFactory<BallDesc, Ball>(desc => new Ball());
+            simulator.RegisterActorFactory<CubeDesc, Cube>(desc => new Cube());
         }
     }
 }

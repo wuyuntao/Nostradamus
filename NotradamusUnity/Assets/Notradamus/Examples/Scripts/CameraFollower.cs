@@ -8,10 +8,10 @@ namespace Nostradamus.Examples
         public Transform followTarget;
 
         [SerializeField]
-        Vector3 cameraOffset = new Vector3(0, 1, 10);
+        Vector3 cameraOffset = new Vector3(0, 1, -5);
 
         [SerializeField]
-        float smoothTime = 0.3f;
+        float smoothTime = 1f;
 
         Vector3 smoothVelocity;
 
@@ -21,8 +21,9 @@ namespace Nostradamus.Examples
                 return;
 
             var targetPosition = followTarget.TransformPoint(cameraOffset);
+            targetPosition.y = 2.5f;
 
-            transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref smoothVelocity, smoothTime);
+            transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref smoothVelocity, smoothTime, 1);
         }
     }
 }

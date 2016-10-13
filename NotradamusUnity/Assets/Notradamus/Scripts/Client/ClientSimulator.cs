@@ -1,4 +1,5 @@
-﻿using Nostradamus.Server;
+﻿using NLog;
+using Nostradamus.Server;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,229 +8,219 @@ namespace Nostradamus.Client
 {
     public sealed class ClientSimulator : Simulator
     {
-        private readonly ClientId clientId;
-        private readonly int reconciliationDeltaTime;
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private FullSyncFrame fullSyncFrame;
-        private Queue<DeltaSyncFrame> deltaSyncFrames = new Queue<DeltaSyncFrame>();
-        private int maxCommandSeq;
+        private ClientId clientId;
         private CommandFrame commandFrame;
+        private CommandFrame nextCommandFrame;
+        private Timeline authoritativeTimeline = new Timeline();
+        private int lastCommandSeq;
+        private int? lastAcknowledgedCommandSeq;
+        private Timeline predictiveTimeline;
+        private int? nextConvergenceTime;
         private Queue<Command> unacknowledgedCommands = new Queue<Command>();
+        private int time;
 
-        public ClientSimulator(ClientId clientId, int reconciliationDeltaTime)
+        public ClientSimulator(ClientId clientId)
         {
             this.clientId = clientId;
-            this.reconciliationDeltaTime = reconciliationDeltaTime;
         }
 
-        internal override ActorContext CreateActorContext(Actor actor, ISnapshotArgs snapshot)
+        public void ReceiveCommand(Actor actor, ICommandArgs commandArgs)
         {
-            return new ClientActorContext(actor, snapshot);
+            var command = new Command(clientId, actor.Desc.Id, ++lastCommandSeq, time, Scene.Desc.SimulationDeltaTime, commandArgs);
+
+            logger.Debug("ReceiveCommand: {0}", command);
+
+            if (nextCommandFrame == null)
+                nextCommandFrame = new CommandFrame(clientId);
+            nextCommandFrame.Commands.Add(command);
+
+            unacknowledgedCommands.Enqueue(command);
         }
 
         public void ReceiveFullSyncFrame(FullSyncFrame frame)
         {
-            fullSyncFrame = frame;
-            deltaSyncFrames.Clear();
-            unacknowledgedCommands.Clear();
+            logger.Debug("ReceiveFullSyncFrame: {0}", frame);
+
+            authoritativeTimeline.AddPoint(frame.Time + frame.DeltaTime, frame.Snapshot);
         }
 
         public void ReceiveDeltaSyncFrame(DeltaSyncFrame frame)
         {
-            deltaSyncFrames.Enqueue(frame);
+            logger.Debug("ReceiveDeltaSyncFrame: {0}", frame);
+
+            var currentSnapshot = CreateSnapshot();
+
+            var lastTimepoint = authoritativeTimeline.Last;
+
+            if (lastTimepoint.Time != frame.Time)
+                throw new InvalidOperationException();       //TODO: Message
+
+            RecoverSnapshot((SimulatorSnapshot)lastTimepoint.Snapshot);
+
+            ApplyEvents(frame.Events);
+
+            var snapshot = CreateSnapshot();
+
+            authoritativeTimeline.AddPoint(frame.Time + frame.DeltaTime, snapshot);
+
+            int lastCommandSeq;
+            if (frame.LastCommandSeqs.TryGetValue(clientId, out lastCommandSeq))
+                lastAcknowledgedCommandSeq = lastCommandSeq;
+
+            RecoverSnapshot(currentSnapshot);
         }
 
-        public void ReceiveCommand(ActorId actorId, ICommandArgs commandArgs)
+        public void Simulate()
         {
-            var command = new Command(actorId, ++maxCommandSeq, Scene.Time, Scene.DeltaTime, commandArgs);
-
-            if (commandFrame == null)
-                commandFrame = new CommandFrame(clientId);
-
-            commandFrame.Commands.Add(command);
-        }
-
-        public void Simulate(int deltaTime)
-        {
-            if (fullSyncFrame != null)
-                ApplyFullSync();
-
-            if (deltaSyncFrames.Count > 0)
-                ApplyDeltaSync();
-
-            UpdateScene(commandFrame != null ? commandFrame.Commands : null, Time, deltaTime, false);
-
-            Time += deltaTime;
-        }
-
-        private void ApplyFullSync()
-        {
-            logger.Debug("ApplyFullSync: {0}ms", fullSyncFrame.Time);
-
-            Time = fullSyncFrame.Time;
-
-            foreach (var snapshot in fullSyncFrame.Snapshots)
-            {
-                Scene.CreateActorContext(snapshot.ActorId, snapshot.Args);
-            }
-
-            fullSyncFrame = null;
-        }
-
-        private void ApplyDeltaSync()
-        {
-            logger.Debug("ApplyDeltaSync: {0}ms", deltaSyncFrames.Peek().Time);
-
-            int lastFrameTime = 0;
-            int lastCommandSeq = 0;
-            while (deltaSyncFrames.Count > 0)
-            {
-                var frame = deltaSyncFrames.Dequeue();
-                lastFrameTime = frame.Time + frame.DeltaTime;
-
-                UpdateAuthoritativeTimeline(frame);
-
-                int commandSeq;
-                if (frame.LastCommandSeqs.TryGetValue(clientId, out commandSeq))
-                    lastCommandSeq = commandSeq;
-            }
-
-            if (lastCommandSeq == 0)
-            {
-                logger.Debug("No command found");
+            if (authoritativeTimeline.Last == null)     // Not initialized yet
                 return;
+
+            logger.Debug("Simulate: time: {0}, commands: {1}"
+                    , time
+                    , nextCommandFrame != null ? nextCommandFrame.Commands.Count : 0);
+
+            int lastAcknowledgedCommandTime = -1;       // Dequeue acknowledge commands and get last time that command is predicted
+            if (lastAcknowledgedCommandSeq != null)
+            {
+                lastAcknowledgedCommandTime = DequeueAcknowledgedCommands();
             }
 
-            var lastCommandTime = DequeueAcknowledgedCommands(lastCommandSeq);
-
-            if (ActorContexts.Any(context => !context.IsSynchronized(lastFrameTime, lastCommandTime)))
+            if (lastAcknowledgedCommandTime >= 0)
             {
-                RewindAndReplay(lastFrameTime, lastCommandTime);
-            }
-        }
+                var authoritativeSnapshot = authoritativeTimeline.Last.Snapshot;
 
-        private void UpdateAuthoritativeTimeline(DeltaSyncFrame frame)
-        {
-            Scene.Time = frame.Time;
-            Scene.DeltaTime = frame.DeltaTime;
+                var predictiveTimepoint = predictiveTimeline.InterpolatePoint(lastAcknowledgedCommandTime);
+                if (predictiveTimepoint == null)
+                    throw new InvalidOperationException();          // TODO: Message
 
-            var eventsByActorId = from e in frame.Events
-                                  group e by e.ActorId into g
-                                  select g;
+                var currentSnapshot = predictiveTimeline.Last.Snapshot;
 
-            foreach (var events in eventsByActorId)
-            {
-                var actorContext = Scene.GetActorContext(events.Key) as ClientActorContext;
-                if (actorContext == null)
+                if (!authoritativeSnapshot.IsApproximate(predictiveTimepoint.Snapshot))        // Rollback and replay
                 {
-                    logger.Warn("Cannot find actor '{0}'", events.Key);
-                    continue;
+                    predictiveTimeline = new Timeline();
+                    predictiveTimeline.AddPoint(lastAcknowledgedCommandTime, authoritativeSnapshot);
+
+                    RecoverSnapshot((SimulatorSnapshot)authoritativeSnapshot);
+
+                    // TODO: Use SceneDesc.ReconciliationDeltaTime to optimize replay performance
+                    var deltaTime = Scene.Desc.SimulationDeltaTime;
+                    for (var replayTime = lastAcknowledgedCommandTime; replayTime < time; replayTime += deltaTime)
+                    {
+                        if (replayTime + deltaTime > time)
+                            deltaTime = time - replayTime;
+
+                        Simulate(from command in unacknowledgedCommands
+                                 where command.Time >= replayTime && command.Time < replayTime + deltaTime
+                                 select command);
+
+                        predictiveTimeline.AddPoint(replayTime + deltaTime, CreateSnapshot());
+                    }
                 }
 
-                actorContext.CreateAuthoritativeTimepoint(events);
+                // TODO: Get jitter detail for analysis
+                if (!currentSnapshot.IsApproximate(predictiveTimeline.Last.Snapshot))
+                    logger.Warn("Correction done with possible jitter");
             }
 
-            logger.Debug("Update authoritative timeline to {0} / {1}", frame.Time, frame.DeltaTime);
-        }
-
-        private int DequeueAcknowledgedCommands(int lastCommandSeq)
-        {
-            while (unacknowledgedCommands.Count > 0 && unacknowledgedCommands.Peek().Sequence <= lastCommandSeq)
+            if (nextCommandFrame != null || predictiveTimeline != null)
             {
-                var command = unacknowledgedCommands.Dequeue();
-
-                if (command.Sequence == lastCommandSeq)
-                    return command.Time + command.DeltaTime;
-            }
-
-            throw new InvalidOperationException(string.Format("Cannot find acknowledged command #{0}", lastCommandSeq));
-        }
-
-        private void RewindAndReplay(int lastFrameTime, int lastCommandTime)
-        {
-            bool replay = false;
-            foreach (var context in ActorContexts)
-            {
-                replay = context.Rollback(lastFrameTime, lastCommandTime) || replay;
-            }
-
-            logger.Debug("Rollback predictive timeline to {0} / {1}", lastFrameTime, lastCommandTime);
-
-            if (!replay)
-                return;
-
-            Queue<Command> commands;
-            if (unacknowledgedCommands.Count > 0)
-            {
-                commands = unacknowledgedCommands;
-                unacknowledgedCommands = new Queue<Command>();
-            }
-            else
-                commands = null;
-
-            var deltaTime = reconciliationDeltaTime;
-            for (; lastCommandTime < Time; lastCommandTime += deltaTime)
-            {
-                if (lastCommandTime + deltaTime > Time)
-                    deltaTime = Time - lastCommandTime;
-
-                var commandsDequeued = commands != null ? DequeueCommands(commands, lastCommandTime) : null;
-                UpdateScene(commandsDequeued, lastCommandTime, deltaTime, true);
-            }
-        }
-
-        private IEnumerable<Command> DequeueCommands(Queue<Command> commands, int time)
-        {
-            while (commands.Count > 0 && commands.Peek().Time <= time)
-            {
-                yield return commands.Dequeue();
-            }
-        }
-
-        private void UpdateScene(IEnumerable<Command> commands, int time, int deltaTime, bool isReplay)
-        {
-            if (commands != null)
-            {
-                foreach (var command in commands)
+                SimulatorSnapshot snapshot;
+                if (predictiveTimeline != null)
                 {
-                    var actorContext = Scene.GetActorContext(command.ActorId) as ClientActorContext;
-                    if (actorContext != null)
+                    snapshot = (SimulatorSnapshot)predictiveTimeline.InterpolatePoint(time).Snapshot;
+
+                    logger.Debug("RecoverSnapshot from predictive timeline");
+                }
+                else
+                {
+                    snapshot = (SimulatorSnapshot)authoritativeTimeline.InterpolatePoint(time).Snapshot;
+
+                    predictiveTimeline = new Timeline();
+                    predictiveTimeline.AddPoint(time, snapshot);
+
+                    logger.Debug("RecoverSnapshot from authoritative timeline");
+                }
+
+                RecoverSnapshot(snapshot);
+
+                Simulate(nextCommandFrame != null ? nextCommandFrame.Commands : null);
+
+                snapshot = CreateSnapshot();
+
+                if (unacknowledgedCommands.Count > 0)
+                {
+                    predictiveTimeline.AddPoint(time + Scene.Desc.SimulationDeltaTime, snapshot);
+                    nextConvergenceTime = time + Scene.Desc.ConvergenceTime;
+
+                    logger.Debug("Simulate and CreateSnapshot for predictive timeline");
+                }
+                else if (time < nextConvergenceTime)
+                {
+                    var authoritativeSnapshot = authoritativeTimeline.InterpolatePoint(time + Scene.Desc.SimulationDeltaTime).Snapshot;
+
+                    snapshot = (SimulatorSnapshot)((ISnapshotArgs)snapshot).Interpolate(authoritativeSnapshot, Scene.Desc.ConvergenceRate);
+
+                    if (authoritativeSnapshot.IsApproximate(snapshot))
                     {
-                        command.Time = time;
-                        command.DeltaTime = deltaTime;
+                        logger.Debug("All commands are acknowledged and convergence is done in advance: {0} < {1}", time, nextConvergenceTime);
 
-                        actorContext.EnqueuePredictiveCommand(command);
+                        snapshot = (SimulatorSnapshot)authoritativeSnapshot;
 
-                        if (!isReplay)
-                        {
-                            unacknowledgedCommands.Enqueue(command);
-                        }
+                        predictiveTimeline = null;
+                        nextConvergenceTime = null;
                     }
                     else
                     {
-                        logger.Warn("Cannot find actor '{0}'  of command {1}",
-                                command.ActorId, command.Args);
+                        predictiveTimeline.AddPoint(time + Scene.Desc.SimulationDeltaTime, snapshot);
+
+                        logger.Debug("All commands are acknowledged and convergence predictive timeline");
                     }
+                }
+                else
+                {
+                    predictiveTimeline = null;
+                    nextConvergenceTime = null;
+
+                    snapshot = (SimulatorSnapshot)authoritativeTimeline.InterpolatePoint(time + Scene.Desc.SimulationDeltaTime).Snapshot;
+
+                    logger.Debug("RecoverSnapshot from authoritative timeline and remove predictive timeline");
+                }
+
+                RecoverSnapshot(snapshot);
+            }
+            else
+            {
+                var snapshot = (SimulatorSnapshot)authoritativeTimeline.InterpolatePoint(time + Scene.Desc.SimulationDeltaTime).Snapshot;
+
+                logger.Debug("RecoverSnapshot from authoritative timeline");
+
+                RecoverSnapshot(snapshot);
+            }
+
+            time += Scene.Desc.SimulationDeltaTime;
+
+            commandFrame = nextCommandFrame;
+            nextCommandFrame = null;
+
+            lastAcknowledgedCommandSeq = null;
+        }
+
+        private int DequeueAcknowledgedCommands()
+        {
+            while (unacknowledgedCommands.Count > 0 && unacknowledgedCommands.Peek().Sequence <= lastAcknowledgedCommandSeq)
+            {
+                var command = unacknowledgedCommands.Dequeue();
+
+                if (command.Sequence == lastAcknowledgedCommandSeq)
+                {
+                    logger.Debug("DequeueAcknowledgedCommands: {0}", command);
+                    return command.Time + command.DeltaTime;
                 }
             }
 
-            Scene.Update(time, deltaTime);
-
-            foreach (var context in ActorContexts)
-            {
-                context.CreatePredictiveTimepoint(time + deltaTime, isReplay);
-            }
-
-            logger.Debug("Update scene to {0} / {1}. Replay: {2}", time, deltaTime, isReplay);
-        }
-
-        public CommandFrame FetchCommandFrame()
-        {
-            var frame = commandFrame;
-
-            commandFrame = null;
-
-            return frame;
+            throw new InvalidOperationException(string.Format("Cannot find acknowledged command #{0}", lastAcknowledgedCommandSeq));
         }
 
         public ClientId ClientId
@@ -237,13 +228,14 @@ namespace Nostradamus.Client
             get { return clientId; }
         }
 
-        private IEnumerable<ClientActorContext> ActorContexts
+        public CommandFrame CommandFrame
         {
-            get
-            {
-                return from context in Scene.ActorContexts
-                       select (ClientActorContext)context;
-            }
+            get { return commandFrame; }
+        }
+
+        public int Time
+        {
+            get { return time; }
         }
     }
 }

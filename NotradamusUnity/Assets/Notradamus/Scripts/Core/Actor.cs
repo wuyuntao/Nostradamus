@@ -6,83 +6,62 @@ namespace Nostradamus
 {
     public abstract class Actor : Disposable
     {
-        protected static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private readonly Scene scene;
-        private readonly ActorId id;
-        private readonly ClientId ownerId;
-        private ISnapshotArgs snapshot;
         private ActorContext context;
+        private ActorDesc desc;
+        private ISnapshotArgs snapshot;
 
-        protected Actor(Scene scene, ActorId id, ClientId ownerId, ISnapshotArgs snapshot)
+        public Actor()
+        { }
+
+        internal virtual void Initialize(ActorContext context, ActorDesc desc)
         {
-            this.scene = scene;
-            this.id = id;
-            this.ownerId = ownerId;
-            this.snapshot = snapshot;
-            this.context = scene.CreateActorContext(this, snapshot);
+            this.context = context;
+            this.desc = desc;
+            this.snapshot = desc.InitSnapshot();
         }
 
-        public ISnapshotArgs InterpolateSnapshot(int time)
+        protected internal virtual void OnSnapshotRecovered(ISnapshotArgs snapshot)
         {
-            return context.InterpolateSnapshot(time);
+            Snapshot = snapshot;
         }
 
-        protected internal void ApplyEvent(IEventArgs @event)
+        protected internal virtual void OnUpdate()
         {
-            var snapshot = OnEventApplied(@event);
-            if (snapshot == null)
-                throw new InvalidOperationException("Snapshot cannot be null");
-
-            context.EnqueueEvent(@event);
-
-            this.snapshot = snapshot;
         }
 
-        protected internal abstract void OnCommandReceived(ICommandArgs command);
-
-        protected abstract ISnapshotArgs OnEventApplied(IEventArgs @event);
-
-        protected internal abstract void OnUpdate();
-
-        public override string ToString()
+        protected internal virtual void OnCommandReceived(ICommandArgs command)
         {
-            if (string.IsNullOrEmpty(id.Description))
-                return string.Format("{0} #{1}", GetType().Name, id.Value);
-            else
-                return string.Format("{0} #{1} ({2})", GetType().Name, id.Value, id.Description);
+            throw new NotSupportedException(command.ToString());
         }
 
-        public Scene Scene
+        internal void ApplyEvent(IEventArgs @event)
         {
-            get { return scene; }
+            context.ActorManager.OnEventApplied(this, @event);
+
+            OnEventApplied(@event);
         }
 
-        public ActorId Id
+        protected virtual void OnEventApplied(IEventArgs @event)
         {
-            get { return id; }
+            throw new NotSupportedException(@event.ToString());
         }
 
-        public ClientId OwnerId
+        public ActorContext Context
         {
-            get { return ownerId; }
+            get { return context; }
+        }
+
+        public ActorDesc Desc
+        {
+            get { return desc; }
         }
 
         public ISnapshotArgs Snapshot
         {
             get { return snapshot; }
-            internal set
-            {
-                if (value == null)
-                    throw new ArgumentNullException("snapshot");
-
-                snapshot = value;
-            }
-        }
-
-        internal ActorContext Context
-        {
-            get { return context; }
+            protected set { snapshot = value; }
         }
     }
 }

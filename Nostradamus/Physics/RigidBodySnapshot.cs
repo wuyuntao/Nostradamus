@@ -30,7 +30,7 @@ namespace Nostradamus.Physics
 
             foreach (var property in properties)
             {
-                builder.AppendFormat("{0}: {1}", property.Name, property.GetValue(this));
+                builder.AppendFormat("{0}: {1}", property.Name, property.GetValue(this, null));
 
                 if (property == properties[properties.Length - 1])
                     builder.Append(")");

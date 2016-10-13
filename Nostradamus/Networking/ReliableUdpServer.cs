@@ -64,6 +64,8 @@ namespace Nostradamus.Networking
 
             var deltaSyncFrame = simulator.DeltaSyncFrame;
             SendMessageToAll(deltaSyncFrame);
+
+            logger.Debug("Simulate to {0}ms", simulator.Time);
         }
 
         private void OnServerMessage(NetIncomingMessage msg)
@@ -84,11 +86,11 @@ namespace Nostradamus.Networking
 
                         if (envelope.Message is CommandFrame)
                         {
-                            OnServerMessage_ClientSyncFrame(msg, (CommandFrame)envelope.Message);
+                            OnServerMessage_CommandFrame(msg, (CommandFrame)envelope.Message);
                         }
                         else if (envelope.Message is Login)
                         {
-                            OnServerMessage_LoginRequest(msg, (Login)envelope.Message);
+                            OnServerMessage_Login(msg, (Login)envelope.Message);
                         }
                         else
                             logger.Error("Unexpected message: {0}", envelope.Message);
@@ -122,16 +124,18 @@ namespace Nostradamus.Networking
             logger.Trace("Status of {0} changed to {1}", msg.SenderConnection, status);
         }
 
-        private void OnServerMessage_LoginRequest(NetIncomingMessage msg, Login message)
+        private void OnServerMessage_Login(NetIncomingMessage msg, Login message)
         {
             var client = new Client(message.ClientId, msg.SenderConnection);
             clients.Add(message.ClientId, client);
 
             var frame = simulator.FullSyncFrame;
             SendMessage(client, frame);
+
+            logger.Debug("Client {0} login", message.ClientId);
         }
 
-        private void OnServerMessage_ClientSyncFrame(NetIncomingMessage msg, CommandFrame frame)
+        private void OnServerMessage_CommandFrame(NetIncomingMessage msg, CommandFrame frame)
         {
             simulator.ReceiveCommandFrame(frame);
         }

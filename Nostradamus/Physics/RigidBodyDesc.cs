@@ -32,10 +32,10 @@ namespace Nostradamus.Physics
             : base(id)
         {
             if (mass <= 0)
-                throw new ArgumentOutOfRangeException(nameof(mass));
+                throw new ArgumentOutOfRangeException("mass");
 
             if (shape == null)
-                throw new ArgumentNullException(nameof(shape));
+                throw new ArgumentNullException("shape");
 
             Mass = mass;
             Shape = shape;

@@ -77,9 +77,9 @@ namespace Nostradamus.Client
             if (authoritativeTimeline.Last == null)     // Not initialized yet
                 return;
 
-            logger.Debug("Simulate: {0}: {1}, {2}: {3}"
-                    , nameof(time), time
-                    , nameof(nextCommandFrame), nextCommandFrame != null ? nextCommandFrame.Commands.Count : 0);
+            logger.Debug("Simulate: time: {0}, commands: {1}"
+                    , time
+                    , nextCommandFrame != null ? nextCommandFrame.Commands.Count : 0);
 
             int lastAcknowledgedCommandTime = -1;       // Dequeue acknowledge commands and get last time that command is predicted
             if (lastAcknowledgedCommandSeq != null)

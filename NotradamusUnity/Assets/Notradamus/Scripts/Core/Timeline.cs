@@ -3,16 +3,23 @@ using System.Collections.Generic;
 
 namespace Nostradamus
 {
-    class Timeline
+    sealed class Timeline
     {
-        private readonly LinkedList<Timepoint> points = new LinkedList<Timepoint>();
+        private LinkedList<Timepoint> points = new LinkedList<Timepoint>();
 
         public Timepoint AddPoint(int time, ISnapshotArgs snapshot)
         {
             if (points.Last != null)
             {
-                if (time <= points.Last.Value.Time)
+                if (time < points.Last.Value.Time)
                     throw new ArgumentException(string.Format("'time' must > {0}", points.Last.Value.Time));
+
+                if (time == points.Last.Value.Time)
+                {
+                    points.Last.Value.Snapshot = snapshot;
+
+                    return points.Last.Value;
+                }
             }
 
             var point = new Timepoint(this, time, snapshot);
@@ -27,11 +34,12 @@ namespace Nostradamus
             Timepoint previous = null;
             Timepoint next = null;
 
-            for (var point = points.First; point != null; point = point.Next)
+            // Search in reversed order for better performance
+            for (var point = points.Last; point != null; point = point.Previous)
             {
-                if (point.Value.Time < time)
+                if (point.Value.Time > time)
                 {
-                    previous = point.Value;
+                    next = point.Value;
                 }
                 else if (point.Value.Time == time)
                 {
@@ -40,7 +48,7 @@ namespace Nostradamus
                 }
                 else
                 {
-                    next = point.Value;
+                    previous = point.Value;
                     break;
                 }
             }
@@ -88,39 +96,6 @@ namespace Nostradamus
                 return new Timepoint(this, time, snapshot);
             else
                 return null;
-        }
-
-        internal Timepoint FindPoint(int time)
-        {
-            for (var point = points.First; point != null; point = point.Next)
-            {
-                if (point.Value.Time == time)
-                    return point.Value;
-            }
-
-            return null;
-        }
-
-        public Timepoint FindBefore(int time)
-        {
-            for (var node = points.Last; node != null; node = node.Previous)
-            {
-                if (node.Value.Time <= time)
-                    return node.Value;
-            }
-
-            return null;
-        }
-
-        public Timepoint FindAfter(int time)
-        {
-            for (var point = points.First; point != null; point = point.Next)
-            {
-                if (point.Value.Time > time)
-                    return point.Value;
-            }
-
-            return null;
         }
 
         public Timepoint First

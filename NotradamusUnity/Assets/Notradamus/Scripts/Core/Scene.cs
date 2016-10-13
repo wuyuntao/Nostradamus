@@ -1,89 +1,59 @@
 ﻿using NLog;
-using Nostradamus.Utils;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Nostradamus
 {
-    public abstract class Scene : Disposable
+    public abstract class Scene : Actor
     {
-        protected static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private readonly Simulator simulator;
-        private readonly Dictionary<ActorId, ActorContext> actors = new Dictionary<ActorId, ActorContext>();
-
-        public Scene(Simulator simulator)
+        public SceneActor GetActor(ActorId id)
         {
-            this.simulator = simulator;
+            var snapshot = (SceneSnapshot)Snapshot;
+            if (!snapshot.Actors.Contains(id))
+                return null;
 
-            simulator.InitializeScene(this);
+            return Context.GetActor(id) as SceneActor;
         }
 
-        protected override void DisposeManaged()
+        public void AddActor(SceneSnapshot snapshot, SceneActor actor)
         {
-            foreach (var context in actors.Values)
-                context.Actor.Dispose();
-
-            actors.Clear();
-
-            base.DisposeManaged();
+            if (!snapshot.Actors.Contains(actor.Desc.Id))
+                snapshot.Actors.Add(actor.Desc.Id);
         }
 
-        internal ActorContext CreateActorContext(Actor actor, ISnapshotArgs snapshot)
+        public void RemoveActor(SceneSnapshot snapshot, SceneActor actor)
         {
-            var context = simulator.CreateActorContext(actor, snapshot);
-
-            actors.Add(actor.Id, context);
-
-            return context;
+            if (snapshot.Actors.Contains(actor.Desc.Id))
+                snapshot.Actors.Remove(actor.Desc.Id);
         }
 
-        internal ActorContext CreateActorContext(ActorId actorId, ISnapshotArgs snapshot)
-        {
-            var actor = CreateActor(actorId, snapshot);
-
-            return actor.Context;
-        }
-
-        internal ActorContext GetActorContext(ActorId actorId)
-        {
-            ActorContext actor;
-            actors.TryGetValue(actorId, out actor);
-            return actor;
-        }
-
-        internal void Update(int time, int deltaTime)
-        {
-            Time = time;
-            DeltaTime = deltaTime;
-
-            foreach (var context in actors.Values)
-                context.Update();
-
-            OnUpdate();
-        }
-
-        protected abstract Actor CreateActor(ActorId actorId, ISnapshotArgs snapshot);
-
-        protected internal virtual void OnUpdate()
-        { }
-
-        public IEnumerable<Actor> Actors
+        public IEnumerable<SceneActor> Actors
         {
             get
             {
-                return from context in actors.Values
-                       select context.Actor;
+                var snapshot = (SceneSnapshot)Snapshot;
+
+                foreach (var id in snapshot.Actors)
+                {
+                    var actor = Context.GetActor(id) as SceneActor;
+                    if (actor == null)
+                        throw new InvalidOperationException();      // TODO: Message
+
+                    yield return actor;
+                }
             }
         }
 
-        internal IEnumerable<ActorContext> ActorContexts
+        public Simulator Simulator
         {
-            get { return actors.Values; }
+            get { return (Simulator)Context.ActorManager; }
         }
 
-        public int Time { get; internal set; }
-
-        public int DeltaTime { get; internal set; }
+        public new SceneDesc Desc
+        {
+            get { return (SceneDesc)base.Desc; }
+        }
     }
 }

@@ -14,16 +14,14 @@ namespace Nostradamus.Networking
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         private readonly ClientSimulator simulator;
-        private readonly int simulateDeltaTime;
         private readonly IPEndPoint serverEndPoint;
         private readonly NetClient client;
         private bool isStarted;
         private bool hasStopRequest;
 
-        public ReliableUdpClient(ClientSimulator simulator, int simulateDeltaTime, IPEndPoint serverEndPoint, string appIdentifier = "Nostradamus", int simulateLatency = 0, int simulateLoss = 0)
+        public ReliableUdpClient(ClientSimulator simulator, IPEndPoint serverEndPoint, string appIdentifier = "Nostradamus", int simulateLatency = 0, int simulateLoss = 0)
         {
             this.simulator = simulator;
-            this.simulateDeltaTime = simulateDeltaTime;
             this.serverEndPoint = serverEndPoint;
 
             var clientConf = new NetPeerConfiguration(appIdentifier);
@@ -37,6 +35,7 @@ namespace Nostradamus.Networking
         protected override void DisposeManaged()
         {
             client.Shutdown(string.Empty);
+
             simulator.Dispose();
 
             base.DisposeManaged();
@@ -71,9 +70,9 @@ namespace Nostradamus.Networking
 
             if (isStarted)
             {
-                simulator.Simulate(simulateDeltaTime);
+                simulator.Simulate();
 
-                var commandFrame = simulator.FetchCommandFrame();
+                var commandFrame = simulator.CommandFrame;
                 if (commandFrame != null)
                     SendMessage(commandFrame);
             }
@@ -148,9 +147,8 @@ namespace Nostradamus.Networking
 
             switch (status)
             {
-
                 case NetConnectionStatus.Connected:
-                    SendMessage(new Login() { ClientId = simulator.ClientId });
+                    SendMessage(new Login(simulator.ClientId));
                     break;
 
                 case NetConnectionStatus.Disconnected:
@@ -161,7 +159,7 @@ namespace Nostradamus.Networking
 
         private void SendMessage(object message)
         {
-            var bytes = Serializer.Serialize(new MessageEnvelope() { Message = message });
+            var bytes = Serializer.Serialize(new MessageEnvelope(message));
 
             var msg = client.CreateMessage();
             msg.Write(bytes);

@@ -1,86 +1,84 @@
 ﻿using Nostradamus.Client;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Nostradamus.Server
 {
     public sealed class ServerSimulator : Simulator
     {
-        internal override ActorContext CreateActorContext(Actor actor, ISnapshotArgs snapshot)
-        {
-            return new ServerActorContext(actor, snapshot);
-        }
+        private List<Command> commands = new List<Command>();
+        private int time;
+        private FullSyncFrame fullSyncFrame;
+        private DeltaSyncFrame deltaSyncFrame;
+        private Timeline compensationTimeline = new Timeline();
+
+        public ServerSimulator()
+        { }
 
         public void ReceiveCommandFrame(CommandFrame frame)
         {
             foreach (var command in frame.Commands)
+                commands.Add(command);
+        }
+
+        public void Simulate()
+        {
+            var deltaTime = Scene.Desc.SimulationDeltaTime;
+
+            deltaSyncFrame = new DeltaSyncFrame(time, deltaTime);
+
+            EventApplied += EnqueueEvent;
+
+            Simulate(DequeueCommandsBefore(time + deltaTime));
+
+            EventApplied -= EnqueueEvent;
+
+            var snapshot = CreateSnapshot();
+
+            fullSyncFrame = new FullSyncFrame(time, deltaTime, snapshot);
+
+            time += deltaTime;
+
+            compensationTimeline.AddPoint(time, snapshot);
+        }
+
+        private List<Command> DequeueCommandsBefore(int time)
+        {
+            var dequeuedCommands = new List<Command>();
+
+            commands.RemoveAll(command =>
             {
-                // TODO: Avoid get actor context for every command
-                var context = Scene.GetActorContext(command.ActorId);
-                if (context == null)
+                if (command.Time <= time)
                 {
-                    logger.Warn("Cannot find actor '{0}' to enqueue command '{1}'",
-                            command.ActorId, command.Args);
-                }
-                else if (context.Actor.OwnerId != frame.ClientId)
-                {
-                    logger.Warn("Client id not match. '{0}' != '{1}'",
-                            context.Actor.OwnerId, frame.ClientId);
+                    deltaSyncFrame.LastCommandSeqs[command.ClientId] = command.Sequence;
+
+                    dequeuedCommands.Add(command);
+                    return true;
                 }
                 else
-                {
-                    context.EnqueueCommand(command);
-                }
-            }
+                    return false;
+            });
+
+            return dequeuedCommands;
         }
 
-        public void Simulate(int deltaTime)
+        private void EnqueueEvent(Actor actor, IEventArgs @event)
         {
-            Scene.Update(Time, deltaTime);
-
-            foreach (var context in ActorContexts)
-                context.CreateTimepoint();
-
-            logger.Debug("Simulated {0} / {1}", Time, deltaTime);
-
-            Time += deltaTime;
+            deltaSyncFrame.Events.Add(new Event(actor.Desc.Id, @event));
         }
 
-        public FullSyncFrame FetchFullSyncFrame()
+        public int Time
         {
-            var frame = new FullSyncFrame(Scene.Time, Scene.DeltaTime);
-
-            frame.Snapshots.AddRange(from context in ActorContexts
-                                     select context.Actor into actor
-                                     select new Snapshot(actor.Id, actor.Snapshot));
-
-            return frame;
+            get { return time; }
         }
 
-        public DeltaSyncFrame FetchDeltaSyncFrame()
+        public FullSyncFrame FullSyncFrame
         {
-            var frame = new DeltaSyncFrame(Scene.Time, Scene.DeltaTime);
-
-            foreach (var context in ActorContexts)
-            {
-                frame.Events.AddRange(context.DequeueEvents());
-
-                if (context.LastCommandSeq != null)
-                {
-                    frame.LastCommandSeqs[context.Actor.OwnerId] = context.LastCommandSeq.Value;
-                }
-            }
-
-            return frame;
+            get { return fullSyncFrame; }
         }
 
-        private IEnumerable<ServerActorContext> ActorContexts
+        public DeltaSyncFrame DeltaSyncFrame
         {
-            get
-            {
-                return from context in Scene.ActorContexts
-                       select (ServerActorContext)context;
-            }
+            get { return deltaSyncFrame; }
         }
     }
 }

@@ -1,18 +1,22 @@
-﻿using System;
+﻿using FlatBuffers;
+using Nostradamus.Networking;
+using System;
 
 namespace Nostradamus
 {
-    public sealed class ClientId : IEquatable<ClientId>, IComparable<ClientId>
+    public struct ClientId : IEquatable<ClientId>, IComparable<ClientId>
     {
-        public int Value { get; set; }
+        public readonly int Value;
 
-        public string Description { get; set; }
+        public readonly string Description;
 
         public ClientId(int value, string description = null)
         {
             Value = value;
             Description = description;
         }
+
+        #region IEquatable
 
         public override bool Equals(object obj)
         {
@@ -26,8 +30,8 @@ namespace Nostradamus
         {
             if (ReferenceEquals(other, null))
                 return false;
-
-            return Value.Equals(other.Value);
+            else
+                return Value.Equals(other.Value);
         }
 
         public override int GetHashCode()
@@ -43,6 +47,8 @@ namespace Nostradamus
                 return string.Format("{0} #{1} ({2})", GetType().Name, Value, Description);
         }
 
+        #endregion
+
         #region IComparable
 
         int IComparable<ClientId>.CompareTo(ClientId other)
@@ -51,6 +57,8 @@ namespace Nostradamus
         }
 
         #endregion
+
+        #region Operator Override
 
         public static bool operator ==(ClientId a, ClientId b)
         {
@@ -63,6 +71,30 @@ namespace Nostradamus
         public static bool operator !=(ClientId a, ClientId b)
         {
             return !(a == b);
+        }
+
+        #endregion
+    }
+
+    class ClientIdSerializer : Serializer<ClientId, Schema.ClientId>
+    {
+        public static readonly ClientIdSerializer Instance = new ClientIdSerializer();
+
+        public override Offset<Schema.ClientId> Serialize(FlatBufferBuilder fbb, ClientId id)
+        {
+            var desc = string.IsNullOrEmpty(id.Description) ? default(StringOffset) : fbb.CreateString(id.Description);
+
+            return Schema.ClientId.CreateClientId(fbb, id.Value, desc);
+        }
+
+        public override ClientId Deserialize(Schema.ClientId id)
+        {
+            return new ClientId(id.Value, id.Description);
+        }
+
+        public override Schema.ClientId ToFlatBufferObject(ByteBuffer buffer)
+        {
+            return Schema.ClientId.GetRootAsClientId(buffer);
         }
     }
 }

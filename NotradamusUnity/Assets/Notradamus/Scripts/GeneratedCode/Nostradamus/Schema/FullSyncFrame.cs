@@ -17,15 +17,14 @@ public struct FullSyncFrame : IFlatbufferObject
 
   public int Time { get { int o = __p.__offset(4); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
   public int DeltaTime { get { int o = __p.__offset(6); return o != 0 ? __p.bb.GetInt(o + __p.bb_pos) : (int)0; } }
-  public Snapshot? Snapshots(int j) { int o = __p.__offset(8); return o != 0 ? (Snapshot?)(new Snapshot()).__assign(__p.__indirect(__p.__vector(o) + j * 4), __p.bb) : null; }
-  public int SnapshotsLength { get { int o = __p.__offset(8); return o != 0 ? __p.__vector_len(o) : 0; } }
+  public SimulatorSnapshot? Snapshot { get { int o = __p.__offset(8); return o != 0 ? (SimulatorSnapshot?)(new SimulatorSnapshot()).__assign(__p.__indirect(o + __p.bb_pos), __p.bb) : null; } }
 
   public static Offset<FullSyncFrame> CreateFullSyncFrame(FlatBufferBuilder builder,
       int time = 0,
       int deltaTime = 0,
-      VectorOffset snapshotsOffset = default(VectorOffset)) {
+      Offset<SimulatorSnapshot> snapshotOffset = default(Offset<SimulatorSnapshot>)) {
     builder.StartObject(3);
-    FullSyncFrame.AddSnapshots(builder, snapshotsOffset);
+    FullSyncFrame.AddSnapshot(builder, snapshotOffset);
     FullSyncFrame.AddDeltaTime(builder, deltaTime);
     FullSyncFrame.AddTime(builder, time);
     return FullSyncFrame.EndFullSyncFrame(builder);
@@ -34,9 +33,7 @@ public struct FullSyncFrame : IFlatbufferObject
   public static void StartFullSyncFrame(FlatBufferBuilder builder) { builder.StartObject(3); }
   public static void AddTime(FlatBufferBuilder builder, int time) { builder.AddInt(0, time, 0); }
   public static void AddDeltaTime(FlatBufferBuilder builder, int deltaTime) { builder.AddInt(1, deltaTime, 0); }
-  public static void AddSnapshots(FlatBufferBuilder builder, VectorOffset snapshotsOffset) { builder.AddOffset(2, snapshotsOffset.Value, 0); }
-  public static VectorOffset CreateSnapshotsVector(FlatBufferBuilder builder, Offset<Snapshot>[] data) { builder.StartVector(4, data.Length, 4); for (int i = data.Length - 1; i >= 0; i--) builder.AddOffset(data[i].Value); return builder.EndVector(); }
-  public static void StartSnapshotsVector(FlatBufferBuilder builder, int numElems) { builder.StartVector(4, numElems, 4); }
+  public static void AddSnapshot(FlatBufferBuilder builder, Offset<SimulatorSnapshot> snapshotOffset) { builder.AddOffset(2, snapshotOffset.Value, 0); }
   public static Offset<FullSyncFrame> EndFullSyncFrame(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<FullSyncFrame>(o);

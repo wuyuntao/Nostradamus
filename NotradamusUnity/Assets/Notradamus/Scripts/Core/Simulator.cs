@@ -1,54 +1,93 @@
-﻿using NLog;
-using Nostradamus.Utils;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Nostradamus
 {
-	public abstract class Simulator : Disposable
-	{
-		protected static readonly Logger logger = LogManager.GetCurrentClassLogger();
+    public abstract class Simulator : ActorManager
+    {
+        private Scene scene;
 
-		private Scene scene;
-		private int time;
+        // TODO: Must provide scene factory in constructor
 
-		protected Simulator()
-		{ }
+        public TScene CreateScene<TScene>(SceneDesc desc)
+            where TScene : Scene, new()
+        {
+            if (this.scene != null)
+                throw new InvalidOperationException();  // TODO: Message
 
-		protected override void DisposeManaged()
-		{
-			SafeDispose(ref scene);
+            var scene = CreateActor<TScene>(desc);
+            this.scene = scene;
 
-			base.DisposeManaged();
-		}
+            return scene;
+        }
 
-		internal void InitializeScene(Scene scene)
-		{
-			if (scene == null)
-				throw new ArgumentNullException("scene");
+        protected void Simulate(IEnumerable<Command> commands)
+        {
+            if (commands != null)
+            {
+                foreach (var command in commands)
+                {
+                    var actor = Scene.GetActor(command.ActorId);
 
-			if (this.scene != null)
-				throw new InvalidOperationException("Cannot create multiple scene");
+                    actor.OnCommandReceived(command.Args);
+                }
+            }
 
-			this.scene = scene;
-		}
+            foreach (var actor in Scene.Actors)
+            {
+                actor.OnUpdate();
+            }
 
-		internal abstract ActorContext CreateActorContext(Actor actor, ISnapshotArgs snapshot);
+            Scene.OnUpdate();
+        }
 
-		protected Scene Scene
-		{
-			get { return scene; }
-		}
+        protected void ApplyEvents(IEnumerable<Event> events)
+        {
+            foreach (var e in events)
+            {
+                var actor = Scene.GetActor(e.ActorId);
 
-		public int Time
-		{
-			get { return time; }
-			protected set
-			{
-				if (value <= time)
-					throw new ArgumentOutOfRangeException("time");
+                actor.ApplyEvent(e.Args);
+            }
+        }
 
-				time = value;
-			}
-		}
-	}
+        protected SimulatorSnapshot CreateSnapshot()
+        {
+            return new SimulatorSnapshot()
+            {
+                Actors = new List<ActorSnapshot>(from a in Scene.Actors
+                                                 select new ActorSnapshot(a.Desc, a.Snapshot))
+            };
+        }
+
+        protected void RecoverSnapshot(SimulatorSnapshot snapshot)
+        {
+            Scene.OnSnapshotRecovered(new SceneSnapshot()
+            {
+                Actors = new List<ActorId>(from actorSnapshot in snapshot.Actors
+                                           select actorSnapshot.Desc.Id)
+            });
+
+            foreach (var actorSnapshot in snapshot.Actors)
+            {
+                var actor = GetActor(actorSnapshot.Desc.Id);
+                if (actor == null)
+                    actor = CreateActor(actorSnapshot.Desc);
+
+                actor.OnSnapshotRecovered(actorSnapshot.Args);
+            }
+        }
+
+        public Scene Scene
+        {
+            get
+            {
+                if (scene == null)
+                    throw new InvalidOperationException();          // TODO: Message
+
+                return scene;
+            }
+        }
+    }
 }
