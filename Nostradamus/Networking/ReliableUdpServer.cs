@@ -126,8 +126,14 @@ namespace Nostradamus.Networking
 
         private void OnServerMessage_Login(NetIncomingMessage msg, Login message)
         {
-            var client = new Client(message.ClientId, msg.SenderConnection);
-            clients.Add(message.ClientId, client);
+            Client client;
+            if (!clients.TryGetValue(message.ClientId, out client))
+            {
+                client = new Client(message.ClientId, msg.SenderConnection);
+                clients.Add(message.ClientId, client);
+            }
+            else
+                client.Connection = msg.SenderConnection;
 
             var frame = simulator.FullSyncFrame;
             SendMessage(client, frame);
@@ -166,7 +172,7 @@ namespace Nostradamus.Networking
         class Client
         {
             public readonly ClientId Id;
-            public readonly NetConnection Connection;
+            public NetConnection Connection;
 
             public Client(ClientId id, NetConnection connection)
             {

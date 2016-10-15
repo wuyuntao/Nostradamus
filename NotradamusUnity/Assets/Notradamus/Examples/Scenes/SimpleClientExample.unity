@@ -362,7 +362,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   followTarget: {fileID: 0}
   cameraOffset: {x: 0, y: 1, z: -5}
-  smoothTime: 1
+  smoothTime: 0.5
 --- !u!1 &1529627950
 GameObject:
   m_ObjectHideFlags: 0

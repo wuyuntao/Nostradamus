@@ -1,5 +1,6 @@
 ﻿using BulletSharp;
 using BulletSharp.Math;
+using Nostradamus.Client;
 using Nostradamus.Physics;
 using Nostradamus.Server;
 
@@ -8,7 +9,7 @@ namespace Nostradamus.Examples
     public class ExampleSceneDesc : PhysicsSceneDesc
     {
         public ExampleSceneDesc(int simulationDeltaTime, int reconciliationDeltaTime)
-            : base(new ActorId(1), simulationDeltaTime, reconciliationDeltaTime, 5000, 0.1f, DefaultGravity, CreateColliders())
+            : base(new ActorId(1), simulationDeltaTime, reconciliationDeltaTime, 10000, 0.01f, DefaultGravity, CreateColliders())
         { }
 
         private static SceneColliderDesc[] CreateColliders()
@@ -36,6 +37,21 @@ namespace Nostradamus.Examples
             }
 
             base.OnUpdate();
+        }
+
+        protected internal override void OnLateUpdate()
+        {
+            base.OnLateUpdate();
+
+            if (Simulator is ClientSimulator)
+            {
+                var stats = Simulator.StatsFrames.Current.AddStats<ExampleSceneStats>();
+                if (ball != null)
+                {
+                    stats.BallPosition = ((RigidBodySnapshot)ball.Snapshot).Position;
+                    stats.BallRigidBodyPosition = ball.RigidBody.CenterOfMassPosition;
+                }
+            }
         }
 
         protected override void OnEventApplied(IEventArgs @event)

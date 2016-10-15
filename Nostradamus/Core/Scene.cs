@@ -29,6 +29,9 @@ namespace Nostradamus
                 snapshot.Actors.Remove(actor.Desc.Id);
         }
 
+        protected internal virtual void OnLateUpdate()
+        { }
+
         public IEnumerable<SceneActor> Actors
         {
             get

@@ -2,7 +2,9 @@
 using Nostradamus.Client;
 using Nostradamus.Networking;
 using Nostradamus.Physics;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using UnityEngine;
 
@@ -45,6 +47,17 @@ namespace Nostradamus.Examples
                 {
                     var command = new KickBallCommand(x, y, z);
                     simulator.ReceiveCommand(scene.Ball, command);
+                }
+
+                if (Input.GetKeyUp(KeyCode.F))
+                {
+                    var dataDir = Path.Combine(Application.dataPath, "../Data");
+                    Directory.CreateDirectory(dataDir);
+
+                    var statsCsvPath = Path.Combine(dataDir, string.Format("Stats-{0}.csv", DateTime.Now.ToString("yyyyMMdd-HHmmss")));
+                    simulator.SaveStatsFrame(statsCsvPath);
+
+                    logger.Info("StatsCsv saved to {0}", statsCsvPath);
                 }
             }
 

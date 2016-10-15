@@ -2,6 +2,7 @@
 using Nostradamus.Server;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Nostradamus.Client
@@ -24,6 +25,9 @@ namespace Nostradamus.Client
         public ClientSimulator(ClientId clientId)
         {
             this.clientId = clientId;
+
+            StatsFrames.Current.AddStats<ClientSimulatorStats>();
+            CurrentStats.CreateTime = DateTime.UtcNow;
         }
 
         public void ReceiveCommand(Actor actor, ICommandArgs commandArgs)
@@ -37,6 +41,8 @@ namespace Nostradamus.Client
             nextCommandFrame.Commands.Add(command);
 
             unacknowledgedCommands.Enqueue(command);
+
+            CurrentStats.LastUnacknowledgedCommandSeq = lastCommandSeq;
         }
 
         public void ReceiveFullSyncFrame(FullSyncFrame frame)
@@ -44,6 +50,9 @@ namespace Nostradamus.Client
             logger.Debug("ReceiveFullSyncFrame: {0}", frame);
 
             authoritativeTimeline.AddPoint(frame.Time + frame.DeltaTime, frame.Snapshot);
+
+            CurrentStats.ReceivedSyncFrameTime = frame.Time;
+            CurrentStats.ReceivedSyncFrameDeltaTime = frame.DeltaTime;
         }
 
         public void ReceiveDeltaSyncFrame(DeltaSyncFrame frame)
@@ -70,6 +79,10 @@ namespace Nostradamus.Client
                 lastAcknowledgedCommandSeq = lastCommandSeq;
 
             RecoverSnapshot(currentSnapshot);
+
+            CurrentStats.LastAcknowledgedCommandSeq = lastAcknowledgedCommandSeq;
+            CurrentStats.ReceivedSyncFrameTime = frame.Time;
+            CurrentStats.ReceivedSyncFrameDeltaTime = frame.DeltaTime;
         }
 
         public void Simulate()
@@ -121,7 +134,7 @@ namespace Nostradamus.Client
 
                 // TODO: Get jitter detail for analysis
                 if (!currentSnapshot.IsApproximate(predictiveTimeline.Last.Snapshot))
-                    logger.Warn("Correction done with possible jitter");
+                    logger.Debug("Correction done with possible jitter");
             }
 
             if (nextCommandFrame != null || predictiveTimeline != null)
@@ -158,9 +171,9 @@ namespace Nostradamus.Client
                 }
                 else if (time < nextConvergenceTime)
                 {
-                    var authoritativeSnapshot = authoritativeTimeline.InterpolatePoint(time + Scene.Desc.SimulationDeltaTime).Snapshot;
+                    var authoritativeSnapshot = authoritativeTimeline.Last.Snapshot;
 
-                    snapshot = (SimulatorSnapshot)((ISnapshotArgs)snapshot).Interpolate(authoritativeSnapshot, Scene.Desc.ConvergenceRate);
+                    //snapshot = (SimulatorSnapshot)((ISnapshotArgs)snapshot).Interpolate(authoritativeSnapshot, Scene.Desc.ConvergenceRate);
 
                     if (authoritativeSnapshot.IsApproximate(snapshot))
                     {
@@ -199,6 +212,17 @@ namespace Nostradamus.Client
                 RecoverSnapshot(snapshot);
             }
 
+            CurrentStats.Time = time;
+            CurrentStats.DeltaTime = Scene.Desc.SimulationDeltaTime;
+            CurrentStats.SimulateTime = DateTime.UtcNow;
+            CurrentStats.AdvanceStats(StatsFrames.Current);
+
+            Scene.OnLateUpdate();
+
+            StatsFrames.CreateNextFrame();
+            StatsFrames.Current.AddStats<ClientSimulatorStats>();
+            CurrentStats.CreateTime = DateTime.UtcNow;
+
             time += Scene.Desc.SimulationDeltaTime;
 
             commandFrame = nextCommandFrame;
@@ -223,6 +247,11 @@ namespace Nostradamus.Client
             throw new InvalidOperationException(string.Format("Cannot find acknowledged command #{0}", lastAcknowledgedCommandSeq));
         }
 
+        public void SaveStatsFrame(string filename)
+        {
+            File.WriteAllText(filename, StatsFrames.ToCsv());
+        }
+
         public ClientId ClientId
         {
             get { return clientId; }
@@ -236,6 +265,11 @@ namespace Nostradamus.Client
         public int Time
         {
             get { return time; }
+        }
+
+        internal ClientSimulatorStats CurrentStats
+        {
+            get { return StatsFrames.Current.GetStats<ClientSimulatorStats>(); }
         }
     }
 }

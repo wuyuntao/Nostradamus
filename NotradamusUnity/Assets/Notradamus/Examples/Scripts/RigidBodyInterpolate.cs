@@ -40,6 +40,9 @@ namespace Nostradamus.Examples
         {
             transform.position = Vector3.SmoothDamp(transform.position, snapshot.Position.ToUnity(), ref smoothVelocity, 0.3f);
             transform.rotation = Quaternion.Slerp(transform.rotation, snapshot.Rotation.ToUnity(), 0.3f);
+
+            //transform.position = snapshot.Position.ToUnity();
+            //transform.rotation = snapshot.Rotation.ToUnity();
         }
     }
 }

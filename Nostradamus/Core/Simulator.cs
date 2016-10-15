@@ -7,6 +7,7 @@ namespace Nostradamus
     public abstract class Simulator : ActorManager
     {
         private Scene scene;
+        private StatsFrameStream statsFrames = new StatsFrameStream();
 
         // TODO: Must provide scene factory in constructor
 
@@ -88,6 +89,11 @@ namespace Nostradamus
 
                 return scene;
             }
+        }
+
+        public StatsFrameStream StatsFrames
+        {
+            get { return statsFrames; }
         }
     }
 }

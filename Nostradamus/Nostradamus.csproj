@@ -102,6 +102,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client\ClientSimulatorStats.cs" />
     <Compile Include="Client\CommandFrame.cs" />
     <Compile Include="Core\Actor.cs" />
     <Compile Include="Core\ActorContext.cs" />
@@ -109,10 +110,12 @@
     <Compile Include="Core\ActorManager.cs" />
     <Compile Include="Client\ClientSimulator.cs" />
     <Compile Include="Core\ActorSnapshot.cs" />
+    <Compile Include="Core\StatsFrameStream.cs" />
     <Compile Include="Examples\Ball.cs" />
     <Compile Include="Examples\BallDesc.cs" />
     <Compile Include="Examples\Cube.cs" />
     <Compile Include="Examples\CubeDesc.cs" />
+    <Compile Include="Examples\ExampleSceneStats.cs" />
     <Compile Include="Examples\KickBallCommand.cs" />
     <Compile Include="Examples\ExampleScene.cs" />
     <Compile Include="Examples\SceneInitializedEvent.cs" />

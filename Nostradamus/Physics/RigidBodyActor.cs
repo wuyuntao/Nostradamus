@@ -1,7 +1,6 @@
 ﻿using BulletSharp;
 using BulletSharp.Math;
 using NLog;
-using Nostradamus.Server;
 
 namespace Nostradamus.Physics
 {
@@ -47,7 +46,9 @@ namespace Nostradamus.Physics
 
         protected override void DisposeManaged()
         {
-            Scene.World.RemoveRigidBody(rigidBody);
+            if (Scene.World != null)
+                Scene.World.RemoveRigidBody(rigidBody);
+
             SafeDispose(ref rigidBody);
 
             base.DisposeManaged();

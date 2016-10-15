@@ -30,6 +30,8 @@ namespace Nostradamus.Server
 
             Simulate(DequeueCommandsBefore(time + deltaTime));
 
+            Scene.OnLateUpdate();
+
             EventApplied -= EnqueueEvent;
 
             var snapshot = CreateSnapshot();
