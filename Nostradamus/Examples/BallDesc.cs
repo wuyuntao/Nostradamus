@@ -1,5 +1,4 @@
-﻿using System;
-using BulletSharp;
+﻿using BulletSharp;
 using BulletSharp.Math;
 using FlatBuffers;
 using Nostradamus.Networking;

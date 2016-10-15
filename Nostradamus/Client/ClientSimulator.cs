@@ -171,6 +171,7 @@ namespace Nostradamus.Client
                 }
                 else if (time < nextConvergenceTime)
                 {
+                    /*
                     var authoritativeSnapshot = authoritativeTimeline.Last.Snapshot;
 
                     // TODO: Need a better convergence algorithm
@@ -189,8 +190,9 @@ namespace Nostradamus.Client
                     {
                         predictiveTimeline.AddPoint(time + Scene.Desc.SimulationDeltaTime, snapshot);
 
-                        logger.Debug("All commands are acknowledged and convergence predictive timeline");
+                        logger.Info("All commands are acknowledged and convergence predictive timeline");
                     }
+                    */
                 }
                 else
                 {

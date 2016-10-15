@@ -43,11 +43,9 @@ namespace Nostradamus.Examples
                 var x = Input.GetAxis("Horizontal");
                 var y = Input.GetAxis("Jump");
                 var z = Input.GetAxis("Vertical");
-                if (x != 0 || y != 0 || z != 0)
-                {
-                    var command = new KickBallCommand(x, y, z);
-                    simulator.ReceiveCommand(scene.Ball, command);
-                }
+
+                var command = new KickBallCommand(x, y, z);
+                simulator.ReceiveCommand(scene.Ball, command);
 
                 if (Input.GetKeyUp(KeyCode.F))
                 {
