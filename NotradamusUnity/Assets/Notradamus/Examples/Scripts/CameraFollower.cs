@@ -20,10 +20,9 @@ namespace Nostradamus.Examples
             if (followTarget == null)
                 return;
 
-            var targetPosition = followTarget.TransformPoint(cameraOffset);
-            targetPosition.y = 2.5f;
+            var targetPosition = followTarget.position + cameraOffset;
 
-            transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref smoothVelocity, smoothTime, 1);
+            transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref smoothVelocity, smoothTime);
         }
     }
 }
