@@ -151,9 +151,7 @@
     <Compile Include="Core\Timepoint.cs" />
     <Compile Include="Utils\Disposable.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="GeneratedCode\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
