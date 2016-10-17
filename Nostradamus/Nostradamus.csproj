@@ -119,27 +119,8 @@
     <Compile Include="Examples\KickBallCommand.cs" />
     <Compile Include="Examples\ExampleScene.cs" />
     <Compile Include="Examples\SceneInitializedEvent.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\ActorId.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\ActorSnapshot.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\BallDesc.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\ClientId.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\Command.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\CommandFrame.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\CommandSeq.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\CubeDesc.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\DeltaSyncFrame.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\Event.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\FullSyncFrame.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\KickBallCommand.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\Login.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\MessageEnvelope.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\Quaternion.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\RigidBodyMovedEvent.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\RigidBodySnapshot.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\SceneInitializedEvent.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\SimulatorSnapshot.cs" />
-    <Compile Include="GeneratedCode\Nostradamus\Schema\Vector3.cs" />
     <Compile Include="Networking\Login.cs" />
+    <Compile Include="Networking\Schema.cs" />
     <Compile Include="Physics\PhysicsScene.cs" />
     <Compile Include="Physics\PhysicsSceneDesc.cs" />
     <Compile Include="Core\Scene.cs" />
@@ -170,7 +151,9 @@
     <Compile Include="Core\Timepoint.cs" />
     <Compile Include="Utils\Disposable.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="GeneratedCode\" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -178,7 +161,7 @@
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Nostradamus.fbs" />
+    <None Include="Networking\Schema.fbs" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
