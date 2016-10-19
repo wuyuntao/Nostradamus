@@ -8,8 +8,6 @@ namespace Nostradamus.Examples
     {
         static void Main(string[] args)
         {
-            Serializer.Initialize();
-
             //var t1 = new ServerSimulatorTest();
             //t1.TestExampleScene();
 

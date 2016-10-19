@@ -1,4 +1,5 @@
 ﻿using FlatBuffers;
+using FlatBuffers.Schema;
 using System;
 
 namespace Nostradamus.Networking
@@ -9,21 +10,21 @@ namespace Nostradamus.Networking
 
         public MessageEnvelope(object message)
         {
+            MessageEnvelopeSerializer s = null;
             Message = message;
         }
     }
 
     class MessageEnvelopeSerializer : Serializer<MessageEnvelope, Schema.MessageEnvelope>
     {
-        public static readonly MessageEnvelopeSerializer Instance = new MessageEnvelopeSerializer();
+        public static readonly MessageEnvelopeSerializer Instance = SerializerSet.Instance.CreateSerializer<MessageEnvelopeSerializer, MessageEnvelope, Schema.MessageEnvelope>();
 
         public override Offset<Schema.MessageEnvelope> Serialize(FlatBufferBuilder fbb, MessageEnvelope envelope)
         {
-            var key = GetTypeKey(envelope.Message.GetType());
-            var serializer = GetSerializer(key);
-            var data = serializer.Serialize(envelope.Message);
+            var type = envelope.Message.GetType();
+            var data = SerializerSet.Instance.Serialize(type, envelope.Message);
 
-            var oId = fbb.CreateString(key);
+            var oId = fbb.CreateString(type.FullName);
             var voData = Nostradamus.Schema.MessageEnvelope.CreateDataVector(fbb, data);
             var oEnvelope = Nostradamus.Schema.MessageEnvelope.CreateMessageEnvelope(fbb, oId, voData);
 
@@ -32,16 +33,15 @@ namespace Nostradamus.Networking
 
         public override MessageEnvelope Deserialize(Schema.MessageEnvelope envelope)
         {
-            var serializer = GetSerializer(envelope.Id);
             var segment = envelope.GetDataBytes().Value;
             var data = new byte[segment.Count];
             Array.Copy(segment.Array, segment.Offset, data, 0, segment.Count);
-            var message = serializer.Deserialize(data);
+            var message = SerializerSet.Instance.Deserialize(envelope.Id, data);
 
             return new MessageEnvelope(message);
         }
 
-        public override Schema.MessageEnvelope ToFlatBufferObject(ByteBuffer buffer)
+        protected override Schema.MessageEnvelope GetRootAs(ByteBuffer buffer)
         {
             return Schema.MessageEnvelope.GetRootAsMessageEnvelope(buffer);
         }

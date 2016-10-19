@@ -1,6 +1,8 @@
 ﻿using BulletSharp.Math;
 using FlatBuffers;
+using FlatBuffers.Schema;
 using Nostradamus.Networking;
+using System;
 
 namespace Nostradamus.Physics
 {
@@ -17,7 +19,7 @@ namespace Nostradamus.Physics
 
     public class Vector3Serializer : Serializer<Vector3, Schema.Vector3>
     {
-        public static readonly Vector3Serializer Instance = new Vector3Serializer();
+        public static readonly Vector3Serializer Instance = SerializerSet.Instance.CreateSerializer<Vector3Serializer, Vector3, Schema.Vector3>();
 
         public override Vector3 Deserialize(Schema.Vector3 vector)
         {
@@ -29,7 +31,7 @@ namespace Nostradamus.Physics
             return Schema.Vector3.CreateVector3(fbb, vector.X, vector.Y, vector.Z);
         }
 
-        public override Schema.Vector3 ToFlatBufferObject(ByteBuffer buffer)
+        protected override Schema.Vector3 GetRootAs(ByteBuffer buffer)
         {
             return Schema.Vector3.GetRootAsVector3(buffer);
         }
@@ -37,7 +39,7 @@ namespace Nostradamus.Physics
 
     public class QuaternionSerializer : Serializer<Quaternion, Schema.Quaternion>
     {
-        public static readonly QuaternionSerializer Instance = new QuaternionSerializer();
+        public static readonly QuaternionSerializer Instance = SerializerSet.Instance.CreateSerializer<QuaternionSerializer, Quaternion, Schema.Quaternion>();
 
         public override Quaternion Deserialize(Schema.Quaternion quaternion)
         {
@@ -49,7 +51,7 @@ namespace Nostradamus.Physics
             return Schema.Quaternion.CreateQuaternion(fbb, quaternion.X, quaternion.Y, quaternion.Z, quaternion.W);
         }
 
-        public override Schema.Quaternion ToFlatBufferObject(ByteBuffer buffer)
+        protected override Schema.Quaternion GetRootAs(ByteBuffer buffer)
         {
             return Schema.Quaternion.GetRootAsQuaternion(buffer);
         }
@@ -79,7 +81,7 @@ namespace Nostradamus.Physics
             return new RigidBodyMovedEvent() { Position = position, Rotation = rotation, LinearVelocity = linearVelocity, AngularVelocity = angularVelocity };
         }
 
-        public override Schema.RigidBodyMovedEvent ToFlatBufferObject(ByteBuffer buffer)
+        protected override Schema.RigidBodyMovedEvent GetRootAs(ByteBuffer buffer)
         {
             return Schema.RigidBodyMovedEvent.GetRootAsRigidBodyMovedEvent(buffer);
         }

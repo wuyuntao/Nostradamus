@@ -1,4 +1,5 @@
 ﻿using FlatBuffers;
+using FlatBuffers.Schema;
 
 namespace Nostradamus.Networking
 {
@@ -14,7 +15,7 @@ namespace Nostradamus.Networking
 
     class LoginSerializer : Serializer<Login, Schema.Login>
     {
-        public static readonly LoginSerializer Instance = new LoginSerializer();
+        public static readonly LoginSerializer Instance = SerializerSet.Instance.CreateSerializer<LoginSerializer, Login, Schema.Login>();
 
         public override Offset<Schema.Login> Serialize(FlatBufferBuilder fbb, Login login)
         {
@@ -30,7 +31,7 @@ namespace Nostradamus.Networking
             return new Login(clientId);
         }
 
-        public override Schema.Login ToFlatBufferObject(ByteBuffer buffer)
+        protected override Schema.Login GetRootAs(ByteBuffer buffer)
         {
             return Schema.Login.GetRootAsLogin(buffer);
         }

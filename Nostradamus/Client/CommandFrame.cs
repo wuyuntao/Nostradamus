@@ -1,5 +1,5 @@
 ﻿using FlatBuffers;
-using Nostradamus.Networking;
+using FlatBuffers.Schema;
 using System.Collections.Generic;
 
 namespace Nostradamus.Client
@@ -24,7 +24,7 @@ namespace Nostradamus.Client
 
     class CommandFrameSerializer : Serializer<CommandFrame, Schema.CommandFrame>
     {
-        public static readonly CommandFrameSerializer Instance = new CommandFrameSerializer();
+        public static readonly CommandFrameSerializer Instance = SerializerSet.Instance.CreateSerializer<CommandFrameSerializer, CommandFrame, Schema.CommandFrame>();
 
         public override Offset<Schema.CommandFrame> Serialize(FlatBufferBuilder fbb, CommandFrame frame)
         {
@@ -58,7 +58,7 @@ namespace Nostradamus.Client
             return commandFrame;
         }
 
-        public override Schema.CommandFrame ToFlatBufferObject(ByteBuffer buffer)
+        protected override Schema.CommandFrame GetRootAs(ByteBuffer buffer)
         {
             return Schema.CommandFrame.GetRootAsCommandFrame(buffer);
         }

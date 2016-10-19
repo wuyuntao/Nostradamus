@@ -1,4 +1,5 @@
 ﻿using FlatBuffers;
+using FlatBuffers.Schema;
 using Nostradamus.Networking;
 
 namespace Nostradamus
@@ -49,7 +50,7 @@ namespace Nostradamus
 
     class CommandSerializer : Serializer<Command, Schema.Command>
     {
-        public static readonly CommandSerializer Instance = new CommandSerializer();
+        public static readonly CommandSerializer Instance = SerializerSet.Instance.CreateSerializer<CommandSerializer, Command, Schema.Command>();
 
         public override Offset<Schema.Command> Serialize(FlatBufferBuilder fbb, Command command)
         {
@@ -59,7 +60,7 @@ namespace Nostradamus
             var oActorIdDesc = string.IsNullOrEmpty(command.ActorId.Description) ? default(StringOffset) : fbb.CreateString(command.ActorId.Description);
             var oActorId = Schema.ActorId.CreateActorId(fbb, command.ActorId.Value, oActorIdDesc);
 
-            var oArgs = MessageEnvelopeSerializer.Instance.Serialize(fbb, new MessageEnvelope(command.Args));
+            var oArgs = MessageEnvelopeSerializer.Instance.Serialize(fbb, new Networking.MessageEnvelope(command.Args));
 
             return Schema.Command.CreateCommand(fbb, oClientId, oActorId, command.Sequence, command.Time, command.DeltaTime, oArgs);
         }
@@ -73,7 +74,7 @@ namespace Nostradamus
             return new Command(clientId, actorId, command.Sequence, (ICommandArgs)args.Message);
         }
 
-        public override Schema.Command ToFlatBufferObject(ByteBuffer buffer)
+        protected override Schema.Command GetRootAs(ByteBuffer buffer)
         {
             return Schema.Command.GetRootAsCommand(buffer);
         }

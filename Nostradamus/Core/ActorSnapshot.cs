@@ -1,4 +1,5 @@
 ﻿using FlatBuffers;
+using FlatBuffers.Schema;
 using Nostradamus.Networking;
 
 namespace Nostradamus
@@ -29,12 +30,12 @@ namespace Nostradamus
 
     class ActorSnapshotSerializer : Serializer<ActorSnapshot, Schema.ActorSnapshot>
     {
-        public static readonly ActorSnapshotSerializer Instance = new ActorSnapshotSerializer();
+        public static readonly ActorSnapshotSerializer Instance = SerializerSet.Instance.CreateSerializer<ActorSnapshotSerializer, ActorSnapshot, Schema.ActorSnapshot>();
 
         public override Offset<Schema.ActorSnapshot> Serialize(FlatBufferBuilder fbb, ActorSnapshot e)
         {
-            var oDesc = MessageEnvelopeSerializer.Instance.Serialize(fbb, new MessageEnvelope(e.Desc));
-            var oArgs = MessageEnvelopeSerializer.Instance.Serialize(fbb, new MessageEnvelope(e.Args));
+            var oDesc = MessageEnvelopeSerializer.Instance.Serialize(fbb, new Networking.MessageEnvelope(e.Desc));
+            var oArgs = MessageEnvelopeSerializer.Instance.Serialize(fbb, new Networking.MessageEnvelope(e.Args));
 
             return Schema.ActorSnapshot.CreateActorSnapshot(fbb, oDesc, oArgs);
         }
@@ -47,7 +48,7 @@ namespace Nostradamus
             return new ActorSnapshot((ActorDesc)desc.Message, (ISnapshotArgs)args.Message);
         }
 
-        public override Schema.ActorSnapshot ToFlatBufferObject(ByteBuffer buffer)
+        protected override Schema.ActorSnapshot GetRootAs(ByteBuffer buffer)
         {
             return Schema.ActorSnapshot.GetRootAsActorSnapshot(buffer);
         }

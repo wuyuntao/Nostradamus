@@ -114,4 +114,6 @@ table KickBallCommand {
 }
 
 table SceneInitializedEvent {
+    cubeRows: ubyte;
+    cubeColumns: ubyte;
 }

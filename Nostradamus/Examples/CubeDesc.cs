@@ -1,6 +1,7 @@
 ﻿using BulletSharp;
 using BulletSharp.Math;
 using FlatBuffers;
+using FlatBuffers.Schema;
 using Nostradamus.Networking;
 using Nostradamus.Physics;
 
@@ -24,7 +25,7 @@ namespace Nostradamus.Examples
 
     class CubeDescSerializer : Serializer<CubeDesc, Schema.CubeDesc>
     {
-        public static readonly CubeDescSerializer Instance = new CubeDescSerializer();
+        public static readonly CubeDescSerializer Instance = SerializerSet.Instance.CreateSerializer<CubeDescSerializer, CubeDesc, Schema.CubeDesc>();
 
         public override Offset<Schema.CubeDesc> Serialize(FlatBufferBuilder fbb, CubeDesc obj)
         {
@@ -42,7 +43,7 @@ namespace Nostradamus.Examples
             return new CubeDesc(id, position);
         }
 
-        public override Schema.CubeDesc ToFlatBufferObject(ByteBuffer buffer)
+        protected override Schema.CubeDesc GetRootAs(ByteBuffer buffer)
         {
             return Schema.CubeDesc.GetRootAsCubeDesc(buffer);
         }

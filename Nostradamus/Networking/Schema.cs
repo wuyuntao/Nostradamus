@@ -670,8 +670,21 @@ public struct SceneInitializedEvent : IFlatbufferObject
   public void __init(int _i, ByteBuffer _bb) { __p.bb_pos = _i; __p.bb = _bb; }
   public SceneInitializedEvent __assign(int _i, ByteBuffer _bb) { __init(_i, _bb); return this; }
 
+  public byte CubeRows { get { int o = __p.__offset(4); return o != 0 ? __p.bb.Get(o + __p.bb_pos) : (byte)0; } }
+  public byte CubeColumns { get { int o = __p.__offset(6); return o != 0 ? __p.bb.Get(o + __p.bb_pos) : (byte)0; } }
 
-  public static void StartSceneInitializedEvent(FlatBufferBuilder builder) { builder.StartObject(0); }
+  public static Offset<SceneInitializedEvent> CreateSceneInitializedEvent(FlatBufferBuilder builder,
+      byte cubeRows = 0,
+      byte cubeColumns = 0) {
+    builder.StartObject(2);
+    SceneInitializedEvent.AddCubeColumns(builder, cubeColumns);
+    SceneInitializedEvent.AddCubeRows(builder, cubeRows);
+    return SceneInitializedEvent.EndSceneInitializedEvent(builder);
+  }
+
+  public static void StartSceneInitializedEvent(FlatBufferBuilder builder) { builder.StartObject(2); }
+  public static void AddCubeRows(FlatBufferBuilder builder, byte cubeRows) { builder.AddByte(0, cubeRows, 0); }
+  public static void AddCubeColumns(FlatBufferBuilder builder, byte cubeColumns) { builder.AddByte(1, cubeColumns, 0); }
   public static Offset<SceneInitializedEvent> EndSceneInitializedEvent(FlatBufferBuilder builder) {
     int o = builder.EndObject();
     return new Offset<SceneInitializedEvent>(o);

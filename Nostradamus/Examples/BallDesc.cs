@@ -1,6 +1,7 @@
 ﻿using BulletSharp;
 using BulletSharp.Math;
 using FlatBuffers;
+using FlatBuffers.Schema;
 using Nostradamus.Networking;
 using Nostradamus.Physics;
 
@@ -28,7 +29,7 @@ namespace Nostradamus.Examples
 
     class BallDescSerializer : Serializer<BallDesc, Schema.BallDesc>
     {
-        public static readonly BallDescSerializer Instance = new BallDescSerializer();
+        public static readonly BallDescSerializer Instance = SerializerSet.Instance.CreateSerializer<BallDescSerializer, BallDesc, Schema.BallDesc>();
 
         public override Offset<Schema.BallDesc> Serialize(FlatBufferBuilder fbb, BallDesc obj)
         {
@@ -46,7 +47,7 @@ namespace Nostradamus.Examples
             return new BallDesc(id, position);
         }
 
-        public override Schema.BallDesc ToFlatBufferObject(ByteBuffer buffer)
+        protected override Schema.BallDesc GetRootAs(ByteBuffer buffer)
         {
             return Schema.BallDesc.GetRootAsBallDesc(buffer);
         }

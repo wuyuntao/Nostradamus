@@ -1,4 +1,5 @@
 ﻿using FlatBuffers;
+using FlatBuffers.Schema;
 using Nostradamus.Networking;
 
 namespace Nostradamus.Server
@@ -30,7 +31,7 @@ namespace Nostradamus.Server
 
     class FullSyncFrameSerializer : Serializer<FullSyncFrame, Schema.FullSyncFrame>
     {
-        public static readonly FullSyncFrameSerializer Instance = new FullSyncFrameSerializer();
+        public static readonly FullSyncFrameSerializer Instance = SerializerSet.Instance.CreateSerializer<FullSyncFrameSerializer, FullSyncFrame, Schema.FullSyncFrame>();
 
         public override Offset<Schema.FullSyncFrame> Serialize(FlatBufferBuilder fbb, FullSyncFrame frame)
         {
@@ -46,7 +47,7 @@ namespace Nostradamus.Server
             return new FullSyncFrame(frame.Time, frame.DeltaTime, snapshot);
         }
 
-        public override Schema.FullSyncFrame ToFlatBufferObject(ByteBuffer buffer)
+        protected override Schema.FullSyncFrame GetRootAs(ByteBuffer buffer)
         {
             return Schema.FullSyncFrame.GetRootAsFullSyncFrame(buffer);
         }

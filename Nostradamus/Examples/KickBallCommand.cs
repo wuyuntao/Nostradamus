@@ -1,5 +1,5 @@
 ﻿using FlatBuffers;
-using Nostradamus.Networking;
+using FlatBuffers.Schema;
 
 namespace Nostradamus.Examples
 {
@@ -21,7 +21,7 @@ namespace Nostradamus.Examples
 
     public class KickBallCommandSerializer : Serializer<KickBallCommand, Schema.KickBallCommand>
     {
-        public static readonly KickBallCommandSerializer Instance = new KickBallCommandSerializer();
+        public static readonly KickBallCommandSerializer Instance = SerializerSet.Instance.CreateSerializer<KickBallCommandSerializer, KickBallCommand, Schema.KickBallCommand>();
 
         public override Offset<Schema.KickBallCommand> Serialize(FlatBufferBuilder fbb, KickBallCommand command)
         {
@@ -33,7 +33,7 @@ namespace Nostradamus.Examples
             return new KickBallCommand(command.InputX, command.InputY, command.InputZ);
         }
 
-        public override Schema.KickBallCommand ToFlatBufferObject(ByteBuffer buffer)
+        protected override Schema.KickBallCommand GetRootAs(ByteBuffer buffer)
         {
             return Schema.KickBallCommand.GetRootAsKickBallCommand(buffer);
         }

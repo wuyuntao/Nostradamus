@@ -1,4 +1,5 @@
-﻿using Lidgren.Network;
+﻿using FlatBuffers.Schema;
+using Lidgren.Network;
 using NLog;
 using Nostradamus.Client;
 using Nostradamus.Server;
@@ -82,7 +83,7 @@ namespace Nostradamus.Networking
 
                 case NetIncomingMessageType.Data:
                     {
-                        var envelope = Serializer.Deserialize<MessageEnvelope>(msg.Data);
+                        var envelope = (MessageEnvelope)SerializerSet.Instance.Deserialize(typeof(MessageEnvelope), msg.Data);
 
                         if (envelope.Message is CommandFrame)
                         {
@@ -148,7 +149,7 @@ namespace Nostradamus.Networking
 
         private void SendMessage(Client client, object message)
         {
-            var bytes = Serializer.Serialize(new MessageEnvelope(message));
+            var bytes = SerializerSet.Instance.Serialize(typeof(MessageEnvelope), new MessageEnvelope(message));
 
             var msg = server.CreateMessage();
             msg.Write(bytes);
@@ -158,7 +159,7 @@ namespace Nostradamus.Networking
 
         private void SendMessageToAll(object message)
         {
-            var bytes = Serializer.Serialize(new MessageEnvelope(message));
+            var bytes = SerializerSet.Instance.Serialize(typeof(MessageEnvelope), new MessageEnvelope(message));
 
             var msg = server.CreateMessage();
             msg.Write(bytes);

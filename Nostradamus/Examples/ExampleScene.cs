@@ -33,7 +33,7 @@ namespace Nostradamus.Examples
         {
             if (cube == null && ball == null && Simulator is ServerSimulator)
             {
-                ApplyEvent(new SceneInitializedEvent());
+                ApplyEvent(new SceneInitializedEvent(1, 1));
             }
 
             base.OnUpdate();

@@ -1,5 +1,6 @@
 ﻿using BulletSharp.Math;
 using FlatBuffers;
+using FlatBuffers.Schema;
 using NLog;
 using Nostradamus.Networking;
 using System;
@@ -115,7 +116,7 @@ namespace Nostradamus.Physics
 
     public class RigidBodySnapshotSerializer : Serializer<RigidBodySnapshot, Schema.RigidBodySnapshot>
     {
-        public static readonly RigidBodySnapshotSerializer Instance = new RigidBodySnapshotSerializer();
+        public static readonly RigidBodySnapshotSerializer Instance = SerializerSet.Instance.CreateSerializer<RigidBodySnapshotSerializer, RigidBodySnapshot, Schema.RigidBodySnapshot>();
 
         public override Offset<Schema.RigidBodySnapshot> Serialize(FlatBufferBuilder fbb, RigidBodySnapshot e)
         {
@@ -137,7 +138,7 @@ namespace Nostradamus.Physics
             return new RigidBodySnapshot() { Position = position, Rotation = rotation, LinearVelocity = linearVelocity, AngularVelocity = angularVelocity };
         }
 
-        public override Schema.RigidBodySnapshot ToFlatBufferObject(ByteBuffer buffer)
+        protected override Schema.RigidBodySnapshot GetRootAs(ByteBuffer buffer)
         {
             return Schema.RigidBodySnapshot.GetRootAsRigidBodySnapshot(buffer);
         }

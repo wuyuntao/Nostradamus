@@ -1,4 +1,5 @@
 ﻿using FlatBuffers;
+using FlatBuffers.Schema;
 using Nostradamus.Networking;
 using System.Collections.Generic;
 using System.Linq;
@@ -86,7 +87,7 @@ namespace Nostradamus
 
     class SimulatorSnapshotSerializer : Serializer<SimulatorSnapshot, Schema.SimulatorSnapshot>
     {
-        public static readonly SimulatorSnapshotSerializer Instance = new SimulatorSnapshotSerializer();
+        public static readonly SimulatorSnapshotSerializer Instance = SerializerSet.Instance.CreateSerializer<SimulatorSnapshotSerializer, SimulatorSnapshot, Schema.SimulatorSnapshot>();
 
         public override Offset<Schema.SimulatorSnapshot> Serialize(FlatBufferBuilder fbb, SimulatorSnapshot snapshot)
         {
@@ -116,7 +117,7 @@ namespace Nostradamus
             return new SimulatorSnapshot() { Actors = actors };
         }
 
-        public override Schema.SimulatorSnapshot ToFlatBufferObject(ByteBuffer buffer)
+        protected override Schema.SimulatorSnapshot GetRootAs(ByteBuffer buffer)
         {
             return Schema.SimulatorSnapshot.GetRootAsSimulatorSnapshot(buffer);
         }

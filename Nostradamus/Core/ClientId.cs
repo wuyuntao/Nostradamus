@@ -1,5 +1,5 @@
 ﻿using FlatBuffers;
-using Nostradamus.Networking;
+using FlatBuffers.Schema;
 using System;
 
 namespace Nostradamus
@@ -78,7 +78,7 @@ namespace Nostradamus
 
     class ClientIdSerializer : Serializer<ClientId, Schema.ClientId>
     {
-        public static readonly ClientIdSerializer Instance = new ClientIdSerializer();
+        public static readonly ClientIdSerializer Instance = SerializerSet.Instance.CreateSerializer<ClientIdSerializer, ClientId, Schema.ClientId>();
 
         public override Offset<Schema.ClientId> Serialize(FlatBufferBuilder fbb, ClientId id)
         {
@@ -92,7 +92,7 @@ namespace Nostradamus
             return new ClientId(id.Value, id.Description);
         }
 
-        public override Schema.ClientId ToFlatBufferObject(ByteBuffer buffer)
+        protected override Schema.ClientId GetRootAs(ByteBuffer buffer)
         {
             return Schema.ClientId.GetRootAsClientId(buffer);
         }

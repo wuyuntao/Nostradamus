@@ -121,6 +121,7 @@
     <Compile Include="Examples\SceneInitializedEvent.cs" />
     <Compile Include="Networking\Login.cs" />
     <Compile Include="Networking\Schema.cs" />
+    <Compile Include="Networking\SchemaAccessors.cs" />
     <Compile Include="Physics\PhysicsScene.cs" />
     <Compile Include="Physics\PhysicsSceneDesc.cs" />
     <Compile Include="Core\Scene.cs" />
@@ -137,7 +138,6 @@
     <Compile Include="Networking\MessageEnvelope.cs" />
     <Compile Include="Networking\ReliableUdpClient.cs" />
     <Compile Include="Networking\ReliableUdpServer.cs" />
-    <Compile Include="Networking\Serializer.cs" />
     <Compile Include="Physics\RigidBodyActor.cs" />
     <Compile Include="Physics\RigidBodyDesc.cs" />
     <Compile Include="Physics\RigidBodyMovedEvent.cs" />
