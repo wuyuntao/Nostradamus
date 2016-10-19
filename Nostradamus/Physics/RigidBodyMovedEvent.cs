@@ -1,8 +1,6 @@
 ﻿using BulletSharp.Math;
 using FlatBuffers;
 using FlatBuffers.Schema;
-using Nostradamus.Networking;
-using System;
 
 namespace Nostradamus.Physics
 {
@@ -19,7 +17,7 @@ namespace Nostradamus.Physics
 
     public class Vector3Serializer : Serializer<Vector3, Schema.Vector3>
     {
-        public static readonly Vector3Serializer Instance = SerializerSet.Instance.CreateSerializer<Vector3Serializer, Vector3, Schema.Vector3>();
+        public static readonly Vector3Serializer Instance = new Vector3Serializer();
 
         public override Vector3 Deserialize(Schema.Vector3 vector)
         {
@@ -39,7 +37,7 @@ namespace Nostradamus.Physics
 
     public class QuaternionSerializer : Serializer<Quaternion, Schema.Quaternion>
     {
-        public static readonly QuaternionSerializer Instance = SerializerSet.Instance.CreateSerializer<QuaternionSerializer, Quaternion, Schema.Quaternion>();
+        public static readonly QuaternionSerializer Instance = new QuaternionSerializer();
 
         public override Quaternion Deserialize(Schema.Quaternion quaternion)
         {

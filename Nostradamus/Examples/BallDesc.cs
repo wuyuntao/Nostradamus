@@ -29,7 +29,7 @@ namespace Nostradamus.Examples
 
     class BallDescSerializer : Serializer<BallDesc, Schema.BallDesc>
     {
-        public static readonly BallDescSerializer Instance = SerializerSet.Instance.CreateSerializer<BallDescSerializer, BallDesc, Schema.BallDesc>();
+        public static readonly BallDescSerializer Instance = new BallDescSerializer();
 
         public override Offset<Schema.BallDesc> Serialize(FlatBufferBuilder fbb, BallDesc obj)
         {

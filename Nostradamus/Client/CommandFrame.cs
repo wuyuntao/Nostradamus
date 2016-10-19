@@ -24,7 +24,7 @@ namespace Nostradamus.Client
 
     class CommandFrameSerializer : Serializer<CommandFrame, Schema.CommandFrame>
     {
-        public static readonly CommandFrameSerializer Instance = SerializerSet.Instance.CreateSerializer<CommandFrameSerializer, CommandFrame, Schema.CommandFrame>();
+        public static readonly CommandFrameSerializer Instance = new CommandFrameSerializer();
 
         public override Offset<Schema.CommandFrame> Serialize(FlatBufferBuilder fbb, CommandFrame frame)
         {

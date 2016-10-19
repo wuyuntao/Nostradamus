@@ -17,7 +17,7 @@ namespace Nostradamus.Networking
 
     class MessageEnvelopeSerializer : Serializer<MessageEnvelope, Schema.MessageEnvelope>
     {
-        public static readonly MessageEnvelopeSerializer Instance = SerializerSet.Instance.CreateSerializer<MessageEnvelopeSerializer, MessageEnvelope, Schema.MessageEnvelope>();
+        public static readonly MessageEnvelopeSerializer Instance = new MessageEnvelopeSerializer();
 
         public override Offset<Schema.MessageEnvelope> Serialize(FlatBufferBuilder fbb, MessageEnvelope envelope)
         {

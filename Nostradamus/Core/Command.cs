@@ -50,7 +50,7 @@ namespace Nostradamus
 
     class CommandSerializer : Serializer<Command, Schema.Command>
     {
-        public static readonly CommandSerializer Instance = SerializerSet.Instance.CreateSerializer<CommandSerializer, Command, Schema.Command>();
+        public static readonly CommandSerializer Instance = new CommandSerializer();
 
         public override Offset<Schema.Command> Serialize(FlatBufferBuilder fbb, Command command)
         {

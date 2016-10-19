@@ -15,7 +15,7 @@ namespace Nostradamus.Networking
 
     class LoginSerializer : Serializer<Login, Schema.Login>
     {
-        public static readonly LoginSerializer Instance = SerializerSet.Instance.CreateSerializer<LoginSerializer, Login, Schema.Login>();
+        public static readonly LoginSerializer Instance = new LoginSerializer();
 
         public override Offset<Schema.Login> Serialize(FlatBufferBuilder fbb, Login login)
         {

@@ -21,7 +21,7 @@ namespace Nostradamus.Examples
 
     public class KickBallCommandSerializer : Serializer<KickBallCommand, Schema.KickBallCommand>
     {
-        public static readonly KickBallCommandSerializer Instance = SerializerSet.Instance.CreateSerializer<KickBallCommandSerializer, KickBallCommand, Schema.KickBallCommand>();
+        public static readonly KickBallCommandSerializer Instance = new KickBallCommandSerializer();
 
         public override Offset<Schema.KickBallCommand> Serialize(FlatBufferBuilder fbb, KickBallCommand command)
         {

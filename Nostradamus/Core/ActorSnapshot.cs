@@ -30,7 +30,7 @@ namespace Nostradamus
 
     class ActorSnapshotSerializer : Serializer<ActorSnapshot, Schema.ActorSnapshot>
     {
-        public static readonly ActorSnapshotSerializer Instance = SerializerSet.Instance.CreateSerializer<ActorSnapshotSerializer, ActorSnapshot, Schema.ActorSnapshot>();
+        public static readonly ActorSnapshotSerializer Instance = new ActorSnapshotSerializer();
 
         public override Offset<Schema.ActorSnapshot> Serialize(FlatBufferBuilder fbb, ActorSnapshot e)
         {

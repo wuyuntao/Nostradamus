@@ -31,7 +31,7 @@ namespace Nostradamus.Server
 
     class FullSyncFrameSerializer : Serializer<FullSyncFrame, Schema.FullSyncFrame>
     {
-        public static readonly FullSyncFrameSerializer Instance = SerializerSet.Instance.CreateSerializer<FullSyncFrameSerializer, FullSyncFrame, Schema.FullSyncFrame>();
+        public static readonly FullSyncFrameSerializer Instance = new FullSyncFrameSerializer();
 
         public override Offset<Schema.FullSyncFrame> Serialize(FlatBufferBuilder fbb, FullSyncFrame frame)
         {

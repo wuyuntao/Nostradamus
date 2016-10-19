@@ -116,7 +116,7 @@ namespace Nostradamus.Physics
 
     public class RigidBodySnapshotSerializer : Serializer<RigidBodySnapshot, Schema.RigidBodySnapshot>
     {
-        public static readonly RigidBodySnapshotSerializer Instance = SerializerSet.Instance.CreateSerializer<RigidBodySnapshotSerializer, RigidBodySnapshot, Schema.RigidBodySnapshot>();
+        public static readonly RigidBodySnapshotSerializer Instance = new RigidBodySnapshotSerializer();
 
         public override Offset<Schema.RigidBodySnapshot> Serialize(FlatBufferBuilder fbb, RigidBodySnapshot e)
         {

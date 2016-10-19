@@ -31,9 +31,9 @@ namespace Nostradamus.Server
         }
     }
 
-    class CommandSeqSerializer : Serializer<KeyValuePair<ClientId, int>, Schema.CommandSeq>
+    class CommandSeqSerializer : Serializer<KeyValuePair<ClientId, int>, CommandSeq>
     {
-        public static readonly CommandSeqSerializer Instance = SerializerSet.Instance.CreateSerializer<CommandSeqSerializer, KeyValuePair<ClientId, int>, Schema.CommandSeq>();
+        public static readonly CommandSeqSerializer Instance = new CommandSeqSerializer();
 
         public override Offset<CommandSeq> Serialize(FlatBufferBuilder fbb, KeyValuePair<ClientId, int> pair)
         {
@@ -57,7 +57,7 @@ namespace Nostradamus.Server
 
     class DeltaSyncFrameSerializer : Serializer<DeltaSyncFrame, Schema.DeltaSyncFrame>
     {
-        public static readonly DeltaSyncFrameSerializer Instance = SerializerSet.Instance.CreateSerializer<DeltaSyncFrameSerializer, DeltaSyncFrame, Schema.DeltaSyncFrame>();
+        public static readonly DeltaSyncFrameSerializer Instance = new DeltaSyncFrameSerializer();
 
         public override Offset<Schema.DeltaSyncFrame> Serialize(FlatBufferBuilder fbb, DeltaSyncFrame frame)
         {

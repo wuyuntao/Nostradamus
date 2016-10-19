@@ -1,4 +1,5 @@
-﻿using Nostradamus.Networking;
+﻿using FlatBuffers.Schema;
+using Nostradamus.Networking;
 using Nostradamus.Tests;
 using System;
 

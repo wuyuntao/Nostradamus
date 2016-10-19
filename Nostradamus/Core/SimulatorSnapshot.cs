@@ -87,7 +87,7 @@ namespace Nostradamus
 
     class SimulatorSnapshotSerializer : Serializer<SimulatorSnapshot, Schema.SimulatorSnapshot>
     {
-        public static readonly SimulatorSnapshotSerializer Instance = SerializerSet.Instance.CreateSerializer<SimulatorSnapshotSerializer, SimulatorSnapshot, Schema.SimulatorSnapshot>();
+        public static readonly SimulatorSnapshotSerializer Instance = new SimulatorSnapshotSerializer();
 
         public override Offset<Schema.SimulatorSnapshot> Serialize(FlatBufferBuilder fbb, SimulatorSnapshot snapshot)
         {

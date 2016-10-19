@@ -25,7 +25,7 @@ namespace Nostradamus.Examples
 
     class CubeDescSerializer : Serializer<CubeDesc, Schema.CubeDesc>
     {
-        public static readonly CubeDescSerializer Instance = SerializerSet.Instance.CreateSerializer<CubeDescSerializer, CubeDesc, Schema.CubeDesc>();
+        public static readonly CubeDescSerializer Instance = new CubeDescSerializer();
 
         public override Offset<Schema.CubeDesc> Serialize(FlatBufferBuilder fbb, CubeDesc obj)
         {

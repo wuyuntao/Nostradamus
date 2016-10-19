@@ -197,7 +197,7 @@ namespace Nostradamus.Schema.Serialization
 {
     public class MessageEnvelopeSerializer : Serializer<Nostradamus.Schema.Mutable.MessageEnvelope, MessageEnvelope>
     {
-        public static readonly MessageEnvelopeSerializer Instance = SerializerSet.Instance.CreateSerializer<MessageEnvelopeSerializer, Nostradamus.Schema.Mutable.MessageEnvelope, MessageEnvelope>();
+        public static readonly MessageEnvelopeSerializer Instance = new MessageEnvelopeSerializer();
 
         public override Offset<MessageEnvelope> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.MessageEnvelope obj)
         {
@@ -224,7 +224,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class ActorIdSerializer : Serializer<Nostradamus.Schema.Mutable.ActorId, ActorId>
     {
-        public static readonly ActorIdSerializer Instance = SerializerSet.Instance.CreateSerializer<ActorIdSerializer, Nostradamus.Schema.Mutable.ActorId, ActorId>();
+        public static readonly ActorIdSerializer Instance = new ActorIdSerializer();
 
         public override Offset<ActorId> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.ActorId obj)
         {
@@ -251,7 +251,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class ClientIdSerializer : Serializer<Nostradamus.Schema.Mutable.ClientId, ClientId>
     {
-        public static readonly ClientIdSerializer Instance = SerializerSet.Instance.CreateSerializer<ClientIdSerializer, Nostradamus.Schema.Mutable.ClientId, ClientId>();
+        public static readonly ClientIdSerializer Instance = new ClientIdSerializer();
 
         public override Offset<ClientId> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.ClientId obj)
         {
@@ -278,7 +278,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class CommandSerializer : Serializer<Nostradamus.Schema.Mutable.Command, Command>
     {
-        public static readonly CommandSerializer Instance = SerializerSet.Instance.CreateSerializer<CommandSerializer, Nostradamus.Schema.Mutable.Command, Command>();
+        public static readonly CommandSerializer Instance = new CommandSerializer();
 
         public override Offset<Command> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.Command obj)
         {
@@ -312,7 +312,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class EventSerializer : Serializer<Nostradamus.Schema.Mutable.Event, Event>
     {
-        public static readonly EventSerializer Instance = SerializerSet.Instance.CreateSerializer<EventSerializer, Nostradamus.Schema.Mutable.Event, Event>();
+        public static readonly EventSerializer Instance = new EventSerializer();
 
         public override Offset<Event> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.Event obj)
         {
@@ -338,7 +338,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class ActorSnapshotSerializer : Serializer<Nostradamus.Schema.Mutable.ActorSnapshot, ActorSnapshot>
     {
-        public static readonly ActorSnapshotSerializer Instance = SerializerSet.Instance.CreateSerializer<ActorSnapshotSerializer, Nostradamus.Schema.Mutable.ActorSnapshot, ActorSnapshot>();
+        public static readonly ActorSnapshotSerializer Instance = new ActorSnapshotSerializer();
 
         public override Offset<ActorSnapshot> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.ActorSnapshot obj)
         {
@@ -364,7 +364,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class SimulatorSnapshotSerializer : Serializer<Nostradamus.Schema.Mutable.SimulatorSnapshot, SimulatorSnapshot>
     {
-        public static readonly SimulatorSnapshotSerializer Instance = SerializerSet.Instance.CreateSerializer<SimulatorSnapshotSerializer, Nostradamus.Schema.Mutable.SimulatorSnapshot, SimulatorSnapshot>();
+        public static readonly SimulatorSnapshotSerializer Instance = new SimulatorSnapshotSerializer();
 
         public override Offset<SimulatorSnapshot> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.SimulatorSnapshot obj)
         {
@@ -388,7 +388,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class CommandFrameSerializer : Serializer<Nostradamus.Schema.Mutable.CommandFrame, CommandFrame>
     {
-        public static readonly CommandFrameSerializer Instance = SerializerSet.Instance.CreateSerializer<CommandFrameSerializer, Nostradamus.Schema.Mutable.CommandFrame, CommandFrame>();
+        public static readonly CommandFrameSerializer Instance = new CommandFrameSerializer();
 
         public override Offset<CommandFrame> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.CommandFrame obj)
         {
@@ -414,7 +414,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class FullSyncFrameSerializer : Serializer<Nostradamus.Schema.Mutable.FullSyncFrame, FullSyncFrame>
     {
-        public static readonly FullSyncFrameSerializer Instance = SerializerSet.Instance.CreateSerializer<FullSyncFrameSerializer, Nostradamus.Schema.Mutable.FullSyncFrame, FullSyncFrame>();
+        public static readonly FullSyncFrameSerializer Instance = new FullSyncFrameSerializer();
 
         public override Offset<FullSyncFrame> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.FullSyncFrame obj)
         {
@@ -442,7 +442,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class CommandSeqSerializer : Serializer<Nostradamus.Schema.Mutable.CommandSeq, CommandSeq>
     {
-        public static readonly CommandSeqSerializer Instance = SerializerSet.Instance.CreateSerializer<CommandSeqSerializer, Nostradamus.Schema.Mutable.CommandSeq, CommandSeq>();
+        public static readonly CommandSeqSerializer Instance = new CommandSeqSerializer();
 
         public override Offset<CommandSeq> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.CommandSeq obj)
         {
@@ -468,7 +468,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class DeltaSyncFrameSerializer : Serializer<Nostradamus.Schema.Mutable.DeltaSyncFrame, DeltaSyncFrame>
     {
-        public static readonly DeltaSyncFrameSerializer Instance = SerializerSet.Instance.CreateSerializer<DeltaSyncFrameSerializer, Nostradamus.Schema.Mutable.DeltaSyncFrame, DeltaSyncFrame>();
+        public static readonly DeltaSyncFrameSerializer Instance = new DeltaSyncFrameSerializer();
 
         public override Offset<DeltaSyncFrame> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.DeltaSyncFrame obj)
         {
@@ -498,7 +498,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class LoginSerializer : Serializer<Nostradamus.Schema.Mutable.Login, Login>
     {
-        public static readonly LoginSerializer Instance = SerializerSet.Instance.CreateSerializer<LoginSerializer, Nostradamus.Schema.Mutable.Login, Login>();
+        public static readonly LoginSerializer Instance = new LoginSerializer();
 
         public override Offset<Login> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.Login obj)
         {
@@ -522,7 +522,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class Vector3Serializer : Serializer<Nostradamus.Schema.Mutable.Vector3, Vector3>
     {
-        public static readonly Vector3Serializer Instance = SerializerSet.Instance.CreateSerializer<Vector3Serializer, Nostradamus.Schema.Mutable.Vector3, Vector3>();
+        public static readonly Vector3Serializer Instance = new Vector3Serializer();
 
         public override Offset<Vector3> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.Vector3 obj)
         {
@@ -550,7 +550,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class QuaternionSerializer : Serializer<Nostradamus.Schema.Mutable.Quaternion, Quaternion>
     {
-        public static readonly QuaternionSerializer Instance = SerializerSet.Instance.CreateSerializer<QuaternionSerializer, Nostradamus.Schema.Mutable.Quaternion, Quaternion>();
+        public static readonly QuaternionSerializer Instance = new QuaternionSerializer();
 
         public override Offset<Quaternion> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.Quaternion obj)
         {
@@ -580,7 +580,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class RigidBodyMovedEventSerializer : Serializer<Nostradamus.Schema.Mutable.RigidBodyMovedEvent, RigidBodyMovedEvent>
     {
-        public static readonly RigidBodyMovedEventSerializer Instance = SerializerSet.Instance.CreateSerializer<RigidBodyMovedEventSerializer, Nostradamus.Schema.Mutable.RigidBodyMovedEvent, RigidBodyMovedEvent>();
+        public static readonly RigidBodyMovedEventSerializer Instance = new RigidBodyMovedEventSerializer();
 
         public override Offset<RigidBodyMovedEvent> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.RigidBodyMovedEvent obj)
         {
@@ -610,7 +610,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class RigidBodySnapshotSerializer : Serializer<Nostradamus.Schema.Mutable.RigidBodySnapshot, RigidBodySnapshot>
     {
-        public static readonly RigidBodySnapshotSerializer Instance = SerializerSet.Instance.CreateSerializer<RigidBodySnapshotSerializer, Nostradamus.Schema.Mutable.RigidBodySnapshot, RigidBodySnapshot>();
+        public static readonly RigidBodySnapshotSerializer Instance = new RigidBodySnapshotSerializer();
 
         public override Offset<RigidBodySnapshot> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.RigidBodySnapshot obj)
         {
@@ -640,7 +640,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class BallDescSerializer : Serializer<Nostradamus.Schema.Mutable.BallDesc, BallDesc>
     {
-        public static readonly BallDescSerializer Instance = SerializerSet.Instance.CreateSerializer<BallDescSerializer, Nostradamus.Schema.Mutable.BallDesc, BallDesc>();
+        public static readonly BallDescSerializer Instance = new BallDescSerializer();
 
         public override Offset<BallDesc> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.BallDesc obj)
         {
@@ -666,7 +666,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class CubeDescSerializer : Serializer<Nostradamus.Schema.Mutable.CubeDesc, CubeDesc>
     {
-        public static readonly CubeDescSerializer Instance = SerializerSet.Instance.CreateSerializer<CubeDescSerializer, Nostradamus.Schema.Mutable.CubeDesc, CubeDesc>();
+        public static readonly CubeDescSerializer Instance = new CubeDescSerializer();
 
         public override Offset<CubeDesc> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.CubeDesc obj)
         {
@@ -692,7 +692,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class KickBallCommandSerializer : Serializer<Nostradamus.Schema.Mutable.KickBallCommand, KickBallCommand>
     {
-        public static readonly KickBallCommandSerializer Instance = SerializerSet.Instance.CreateSerializer<KickBallCommandSerializer, Nostradamus.Schema.Mutable.KickBallCommand, KickBallCommand>();
+        public static readonly KickBallCommandSerializer Instance = new KickBallCommandSerializer();
 
         public override Offset<KickBallCommand> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.KickBallCommand obj)
         {
@@ -720,7 +720,7 @@ namespace Nostradamus.Schema.Serialization
 
     public class SceneInitializedEventSerializer : Serializer<Nostradamus.Schema.Mutable.SceneInitializedEvent, SceneInitializedEvent>
     {
-        public static readonly SceneInitializedEventSerializer Instance = SerializerSet.Instance.CreateSerializer<SceneInitializedEventSerializer, Nostradamus.Schema.Mutable.SceneInitializedEvent, SceneInitializedEvent>();
+        public static readonly SceneInitializedEventSerializer Instance = new SceneInitializedEventSerializer();
 
         public override Offset<SceneInitializedEvent> Serialize(FlatBufferBuilder fbb, Nostradamus.Schema.Mutable.SceneInitializedEvent obj)
         {

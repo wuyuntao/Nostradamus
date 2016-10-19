@@ -78,7 +78,7 @@ namespace Nostradamus
 
     class ActorIdSerializer : Serializer<ActorId, Schema.ActorId>
     {
-        public static readonly ActorIdSerializer Instance = SerializerSet.Instance.CreateSerializer<ActorIdSerializer, ActorId, Schema.ActorId>();
+        public static readonly ActorIdSerializer Instance = new ActorIdSerializer();
 
         public override Offset<Schema.ActorId> Serialize(FlatBufferBuilder fbb, ActorId id)
         {

@@ -30,7 +30,7 @@ namespace Nostradamus
 
     class EventSerializer : Serializer<Event, Schema.Event>
     {
-        public static readonly EventSerializer Instance = SerializerSet.Instance.CreateSerializer<EventSerializer, Event, Schema.Event>();
+        public static readonly EventSerializer Instance = new EventSerializer();
 
 
         public override Offset<Schema.Event> Serialize(FlatBufferBuilder fbb, Event e)
